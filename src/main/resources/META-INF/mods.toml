@@ -1,0 +1,32 @@
+modLoader="javafml"
+loaderVersion="[39,)"
+issueTrackerURL="https://github.com/cech12/BucketLib/issues"
+license="The MIT License (MIT)"
+[[mods]]
+    modId="bucketlib"
+    version="${file.jarVersion}"
+    displayName="BucketLib"
+    displayURL="https://github.com/cech12/BucketLib"
+    logoFile="logo.png"
+    authors="Cech12"
+    description='''
+    A library mod for custom buckets.
+    '''
+[[dependencies.bucketlib]]
+    modId="forge"
+    mandatory=true
+    versionRange="[39.0.0,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.bucketlib]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.18.1,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.bucketlib]]
+   modId="jei"
+   mandatory=false
+   versionRange="[9.1.0.41,)"
+   ordering="NONE"
+   side="BOTH"
