@@ -6,3 +6,4 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [1.18.1-0.0.0.0] - ????-??-??
 ### Changed
 - Initial version
+- Buckets can contain fluids

@@ -1,0 +1,12 @@
+{
+  "loader": "bucketlib:universal_bucket",
+  "parent": "forge:item/default",
+  "textures": {
+    "base": "bucketlib:item/universal_bucket_base",
+    "lowerBase": "bucketlib:item/universal_bucket_lower_base",
+    "fluidMask": "forge:item/mask/bucket_fluid",
+    "crackedBase": "bucketlib:item/universal_bucket_cracked_base",
+    "crackedLowerBase": "bucketlib:item/universal_bucket_cracked_lower_base",
+    "crackedFluidMask": "forge:item/mask/bucket_fluid"
+  }
+}
