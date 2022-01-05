@@ -3,8 +3,10 @@ package cech12.bucketlib.item;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.tags.Tag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -16,28 +18,32 @@ import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fluids.FluidActionResult;
-import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.ItemFluidContainer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class UniversalBucketItem extends ItemFluidContainer implements DispensibleContainerItem {
+public class UniversalBucketItem extends Item implements DispensibleContainerItem {
 
     //TODO Entity
     //TODO Blocks
 
-    public UniversalBucketItem() {
-        super((new Item.Properties()).tab(CreativeModeTab.TAB_MISC), FluidAttributes.BUCKET_VOLUME);
+    private final Properties properties;
+
+    public UniversalBucketItem(Properties properties) {
+        super((new Item.Properties()).tab(properties.tab));
+        this.properties = properties;
     }
 
     @Override
@@ -51,8 +57,31 @@ public class UniversalBucketItem extends ItemFluidContainer implements Dispensib
     }
 
     public boolean isCracked(ItemStack stack) {
-        //TODO
+        FluidStack fluidStack = FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY);
+        if (!fluidStack.isEmpty()) {
+            Fluid fluid = fluidStack.getFluid();
+            int fluidTemperature = fluid.getAttributes().getTemperature();
+            Integer upperCrackingTemperature = getUpperBreakTemperature();
+            Integer lowerCrackingTemperature = getLowerBreakTemperature();
+            return isCrackingFluid(fluid)
+                    || (upperCrackingTemperature != null && fluidTemperature >= upperCrackingTemperature)
+                    || (lowerCrackingTemperature != null && fluidTemperature <= lowerCrackingTemperature);
+        }
         return false;
+    }
+
+    public boolean canHoldFluid(Fluid fluid) {
+        if (this.properties.allowedFluidsTag != null || this.properties.allowedFluids != null) {
+            return isAllowedFluid(fluid);
+        }
+        if (this.properties.blockedFluidsTag != null || this.properties.blockedFluids != null) {
+            return !isBlockedFluid(fluid);
+        }
+        int fluidTemperature = fluid.getAttributes().getTemperature();
+        Integer maxTemperature = getMaxTemperature();
+        Integer minTemperature = getMinTemperature();
+        return (maxTemperature == null || fluidTemperature <= maxTemperature)
+                && (minTemperature == null || fluidTemperature >= minTemperature);
     }
 
     private boolean containsFluid(ItemStack stack) {
@@ -63,7 +92,7 @@ public class UniversalBucketItem extends ItemFluidContainer implements Dispensib
 
     @Override
     public int getItemStackLimit(ItemStack stack) {
-        return containsFluid(stack) ? 1 : 16;
+        return containsFluid(stack) ? 1 : this.properties.maxStackSize;
     }
 
     @Override
@@ -84,12 +113,12 @@ public class UniversalBucketItem extends ItemFluidContainer implements Dispensib
             FluidStack fluidStack = FluidUtil.getFluidContained(itemstack).orElse(FluidStack.EMPTY);
             FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, relativeBlockPos, itemstack, fluidStack);
             if (fluidActionResult.isSuccess()) {
-                return InteractionResultHolder.success(this.createEmptyResult(itemstack, player, fluidActionResult.getResult()));
+                return InteractionResultHolder.sidedSuccess(this.createEmptyResult(itemstack, player, fluidActionResult.getResult()), level.isClientSide());
             }
         } else {
             FluidActionResult fluidActionResult = FluidUtil.tryPickUpFluid(itemstack, player, level, hitBlockPos, hitDirection);
             if (fluidActionResult.isSuccess()) {
-                return InteractionResultHolder.success(ItemUtils.createFilledResult(itemstack, player, fluidActionResult.getResult()));
+                return InteractionResultHolder.sidedSuccess(ItemUtils.createFilledResult(itemstack, player, fluidActionResult.getResult()), level.isClientSide());
             }
         }
         //TODO Entity interaction
@@ -102,6 +131,11 @@ public class UniversalBucketItem extends ItemFluidContainer implements Dispensib
     }
 
     @Override
+    public ICapabilityProvider initCapabilities(@Nonnull ItemStack stack, @Nullable CompoundTag nbt) {
+        return new UniversalBucketFluidHandler(stack);
+    }
+
+    @Override
     public void checkExtraContent(@Nullable Player player, @Nonnull Level level, @Nonnull ItemStack stack, @Nonnull BlockPos pos) {
         //TODO dispenser behavior
         DispensibleContainerItem.super.checkExtraContent(player, level, stack, pos);
@@ -111,6 +145,155 @@ public class UniversalBucketItem extends ItemFluidContainer implements Dispensib
     public boolean emptyContents(@Nullable Player player, @Nonnull Level level, @Nonnull BlockPos pos, @Nullable BlockHitResult hitResult) {
         //TODO dispenser behavior
         return false;
+    }
+
+
+    private Integer getIntProperty(ForgeConfigSpec.IntValue config, Integer defaultValue) {
+        if (config != null) {
+            return config.get();
+        }
+        return defaultValue;
+    }
+
+    private boolean isFluidListedInProperty(Fluid fluid, Tag<Fluid> tag, List<Fluid> defaultList) {
+        if (tag != null) {
+            return tag.contains(fluid);
+        }
+        return defaultList != null && defaultList.contains(fluid);
+    }
+
+    public Integer getMaxTemperature() {
+        return getIntProperty(this.properties.maxTemperatureConfig, this.properties.maxTemperature);
+    }
+
+    public Integer getUpperBreakTemperature() {
+        return getIntProperty(this.properties.upperBreakTemperatureConfig, this.properties.upperCrackingTemperature);
+    }
+
+    public Integer getLowerBreakTemperature() {
+        return getIntProperty(this.properties.lowerCrackingTemperatureConfig, this.properties.lowerCrackingTemperature);
+    }
+
+    public Integer getMinTemperature() {
+        return getIntProperty(this.properties.minTemperatureConfig, this.properties.minTemperature);
+    }
+
+    private boolean isCrackingFluid(Fluid fluid) {
+        return isFluidListedInProperty(fluid, this.properties.crackingFluidsTag, this.properties.crackingFluids);
+    }
+
+    private boolean isBlockedFluid(Fluid fluid) {
+        return isFluidListedInProperty(fluid, this.properties.blockedFluidsTag, this.properties.blockedFluids);
+    }
+
+    private boolean isAllowedFluid(Fluid fluid) {
+        return isFluidListedInProperty(fluid, this.properties.allowedFluidsTag, this.properties.allowedFluids);
+    }
+
+    public static class Properties {
+
+        CreativeModeTab tab = CreativeModeTab.TAB_MISC;
+        int maxStackSize = 16;
+
+        Integer maxTemperature = null;
+        ForgeConfigSpec.IntValue maxTemperatureConfig = null;
+        Integer upperCrackingTemperature = null;
+        ForgeConfigSpec.IntValue upperBreakTemperatureConfig = null;
+        Integer lowerCrackingTemperature = null;
+        ForgeConfigSpec.IntValue lowerCrackingTemperatureConfig = null;
+        Integer minTemperature = null;
+        ForgeConfigSpec.IntValue minTemperatureConfig = null;
+
+        List<Fluid> crackingFluids = null;
+        Tag<Fluid> crackingFluidsTag = null;
+        List<Fluid> blockedFluids = null;
+        Tag<Fluid> blockedFluidsTag = null;
+        List<Fluid> allowedFluids = null;
+        Tag<Fluid> allowedFluidsTag = null;
+
+        public Properties tab(CreativeModeTab tab) {
+            this.tab = tab;
+            return this;
+        }
+
+        public Properties stacksTo(int maxStackSize) {
+            if (maxStackSize < 1) {
+                throw new RuntimeException("Unable to have stack size lower than 1.");
+            }
+            this.maxStackSize = maxStackSize;
+            return this;
+        }
+
+        public Properties maxTemperature(int maxTemperature) {
+            this.maxTemperature = maxTemperature;
+            return this;
+        }
+
+        public Properties maxTemperature(ForgeConfigSpec.IntValue maxTemperatureConfig) {
+            this.maxTemperatureConfig = maxTemperatureConfig;
+            return this;
+        }
+
+        public Properties upperCrackingTemperature(int upperCrackingTemperature) {
+            this.upperCrackingTemperature = upperCrackingTemperature;
+            return this;
+        }
+
+        public Properties upperCrackingTemperature(ForgeConfigSpec.IntValue upperCrackingTemperatureConfig) {
+            this.upperBreakTemperatureConfig = upperCrackingTemperatureConfig;
+            return this;
+        }
+
+        public Properties lowerCrackingTemperature(int lowerBreakTemperature) {
+            this.lowerCrackingTemperature = lowerBreakTemperature;
+            return this;
+        }
+
+        public Properties lowerCrackingTemperature(ForgeConfigSpec.IntValue lowerCrackingTemperatureConfig) {
+            this.lowerCrackingTemperatureConfig = lowerCrackingTemperatureConfig;
+            return this;
+        }
+
+        public Properties minTemperature(int minTemperature) {
+            this.minTemperature = minTemperature;
+            return this;
+        }
+
+        public Properties minTemperature(ForgeConfigSpec.IntValue minTemperatureConfig) {
+            this.minTemperatureConfig = minTemperatureConfig;
+            return this;
+        }
+
+        public Properties crackingFluids(List<Fluid> crackingFluids) {
+            this.crackingFluids = crackingFluids;
+            return this;
+        }
+
+        public Properties crackingFluids(Tag<Fluid> crackingFluidsTag) {
+            this.crackingFluidsTag = crackingFluidsTag;
+            return this;
+        }
+
+        public Properties blockedFluids(List<Fluid> blockedFluids) {
+            this.blockedFluids = blockedFluids;
+            return this;
+        }
+
+        public Properties blockedFluids(Tag<Fluid> blockedFluidsTag) {
+            this.blockedFluidsTag = blockedFluidsTag;
+            return this;
+        }
+
+        public Properties allowedFluids(List<Fluid> allowedFluids) {
+            this.allowedFluids = allowedFluids;
+            return this;
+        }
+
+        public Properties allowedFluids(Tag<Fluid> allowedFluidsTag) {
+            this.allowedFluidsTag = allowedFluidsTag;
+            return this;
+        }
+
     }
 
 }
