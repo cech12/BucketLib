@@ -3,7 +3,11 @@ package cech12.bucketlib;
 import cech12.bucketlib.api.BucketLibApi;
 import cech12.bucketlib.item.UniversalBucketItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fluids.DispenseFluidContainer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -16,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.stream.Collectors;
 
 @Mod(BucketLibApi.MOD_ID)
+@Mod.EventBusSubscriber(modid= BucketLibApi.MOD_ID, bus= Mod.EventBusSubscriber.Bus.MOD)
 public class BucketLib {
 
     private static final Logger LOGGER = LogManager.getLogger();
@@ -29,6 +34,12 @@ public class BucketLib {
         ITEMS.register(modEventBus);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
+    }
+
+    @SubscribeEvent
+    public static void registerItems(RegistryEvent.Register<Item> event) {
+        //TODO For each item, a Dispense behaviour must be registered
+        DispenserBlock.registerBehavior(TEST_BUCKET.get(), DispenseFluidContainer.getInstance());
     }
 
     private void processIMC(final InterModProcessEvent event) {

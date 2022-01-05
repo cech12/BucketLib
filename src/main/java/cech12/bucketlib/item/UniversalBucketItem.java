@@ -12,6 +12,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DispensibleContainerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -32,7 +33,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class UniversalBucketItem extends ItemFluidContainer implements DispensibleContainerItem {
 
-    //TODO Fluid
     //TODO Entity
     //TODO Blocks
 
@@ -73,30 +73,32 @@ public class UniversalBucketItem extends ItemFluidContainer implements Dispensib
         boolean containsFluid = containsFluid(itemstack);
         //check hit block
         BlockHitResult blockhitresult = getPlayerPOVHitResult(level, player, containsFluid ? ClipContext.Fluid.NONE : ClipContext.Fluid.SOURCE_ONLY);
-        if (blockhitresult.getType() == HitResult.Type.MISS) {
-            return InteractionResultHolder.pass(itemstack);
-        } else if (blockhitresult.getType() != HitResult.Type.BLOCK) {
+        if (blockhitresult.getType() == HitResult.Type.MISS || blockhitresult.getType() != HitResult.Type.BLOCK) {
             return InteractionResultHolder.pass(itemstack);
         }
         BlockPos hitBlockPos = blockhitresult.getBlockPos();
         Direction hitDirection = blockhitresult.getDirection();
         BlockPos relativeBlockPos = hitBlockPos.relative(hitDirection);
         //Fluid interaction
-        FluidActionResult result;
         if (containsFluid) {
             FluidStack fluidStack = FluidUtil.getFluidContained(itemstack).orElse(FluidStack.EMPTY);
-            result = FluidUtil.tryPlaceFluid(player, level, interactionHand, relativeBlockPos, itemstack, fluidStack);
+            FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, relativeBlockPos, itemstack, fluidStack);
+            if (fluidActionResult.isSuccess()) {
+                return InteractionResultHolder.success(this.createEmptyResult(itemstack, player, fluidActionResult.getResult()));
+            }
         } else {
-            result = FluidUtil.tryPickUpFluid(itemstack, player, level, hitBlockPos, hitDirection);
-        }
-        if (result.isSuccess()) {
-            return InteractionResultHolder.success(result.getResult());
+            FluidActionResult fluidActionResult = FluidUtil.tryPickUpFluid(itemstack, player, level, hitBlockPos, hitDirection);
+            if (fluidActionResult.isSuccess()) {
+                return InteractionResultHolder.success(ItemUtils.createFilledResult(itemstack, player, fluidActionResult.getResult()));
+            }
         }
         //TODO Entity interaction
         //TODO Block interaction
-        //TODO creative mode should not change the bucket
-        //TODO play sound
         return super.use(level, player, interactionHand);
+    }
+
+    private ItemStack createEmptyResult(ItemStack initialStack, Player player, ItemStack resultStack) {
+        return player.getAbilities().instabuild ? initialStack : resultStack;
     }
 
     @Override
@@ -111,13 +113,4 @@ public class UniversalBucketItem extends ItemFluidContainer implements Dispensib
         return false;
     }
 
-    /*
-    @Nullable
-    @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
-        //TODO init capabilities
-        return super.initCapabilities(stack, nbt);
-    }
-
-     */
 }
