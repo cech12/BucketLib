@@ -10,6 +10,7 @@ updates:
       interval: "daily"
     ignore:
       - dependency-name: "net.minecraftforge.gradle:ForgeGradle"
+        versions: ["5.1.x"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
