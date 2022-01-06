@@ -4,12 +4,12 @@
 version: 2
 updates:
 
-  - package-ecosystem: "gradle"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    ignore:
-      - dependency-name: "net.minecraftforge.gradle:ForgeGradle"
+  #- package-ecosystem: "gradle"
+  #  directory: "/"
+  #  schedule:
+  #    interval: "daily"
+  #  ignore:
+  #    - dependency-name: "net.minecraftforge.gradle:ForgeGradle"
 
   - package-ecosystem: "github-actions"
     directory: "/"
