@@ -59,23 +59,23 @@ jobs:
 
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
-    #- name: Autobuild
-    #  uses: github/codeql-action/autobuild@v1
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v1
 
     # custom Minecraft mod build
-    - name: Cache MC Assets
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build
-      run: ./gradlew build
+    #- name: Cache MC Assets
+    #  uses: actions/cache@v2
+    #  with:
+    #    path: |
+    #      ~/.gradle/caches
+    #      ~/.gradle/wrapper
+    #    key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+    #    restore-keys: |
+    #      ${{ runner.os }}-gradle-
+    #- name: Grant execute permission for gradlew
+    #  run: chmod +x gradlew
+    #- name: Build
+    #  run: ./gradlew build
 
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
