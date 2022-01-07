@@ -1,5 +1,6 @@
 package cech12.bucketlib.item;
 
+import cech12.bucketlib.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -11,7 +12,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.DispensibleContainerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
@@ -34,7 +34,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class UniversalBucketItem extends Item implements DispensibleContainerItem {
+public class UniversalBucketItem extends Item {
 
     //TODO Entity
     //TODO Blocks
@@ -135,19 +135,6 @@ public class UniversalBucketItem extends Item implements DispensibleContainerIte
         return new UniversalBucketFluidHandler(stack);
     }
 
-    @Override
-    public void checkExtraContent(@Nullable Player player, @Nonnull Level level, @Nonnull ItemStack stack, @Nonnull BlockPos pos) {
-        //TODO dispenser behavior
-        DispensibleContainerItem.super.checkExtraContent(player, level, stack, pos);
-    }
-
-    @Override
-    public boolean emptyContents(@Nullable Player player, @Nonnull Level level, @Nonnull BlockPos pos, @Nullable BlockHitResult hitResult) {
-        //TODO dispenser behavior
-        return false;
-    }
-
-
     private Integer getIntProperty(ForgeConfigSpec.IntValue config, Integer defaultValue) {
         if (config != null) {
             return config.get();
@@ -160,6 +147,14 @@ public class UniversalBucketItem extends Item implements DispensibleContainerIte
             return tag.contains(fluid);
         }
         return defaultList != null && defaultList.contains(fluid);
+    }
+    
+    public boolean isDyeable() {
+        return this.properties.dyeable;
+    }
+
+    public int getDefaultColor() {
+        return this.properties.defaultColor;
     }
 
     public Integer getMaxTemperature() {
@@ -195,6 +190,9 @@ public class UniversalBucketItem extends Item implements DispensibleContainerIte
         CreativeModeTab tab = CreativeModeTab.TAB_MISC;
         int maxStackSize = 16;
 
+        boolean dyeable = false;
+        int defaultColor = -1;
+
         Integer maxTemperature = null;
         ForgeConfigSpec.IntValue maxTemperatureConfig = null;
         Integer upperCrackingTemperature = null;
@@ -221,6 +219,18 @@ public class UniversalBucketItem extends Item implements DispensibleContainerIte
                 throw new RuntimeException("Unable to have stack size lower than 1.");
             }
             this.maxStackSize = maxStackSize;
+            return this;
+        }
+
+        public Properties dyeable(int defaultColor) {
+            this.dyeable = true;
+            this.defaultColor = defaultColor;
+            return this;
+        }
+
+        public Properties dyeable(int red, int green, int blue) {
+            this.dyeable = true;
+            this.defaultColor = ColorUtil.getColorFromRGB(red, green, blue);
             return this;
         }
 
