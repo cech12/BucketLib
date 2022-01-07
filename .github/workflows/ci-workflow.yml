@@ -1,0 +1,17 @@
+# This workflow builds the project on each push and pull request
+
+name: CI-Workflow
+
+on:
+  push:
+    branches: [ "1.18" ]
+  pull_request:
+    branches: [ "1.18" ]
+
+jobs:
+  build:
+    uses: cech12/BucketLib/.github/workflows/build@1.18
+  codeql:
+    needs: build
+    uses: cech12/BucketLib/.github/workflows/codeql-analysis@1.18
+
