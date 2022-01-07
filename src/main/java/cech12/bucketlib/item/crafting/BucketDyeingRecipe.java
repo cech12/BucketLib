@@ -5,6 +5,7 @@ import cech12.bucketlib.item.UniversalBucketItem;
 import cech12.bucketlib.util.ColorUtil;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
@@ -72,6 +73,13 @@ public class BucketDyeingRecipe extends CustomRecipe {
             return ColorUtil.dyeItem(bucketAndDyes.getFirst(), bucketAndDyes.getSecond());
         }
         return ItemStack.EMPTY;
+    }
+
+    @Nonnull
+    @Override
+    public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
+        //override it to avoid remaining container items
+        return NonNullList.withSize(inv.getContainerSize(), ItemStack.EMPTY);
     }
 
     /**

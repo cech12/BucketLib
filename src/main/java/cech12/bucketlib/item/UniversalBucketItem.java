@@ -4,6 +4,7 @@ import cech12.bucketlib.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -11,23 +12,31 @@ import net.minecraft.tags.Tag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fluids.FluidActionResult;
+import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStack;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -57,6 +66,7 @@ public class UniversalBucketItem extends Item {
     }
 
     public boolean isCracked(ItemStack stack) {
+        //TODO infinity enchantment
         FluidStack fluidStack = FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY);
         if (!fluidStack.isEmpty()) {
             Fluid fluid = fluidStack.getFluid();
@@ -71,6 +81,10 @@ public class UniversalBucketItem extends Item {
     }
 
     public boolean canHoldFluid(Fluid fluid) {
+        Item bucket = fluid.getBucket();
+        if (!(bucket instanceof BucketItem) || ((BucketItem) bucket).getFluid() != fluid) { //TODO forge milk fluid
+            return false;
+        }
         if (this.properties.allowedFluidsTag != null || this.properties.allowedFluids != null) {
             return isAllowedFluid(fluid);
         }
@@ -128,6 +142,70 @@ public class UniversalBucketItem extends Item {
 
     private ItemStack createEmptyResult(ItemStack initialStack, Player player, ItemStack resultStack) {
         return player.getAbilities().instabuild ? initialStack : resultStack;
+    }
+
+    /**
+     * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
+     */
+    @Override
+    public void fillItemCategory(@Nonnull CreativeModeTab group, @Nonnull NonNullList<ItemStack> items) {
+        if (this.allowdedIn(group)) {
+            //add empty bucket
+            items.add(new ItemStack(this));
+            //add fluid buckets
+            for (Fluid fluid : ForgeRegistries.FLUIDS) {
+                if (canHoldFluid(fluid)) {
+                    FluidUtil.getFluidHandler(new ItemStack(this)).ifPresent(fluidHandler -> {
+                        fluidHandler.fill(new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
+                        items.add(fluidHandler.getContainer());
+                    });
+                }
+            }
+            //TODO add milk bucket
+            //TODO add entity buckets
+            //TODO add block buckets
+        }
+    }
+
+    @Override
+    public int getBurnTime(ItemStack itemStack, @Nullable RecipeType<?> recipeType) {
+        Fluid fluid = FluidUtil.getFluidContained(itemStack).orElse(FluidStack.EMPTY).getFluid();
+        if (fluid != Fluids.EMPTY) {
+            //all fluids have their burn time in their bucket item.
+            //get the burn time via ForgeHooks.getBurnTime to let other mods change burn times of buckets of vanilla and other fluids.
+            return ForgeHooks.getBurnTime(new ItemStack(fluid.getBucket()), recipeType);
+        }
+        return super.getBurnTime(itemStack, recipeType);
+    }
+
+    @Override
+    public boolean hasContainerItem(ItemStack stack) {
+        //for using a filled bucket as fuel or in crafting recipes, an empty bucket should remain
+        return !this.isCracked(stack);
+    }
+
+    @Override
+    public ItemStack getContainerItem(ItemStack itemStack) {
+        //for using a filled bucket as fuel or in crafting recipes, an empty bucket should remain
+        if (this.hasContainerItem(itemStack)) {
+            //TODO infinity enchantment
+            //if (CeramicBucketUtils.isAffectedByInfinityEnchantment(itemStack)) {
+            //    //with infinity enchantment the filled bucket remains
+            //    return itemStack.copy();
+            //}
+            ItemStack container = itemStack.copy();
+            CompoundTag sourceNbt = itemStack.getTag();
+            if (sourceNbt != null && !sourceNbt.isEmpty()) {
+                CompoundTag nbt = sourceNbt.copy();
+                if (nbt.contains(FluidHandlerItemStack.FLUID_NBT_KEY)) {
+                    nbt.remove(FluidHandlerItemStack.FLUID_NBT_KEY);
+                }
+                //TODO remove other tags (Entity, Blocks, ...)
+                container.setTag(nbt);
+            }
+            return container;
+        }
+        return ItemStack.EMPTY;
     }
 
     @Override
