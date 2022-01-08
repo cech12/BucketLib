@@ -2,6 +2,7 @@ package cech12.bucketlib.client.model;
 
 import cech12.bucketlib.api.BucketLibApi;
 import cech12.bucketlib.item.UniversalBucketItem;
+import cech12.bucketlib.util.BucketLibUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -24,6 +25,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -52,6 +54,8 @@ import java.util.function.Function;
  * Multiple changes were done to simplify the class
  */
 public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel> {
+
+    private static final Map<ResourceLocation, ResourceLocation> TEXTURE_MAP = Maps.newHashMap();
 
     // minimal Z offset to prevent depth-fighting
     private static final float NORTH_Z_FLUID = 7.498f / 16f;
@@ -84,29 +88,43 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
         return new UniversalBucketModel(Fluids.EMPTY, otherContent, isCracked);
     }
 
+    public static ResourceLocation getContentTexture(ResourceLocation otherContentLocation) {
+        ResourceLocation texture = TEXTURE_MAP.get(otherContentLocation);
+        if (texture == null) {
+            String textureLocation = String.format("item/bucket_content/%s/%s", otherContentLocation.getNamespace(), otherContentLocation.getPath());
+            texture = new ResourceLocation(BucketLibApi.MOD_ID, textureLocation);
+            TEXTURE_MAP.put(otherContentLocation, texture);
+        }
+        return texture;
+    }
+
     @Override
     public BakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
         Material particleLocation = owner.isTexturePresent("particle") ? owner.resolveTexture("particle") : null;
 
         Material baseLocation = null;
-        if (this.otherContent != null) {
-            if (this.isCracked && owner.isTexturePresent("crackedLowerBase")) {
-                baseLocation = owner.resolveTexture("crackedLowerBase");
-            }
-            if (baseLocation == null && owner.isTexturePresent("lowerBase")) {
-                baseLocation = owner.resolveTexture("lowerBase");
-            }
-        } else {
-            if (this.isCracked && owner.isTexturePresent("crackedBase")) {
-                baseLocation = owner.resolveTexture("crackedBase");
-            }
-            if (baseLocation == null && owner.isTexturePresent("base")) {
-                baseLocation = owner.resolveTexture("base");
-            }
+        //TODO lower base only for entity buckets
+        //if (this.otherContent != null) {
+        //    if (this.isCracked && owner.isTexturePresent("crackedLowerBase")) {
+        //        baseLocation = owner.resolveTexture("crackedLowerBase");
+        //    }
+        //    if (baseLocation == null && owner.isTexturePresent("lowerBase")) {
+        //        baseLocation = owner.resolveTexture("lowerBase");
+        //    }
+        //} else {
+        if (this.isCracked && owner.isTexturePresent("crackedBase")) {
+            baseLocation = owner.resolveTexture("crackedBase");
         }
+        if (baseLocation == null && owner.isTexturePresent("base")) {
+            baseLocation = owner.resolveTexture("base");
+        }
+        //}
 
+        Material otherContentLocation = null;
         Material fluidMaskLocation = null;
-        if (this.fluid != Fluids.EMPTY) {
+        if (this.otherContent != null) {
+            otherContentLocation = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(this.otherContent));
+        } else if (this.fluid != Fluids.EMPTY) {
             if (this.isCracked && owner.isTexturePresent("crackedFluidMask")) {
                 fluidMaskLocation = owner.resolveTexture("crackedFluidMask");
             }
@@ -115,7 +133,7 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
             }
         }
 
-        //TODO otherContent
+        TextureAtlasSprite otherContentSprite = otherContentLocation != null ? spriteGetter.apply(otherContentLocation) : null;
 
         ModelState transformsFromModel = owner.getCombinedTransform();
 
@@ -125,7 +143,7 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
                 PerspectiveMapWrapper.getTransforms(new CompositeModelState(transformsFromModel, modelTransform));
 
         TextureAtlasSprite particleSprite = particleLocation != null ? spriteGetter.apply(particleLocation) : null;
-
+        if (particleSprite == null) particleSprite = otherContentSprite;
         if (particleSprite == null) particleSprite = fluidSprite;
 
         // if the fluid is lighter than air, will manipulate the initial state to be rotated 180deg to turn it upside down
@@ -148,7 +166,10 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
             builder.addQuads(ItemLayerModel.getLayerRenderType(false), ItemLayerModel.getQuadsForSprites(ImmutableList.of(baseLocation), transform, spriteGetter));
         }
 
-        if (fluidMaskLocation != null && fluidSprite != null) {
+        if (otherContentSprite != null) {
+            //tint of -1 to avoid coloring the entity layer
+            builder.addQuads(ItemLayerModel.getLayerRenderType(false), ItemLayerModel.getQuadsForSprite(-1, otherContentSprite, transform));
+        } else if (fluidMaskLocation != null && fluidSprite != null) {
             TextureAtlasSprite templateSprite = spriteGetter.apply(fluidMaskLocation);
             if (templateSprite != null) {
                 // build liquid layer (inside)
@@ -203,7 +224,7 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
     {
         private static final ResourceLocation REBAKE_LOCATION = new ResourceLocation(BucketLibApi.MOD_ID, "bucket_override");
 
-        private final Map<String, BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
+        private final Map<ResourceLocation, BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
         private final ItemOverrides nested;
         private final ModelBakery bakery;
         private final IModelConfiguration owner;
@@ -225,23 +246,26 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
         {
             BakedModel overriden = nested.resolve(originalModel, stack, world, entity, number);
             if (overriden != originalModel) return overriden;
-            if (stack.getItem() instanceof UniversalBucketItem) {
-                UniversalBucketItem bucket = (UniversalBucketItem) stack.getItem();
-                Fluid fluid = FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY).getFluid();
-                String name = fluid.getRegistryName().toString();
+            if (stack.getItem() instanceof UniversalBucketItem bucket) {
+                ResourceLocation content = BucketLibUtil.getContent(stack);
+                Fluid fluid = null;
+                if (content == null) {
+                    fluid = FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY).getFluid();
+                    content = fluid.getRegistryName();
+                }
                 //reset cache if temperature config changed
                 boolean isCracked = bucket.isCracked(stack);
                 if (this.isCracked != isCracked) {
                     this.isCracked = isCracked;
                     cache.clear();
                 }
-                if (!cache.containsKey(name)) {
-                    UniversalBucketModel unbaked = this.parent.withFluid(fluid, isCracked);
+                if (!cache.containsKey(content)) {
+                    UniversalBucketModel unbaked = (fluid == null) ? this.parent.withOtherContent(content, isCracked) : this.parent.withFluid(fluid, isCracked);
                     BakedModel bakedModel = unbaked.bake(owner, bakery, ForgeModelBakery.defaultTextureGetter(), BlockModelRotation.X0_Y0, this, REBAKE_LOCATION);
-                    cache.put(name, bakedModel);
+                    cache.put(content, bakedModel);
                     return bakedModel;
                 }
-                return cache.get(name);
+                return cache.get(content);
             }
             return originalModel;
         }

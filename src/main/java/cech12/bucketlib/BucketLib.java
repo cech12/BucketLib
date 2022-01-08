@@ -1,11 +1,13 @@
 package cech12.bucketlib;
 
 import cech12.bucketlib.api.BucketLibApi;
+import cech12.bucketlib.api.BucketLibTags;
 import cech12.bucketlib.item.crafting.BucketDyeingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
@@ -20,7 +22,13 @@ public class BucketLib {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public BucketLib() {
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
+    }
+
+    private void commonSetup(FMLCommonSetupEvent event) {
+        //Ensure that the tags are initialized
+        BucketLibTags.init();
     }
 
     private void processIMC(final InterModProcessEvent event) {

@@ -1,18 +1,23 @@
 package cech12.bucketlib.item;
 
+import cech12.bucketlib.util.BucketLibUtil;
 import cech12.bucketlib.util.ColorUtil;
 import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -21,6 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -35,19 +41,16 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fluids.FluidActionResult;
-import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class UniversalBucketItem extends Item {
 
@@ -69,6 +72,9 @@ public class UniversalBucketItem extends Item {
         FluidUtil.getFluidContained(stack).ifPresent(fluidStack ->
                 tooltip.add(new TextComponent("Fluid: " + fluidStack.getRawFluid().getRegistryName()).withStyle(ChatFormatting.BLUE))
         );
+        if (BucketLibUtil.containsMilk(stack)) {
+            tooltip.add(new TextComponent("Contains Milk").withStyle(ChatFormatting.WHITE));
+        }
     }
 
     public boolean isCracked(ItemStack stack) {
@@ -104,15 +110,9 @@ public class UniversalBucketItem extends Item {
                 && (minTemperature == null || fluidTemperature >= minTemperature);
     }
 
-    private boolean containsFluid(ItemStack stack) {
-        AtomicBoolean containsFluid = new AtomicBoolean(false);
-        FluidUtil.getFluidContained(stack).ifPresent(fluidStack -> containsFluid.set(!fluidStack.isEmpty()));
-        return containsFluid.get();
-    }
-
     @Override
     public int getItemStackLimit(ItemStack stack) {
-        return containsFluid(stack) ? 1 : this.properties.maxStackSize;
+        return BucketLibUtil.containsFluid(stack) ? 1 : this.properties.maxStackSize;
     }
 
     @Override
@@ -120,55 +120,101 @@ public class UniversalBucketItem extends Item {
     public InteractionResultHolder<ItemStack> use(@Nonnull Level level, @Nonnull Player player, @Nonnull InteractionHand interactionHand) {
         ItemStack itemstack = player.getItemInHand(interactionHand);
         EquipmentSlot equipmentSlot = interactionHand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
-        boolean containsFluid = containsFluid(itemstack);
+        boolean isEmpty = BucketLibUtil.isEmpty(itemstack);
         //check hit block
-        BlockHitResult blockHitResult = getPlayerPOVHitResult(level, player, containsFluid ? ClipContext.Fluid.NONE : ClipContext.Fluid.SOURCE_ONLY);
-        if (blockHitResult.getType() == HitResult.Type.MISS || blockHitResult.getType() != HitResult.Type.BLOCK) {
-            return InteractionResultHolder.pass(itemstack);
-        }
-        BlockPos hitBlockPos = blockHitResult.getBlockPos();
-        BlockState hitBlockState = level.getBlockState(hitBlockPos);
-        Direction hitDirection = blockHitResult.getDirection();
-        BlockPos relativeBlockPos = hitBlockPos.relative(hitDirection);
-        //Fluid interaction
-        if (containsFluid) {
-            FluidStack fluidStack = FluidUtil.getFluidContained(itemstack).orElse(FluidStack.EMPTY);
-            if (hitBlockState.getBlock() instanceof AbstractCauldronBlock) {
-                //fake vanilla bucket using on cauldron
-                player.setItemSlot(equipmentSlot, new ItemStack(fluidStack.getFluid().getBucket()));
-                InteractionResult interactionResult = hitBlockState.use(level, player, interactionHand, blockHitResult);
-                player.setItemSlot(equipmentSlot, itemstack);
-                if (interactionResult.consumesAction()) {
-                    return new InteractionResultHolder<>(interactionResult, createEmptyResult(itemstack, player, removeFluid(itemstack)));
-                }
-            }
-            FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, relativeBlockPos, itemstack, fluidStack);
-            if (fluidActionResult.isSuccess()) {
-                return InteractionResultHolder.sidedSuccess(this.createEmptyResult(itemstack, player, fluidActionResult.getResult()), level.isClientSide());
-            }
-        } else {
-            if (hitBlockState.getBlock() instanceof AbstractCauldronBlock) {
-                //check if bucket can hold cauldron content
-                if (hitBlockState.getBlock() == Blocks.LAVA_CAULDRON && canHoldFluid(Fluids.LAVA)
-                        || hitBlockState.getBlock() == Blocks.WATER_CAULDRON && canHoldFluid(Fluids.WATER)) {
-                    //fake vanilla bucket using on cauldron
-                    player.setItemSlot(equipmentSlot, new ItemStack(Items.BUCKET));
-                    InteractionResult interactionResult = hitBlockState.use(level, player, interactionHand, blockHitResult);
-                    FluidStack resultFluidStack = FluidUtil.getFluidContained(player.getItemInHand(interactionHand)).orElse(FluidStack.EMPTY);
-                    player.setItemSlot(equipmentSlot, itemstack);
-                    if (interactionResult.consumesAction()) {
-                        return new InteractionResultHolder<>(interactionResult, ItemUtils.createFilledResult(itemstack, player, addFluid(itemstack, resultFluidStack.getFluid())));
+        BlockHitResult blockHitResult = getPlayerPOVHitResult(level, player, isEmpty ? ClipContext.Fluid.SOURCE_ONLY : ClipContext.Fluid.NONE);
+        if (blockHitResult.getType() == HitResult.Type.BLOCK) {
+            BlockPos hitBlockPos = blockHitResult.getBlockPos();
+            BlockState hitBlockState = level.getBlockState(hitBlockPos);
+            Direction hitDirection = blockHitResult.getDirection();
+            BlockPos relativeBlockPos = hitBlockPos.relative(hitDirection);
+            if (isEmpty) {
+                //pickup fluid interaction
+                if (hitBlockState.getBlock() instanceof AbstractCauldronBlock) {
+                    //check if bucket can hold cauldron content
+                    if (hitBlockState.getBlock() == Blocks.LAVA_CAULDRON && canHoldFluid(Fluids.LAVA)
+                            || hitBlockState.getBlock() == Blocks.WATER_CAULDRON && canHoldFluid(Fluids.WATER)) {
+                        //fake vanilla bucket using on cauldron
+                        player.setItemSlot(equipmentSlot, new ItemStack(Items.BUCKET));
+                        InteractionResult interactionResult = hitBlockState.use(level, player, interactionHand, blockHitResult);
+                        FluidStack resultFluidStack = FluidUtil.getFluidContained(player.getItemInHand(interactionHand)).orElse(FluidStack.EMPTY);
+                        player.setItemSlot(equipmentSlot, itemstack);
+                        if (interactionResult.consumesAction()) {
+                            return new InteractionResultHolder<>(interactionResult, ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addFluid(itemstack, resultFluidStack.getFluid())));
+                        }
                     }
                 }
+                FluidActionResult fluidActionResult = FluidUtil.tryPickUpFluid(itemstack, player, level, hitBlockPos, hitDirection);
+                if (fluidActionResult.isSuccess()) {
+                    return InteractionResultHolder.sidedSuccess(ItemUtils.createFilledResult(itemstack, player, fluidActionResult.getResult()), level.isClientSide());
+                }
+            } else if (BucketLibUtil.containsFluid(itemstack)) {
+                //place fluid interaction
+                FluidStack fluidStack = FluidUtil.getFluidContained(itemstack).orElse(FluidStack.EMPTY);
+                if (hitBlockState.getBlock() instanceof AbstractCauldronBlock) {
+                    //fake vanilla bucket using on cauldron
+                    player.setItemSlot(equipmentSlot, new ItemStack(fluidStack.getFluid().getBucket()));
+                    InteractionResult interactionResult = hitBlockState.use(level, player, interactionHand, blockHitResult);
+                    player.setItemSlot(equipmentSlot, itemstack);
+                    if (interactionResult.consumesAction()) {
+                        return new InteractionResultHolder<>(interactionResult, createEmptyResult(itemstack, player, BucketLibUtil.removeFluid(itemstack)));
+                    }
+                }
+                FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, relativeBlockPos, itemstack, fluidStack);
+                if (fluidActionResult.isSuccess()) {
+                    return InteractionResultHolder.sidedSuccess(this.createEmptyResult(itemstack, player, fluidActionResult.getResult()), level.isClientSide());
+                }
             }
-            FluidActionResult fluidActionResult = FluidUtil.tryPickUpFluid(itemstack, player, level, hitBlockPos, hitDirection);
-            if (fluidActionResult.isSuccess()) {
-                return InteractionResultHolder.sidedSuccess(ItemUtils.createFilledResult(itemstack, player, fluidActionResult.getResult()), level.isClientSide());
-            }
+            //TODO Entity interaction
+            //TODO Block interaction
         }
-        //TODO Entity interaction
-        //TODO Block interaction
-        return super.use(level, player, interactionHand);
+        if (BucketLibUtil.containsMilk(itemstack)) {
+            return ItemUtils.startUsingInstantly(level, player, interactionHand);
+        }
+        return InteractionResultHolder.pass(itemstack);
+    }
+
+    @Override
+    @Nonnull
+    public InteractionResult interactLivingEntity(@Nonnull ItemStack itemStack, @Nonnull Player player, @Nonnull LivingEntity entity, @Nonnull InteractionHand interactionHand) {
+        if (BucketLibUtil.isEmpty(itemStack)) {
+            return BucketLibUtil.tryMilkLivingEntity(itemStack, entity, player, interactionHand);
+        }
+        return super.interactLivingEntity(itemStack, player, entity, interactionHand);
+    }
+
+
+    @Override
+    @Nonnull
+    public ItemStack finishUsingItem(@Nonnull ItemStack itemStack, @Nonnull Level level, @Nonnull LivingEntity player) {
+        if (!level.isClientSide) {
+            player.curePotionEffects(itemStack);
+        }
+        if (player instanceof ServerPlayer serverPlayer) {
+            CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, new ItemStack(Items.MILK_BUCKET));
+            serverPlayer.awardStat(Stats.ITEM_USED.get(Items.MILK_BUCKET));
+        }
+        if (player instanceof Player && !((Player)player).getAbilities().instabuild) {
+            return BucketLibUtil.removeMilk(itemStack);
+        }
+        return itemStack;
+    }
+
+    @Override
+    public int getUseDuration(@Nonnull ItemStack itemStack) {
+        if (BucketLibUtil.containsMilk(itemStack)) {
+            return 32;
+        }
+        return super.getUseDuration(itemStack);
+    }
+
+    @Override
+    @Nonnull
+    public UseAnim getUseAnimation(@Nonnull ItemStack itemStack) {
+        if (BucketLibUtil.containsMilk(itemStack)) {
+            return UseAnim.DRINK;
+        }
+        return super.getUseAnimation(itemStack);
     }
 
     private ItemStack createEmptyResult(ItemStack initialStack, Player player, ItemStack resultStack) {
@@ -187,10 +233,13 @@ public class UniversalBucketItem extends Item {
             //add fluid buckets
             for (Fluid fluid : ForgeRegistries.FLUIDS) {
                 if (canHoldFluid(fluid)) {
-                    items.add(addFluid(emptyBucket, fluid));
+                    items.add(BucketLibUtil.addFluid(emptyBucket, fluid));
                 }
             }
-            //TODO add milk bucket
+            //add milk bucket if fluid does not exist
+            if (!ForgeMod.MILK.isPresent()) {
+                items.add(BucketLibUtil.addMilk(emptyBucket));
+            }
             //TODO add entity buckets
             //TODO add block buckets
         }
@@ -213,28 +262,11 @@ public class UniversalBucketItem extends Item {
         return !this.isCracked(stack);
     }
 
-    private ItemStack addFluid(ItemStack itemStack, Fluid fluid) {
-        AtomicReference<ItemStack> resultItemStack = new AtomicReference<>(itemStack.copy());
-        FluidUtil.getFluidHandler(resultItemStack.get()).ifPresent(fluidHandler -> {
-            fluidHandler.fill(new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
-            resultItemStack.set(fluidHandler.getContainer());
-        });
-        return resultItemStack.get();
-    }
-
-    private ItemStack removeFluid(ItemStack itemStack) {
-        AtomicReference<ItemStack> resultItemStack = new AtomicReference<>(itemStack.copy());
-        FluidUtil.getFluidHandler(resultItemStack.get()).ifPresent(fluidHandler -> {
-            fluidHandler.drain(new FluidStack(fluidHandler.getFluidInTank(0).getFluid(), FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
-            resultItemStack.set(fluidHandler.getContainer());
-        });
-        return resultItemStack.get();
-    }
 
     @Override
     public ItemStack getContainerItem(ItemStack itemStack) {
         //TODO remove other content (Entity, Blocks, ...)
-        return removeFluid(itemStack);
+        return BucketLibUtil.removeFluid(itemStack);
     }
 
     @Override

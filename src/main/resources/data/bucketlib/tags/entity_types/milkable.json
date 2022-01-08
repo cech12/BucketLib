@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "_comment" : "All listed entities can be milked by all buckets that using this library mod.",
+  "values": [
+    "minecraft:cow",
+    "minecraft:goat"
+  ]
+}
