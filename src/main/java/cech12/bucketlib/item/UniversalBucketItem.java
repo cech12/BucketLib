@@ -177,7 +177,7 @@ public class UniversalBucketItem extends Item {
     @Override
     @Nonnull
     public InteractionResult interactLivingEntity(@Nonnull ItemStack itemStack, @Nonnull Player player, @Nonnull LivingEntity entity, @Nonnull InteractionHand interactionHand) {
-        if (BucketLibUtil.isEmpty(itemStack)) {
+        if (this.canMilkEntities() && BucketLibUtil.isEmpty(itemStack)) {
             return BucketLibUtil.tryMilkLivingEntity(itemStack, entity, player, interactionHand);
         }
         return super.interactLivingEntity(itemStack, player, entity, interactionHand);
@@ -237,7 +237,7 @@ public class UniversalBucketItem extends Item {
                 }
             }
             //add milk bucket if fluid does not exist
-            if (!ForgeMod.MILK.isPresent()) {
+            if (!ForgeMod.MILK.isPresent() && this.canMilkEntities()) {
                 items.add(BucketLibUtil.addMilk(emptyBucket));
             }
             //TODO add entity buckets
@@ -272,6 +272,13 @@ public class UniversalBucketItem extends Item {
     @Override
     public ICapabilityProvider initCapabilities(@Nonnull ItemStack stack, @Nullable CompoundTag nbt) {
         return new UniversalBucketFluidHandler(stack);
+    }
+
+    private boolean getBooleanProperty(ForgeConfigSpec.BooleanValue config, boolean defaultValue) {
+        if (config != null) {
+            return config.get();
+        }
+        return defaultValue;
     }
 
     private Integer getIntProperty(ForgeConfigSpec.IntValue config, Integer defaultValue) {
@@ -324,6 +331,10 @@ public class UniversalBucketItem extends Item {
         return isFluidListedInProperty(fluid, this.properties.allowedFluidsTag, this.properties.allowedFluids);
     }
 
+    private boolean canMilkEntities() {
+        return getBooleanProperty(this.properties.milkingConfig, this.properties.milking);
+    }
+
     public static class Properties {
 
         CreativeModeTab tab = CreativeModeTab.TAB_MISC;
@@ -347,6 +358,9 @@ public class UniversalBucketItem extends Item {
         Tag<Fluid> blockedFluidsTag = null;
         List<Fluid> allowedFluids = null;
         Tag<Fluid> allowedFluidsTag = null;
+
+        boolean milking = true;
+        ForgeConfigSpec.BooleanValue milkingConfig = null;
 
         public Properties tab(CreativeModeTab tab) {
             this.tab = tab;
@@ -440,6 +454,16 @@ public class UniversalBucketItem extends Item {
 
         public Properties allowedFluids(Tag<Fluid> allowedFluidsTag) {
             this.allowedFluidsTag = allowedFluidsTag;
+            return this;
+        }
+
+        public Properties disableMilking() {
+            this.milking = false;
+            return this;
+        }
+
+        public Properties milking(ForgeConfigSpec.BooleanValue milkingConfig) {
+            this.milkingConfig = milkingConfig;
             return this;
         }
 

@@ -39,6 +39,7 @@ public class BucketLibTestMod {
     public static final RegistryObject<Item> WATER_BLOCKING_BUCKET = ITEMS.register("water_blocking_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().blockedFluids(Collections.singletonList(Fluids.WATER))));
     public static final RegistryObject<Item> CRACKING_BUCKET = ITEMS.register("cracking_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().upperCrackingTemperature(1000)));
     public static final RegistryObject<Item> COLORED_BUCKET = ITEMS.register("colored_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().dyeable(255, 0 ,0)));
+    public static final RegistryObject<Item> ANTI_MILK_BUCKET = ITEMS.register("anti_milk_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().disableMilking()));
 
     public BucketLibTestMod() {
         if (!ENABLED) return;
