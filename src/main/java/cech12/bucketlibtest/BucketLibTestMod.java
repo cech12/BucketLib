@@ -1,5 +1,6 @@
 package cech12.bucketlibtest;
 
+import cech12.bucketlib.api.BucketLibApi;
 import cech12.bucketlib.item.UniversalBucketItem;
 import cech12.bucketlib.util.ColorUtil;
 import net.minecraft.world.item.Item;
@@ -13,6 +14,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.DispenseFluidContainer;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -45,6 +47,13 @@ public class BucketLibTestMod {
         if (!ENABLED) return;
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ITEMS.register(modEventBus);
+    }
+
+    @SubscribeEvent
+    public static void sendImc(InterModEnqueueEvent evt) {
+        for (RegistryObject<Item> item : ITEMS.getEntries()) {
+            BucketLibApi.registerBucket(item.getId());
+        }
     }
 
     @SubscribeEvent
