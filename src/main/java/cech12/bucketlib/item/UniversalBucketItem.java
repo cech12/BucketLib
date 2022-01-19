@@ -1,5 +1,7 @@
 package cech12.bucketlib.item;
 
+import cech12.bucketlib.api.BucketLibTags;
+import cech12.bucketlib.config.ServerConfig;
 import cech12.bucketlib.util.BucketLibUtil;
 import cech12.bucketlib.util.ColorUtil;
 import net.minecraft.ChatFormatting;
@@ -28,6 +30,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractCauldronBlock;
@@ -78,7 +83,6 @@ public class UniversalBucketItem extends Item {
     }
 
     public boolean isCracked(ItemStack stack) {
-        //TODO infinity enchantment
         FluidStack fluidStack = FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY);
         if (!fluidStack.isEmpty()) {
             Fluid fluid = fluidStack.getFluid();
@@ -87,7 +91,8 @@ public class UniversalBucketItem extends Item {
             Integer lowerCrackingTemperature = getLowerBreakTemperature();
             return isCrackingFluid(fluid)
                     || (upperCrackingTemperature != null && fluidTemperature >= upperCrackingTemperature)
-                    || (lowerCrackingTemperature != null && fluidTemperature <= lowerCrackingTemperature);
+                    || (lowerCrackingTemperature != null && fluidTemperature <= lowerCrackingTemperature)
+                    && !BucketLibUtil.isAffectedByInfinityEnchantment(stack);
         }
         return false;
     }
@@ -265,8 +270,22 @@ public class UniversalBucketItem extends Item {
 
     @Override
     public ItemStack getContainerItem(ItemStack itemStack) {
+        if (BucketLibUtil.isAffectedByInfinityEnchantment(itemStack)) {
+            return itemStack.copy();
+        }
         //TODO remove other content (Entity, Blocks, ...)
         return BucketLibUtil.removeFluid(itemStack);
+    }
+
+    @Override
+    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
+        if (enchantment == Enchantments.INFINITY_ARROWS
+                && ServerConfig.INFINITY_ENCHANTMENT_ENABLED.get()
+                && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, stack) <= 0
+                && FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY).getFluid().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {
+            return true;
+        }
+        return super.canApplyAtEnchantingTable(stack, enchantment);
     }
 
     @Override

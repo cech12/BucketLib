@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "_comment" : "This tag lists fluids that enable modded buckets to be enchantable with Infinity. It has only an effect if infinityEnchantmentEnabled config is enabled.",
+  "values": [
+    "minecraft:water"
+  ]
+}

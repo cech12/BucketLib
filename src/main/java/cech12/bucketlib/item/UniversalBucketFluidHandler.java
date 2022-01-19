@@ -1,5 +1,6 @@
 package cech12.bucketlib.item;
 
+import cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidAttributes;
@@ -31,14 +32,11 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
         if (maxDrain < capacity) {
             return FluidStack.EMPTY;
         }
-        //TODO consider infinity enchantment
-        /*
         if (action == FluidAction.EXECUTE
-                && CeramicBucketUtils.isAffectedByInfinityEnchantment(this.container)) {
+                && BucketLibUtil.isAffectedByInfinityEnchantment(this.container)) {
             //simulate drain to simulate infinity effect
             return super.drain(maxDrain, FluidAction.SIMULATE);
         }
-         */
         return super.drain(maxDrain, action);
     }
 
