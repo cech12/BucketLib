@@ -24,6 +24,7 @@ import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
@@ -39,8 +40,6 @@ import net.minecraftforge.client.model.ItemMultiLayerBakedModel;
 import net.minecraftforge.client.model.ItemTextureQuadConverter;
 import net.minecraftforge.client.model.PerspectiveMapWrapper;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -67,25 +66,27 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
     private final ResourceLocation otherContent;
 
     private final boolean isCracked;
+    private final boolean isLower;
 
-    public UniversalBucketModel(@Nonnull Fluid fluid, @Nullable ResourceLocation otherContent, boolean isCracked) {
+    public UniversalBucketModel(@Nonnull Fluid fluid, @Nullable ResourceLocation otherContent, boolean isCracked, boolean isLower) {
         this.fluid = fluid;
         this.otherContent = otherContent;
         this.isCracked = isCracked;
+        this.isLower = isLower;
     }
 
     /**
      * Returns a new UniversalBucketModel with the given fluid.
      */
     public UniversalBucketModel withFluid(Fluid newFluid, boolean isCracked) {
-        return new UniversalBucketModel(newFluid, null, isCracked);
+        return new UniversalBucketModel(newFluid, null, isCracked, false);
     }
 
     /**
      * Returns a new UniversalBucketModel with the given other content.
      */
-    public UniversalBucketModel withOtherContent(ResourceLocation otherContent, boolean isCracked) {
-        return new UniversalBucketModel(Fluids.EMPTY, otherContent, isCracked);
+    public UniversalBucketModel withOtherContent(ResourceLocation otherContent, boolean isCracked, boolean isLower) {
+        return new UniversalBucketModel(Fluids.EMPTY, otherContent, isCracked, isLower);
     }
 
     public static ResourceLocation getContentTexture(ResourceLocation otherContentLocation) {
@@ -103,22 +104,21 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
         Material particleLocation = owner.isTexturePresent("particle") ? owner.resolveTexture("particle") : null;
 
         Material baseLocation = null;
-        //TODO lower base only for entity buckets
-        //if (this.otherContent != null) {
-        //    if (this.isCracked && owner.isTexturePresent("crackedLowerBase")) {
-        //        baseLocation = owner.resolveTexture("crackedLowerBase");
-        //    }
-        //    if (baseLocation == null && owner.isTexturePresent("lowerBase")) {
-        //        baseLocation = owner.resolveTexture("lowerBase");
-        //    }
-        //} else {
-        if (this.isCracked && owner.isTexturePresent("crackedBase")) {
-            baseLocation = owner.resolveTexture("crackedBase");
+        if (this.isLower) {
+            if (this.isCracked && owner.isTexturePresent("crackedLowerBase")) {
+                baseLocation = owner.resolveTexture("crackedLowerBase");
+            }
+            if (baseLocation == null && owner.isTexturePresent("lowerBase")) {
+                baseLocation = owner.resolveTexture("lowerBase");
+            }
+        } else {
+            if (this.isCracked && owner.isTexturePresent("crackedBase")) {
+                baseLocation = owner.resolveTexture("crackedBase");
+            }
+            if (baseLocation == null && owner.isTexturePresent("base")) {
+                baseLocation = owner.resolveTexture("base");
+            }
         }
-        if (baseLocation == null && owner.isTexturePresent("base")) {
-            baseLocation = owner.resolveTexture("base");
-        }
-        //}
 
         Material otherContentLocation = null;
         Material fluidMaskLocation = null;
@@ -216,7 +216,7 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
         public UniversalBucketModel read(@Nonnull JsonDeserializationContext deserializationContext, @Nonnull JsonObject modelContents)
         {
             // create new model
-            return new UniversalBucketModel(Fluids.EMPTY, null, false);
+            return new UniversalBucketModel(Fluids.EMPTY, null, false, false);
         }
     }
 
@@ -244,13 +244,20 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
         @Override
         public BakedModel resolve(@Nonnull BakedModel originalModel, @Nonnull ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int number)
         {
-            BakedModel overriden = nested.resolve(originalModel, stack, world, entity, number);
-            if (overriden != originalModel) return overriden;
+            BakedModel overridden = nested.resolve(originalModel, stack, world, entity, number);
+            if (overridden != originalModel) return overridden;
             if (stack.getItem() instanceof UniversalBucketItem bucket) {
-                ResourceLocation content = BucketLibUtil.getContent(stack);
+                ResourceLocation content = null;
+                EntityType<?> entityType = BucketLibUtil.getEntityType(stack);
+                if (entityType != null) {
+                    content = entityType.getRegistryName();
+                }
+                if (content == null) {
+                    content = BucketLibUtil.getContent(stack);
+                }
                 Fluid fluid = null;
                 if (content == null) {
-                    fluid = FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY).getFluid();
+                    fluid = BucketLibUtil.getFluid(stack);
                     content = fluid.getRegistryName();
                 }
                 //reset cache if temperature config changed
@@ -260,7 +267,7 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
                     cache.clear();
                 }
                 if (!cache.containsKey(content)) {
-                    UniversalBucketModel unbaked = (fluid == null) ? this.parent.withOtherContent(content, isCracked) : this.parent.withFluid(fluid, isCracked);
+                    UniversalBucketModel unbaked = (entityType != null || fluid == null) ? this.parent.withOtherContent(content, isCracked, entityType != null) : this.parent.withFluid(fluid, isCracked);
                     BakedModel bakedModel = unbaked.bake(owner, bakery, ForgeModelBakery.defaultTextureGetter(), BlockModelRotation.X0_Y0, this, REBAKE_LOCATION);
                     cache.put(content, bakedModel);
                     return bakedModel;

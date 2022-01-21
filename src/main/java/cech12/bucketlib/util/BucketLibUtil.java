@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -14,14 +15,15 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class BucketLibUtil {
@@ -31,13 +33,7 @@ public class BucketLibUtil {
     private BucketLibUtil() {}
 
     public static boolean isEmpty(ItemStack itemStack) {
-        return !containsFluid(itemStack) && !containsMilk(itemStack);
-    }
-
-    public static boolean containsFluid(ItemStack itemStack) {
-        AtomicBoolean containsFluid = new AtomicBoolean(false);
-        FluidUtil.getFluidContained(itemStack).ifPresent(fluidStack -> containsFluid.set(!fluidStack.isEmpty()));
-        return containsFluid.get();
+        return !containsFluid(itemStack) && !containsMilk(itemStack) && !containsEntityType(itemStack);
     }
 
     /**
@@ -58,35 +54,51 @@ public class BucketLibUtil {
         return false;
     }
 
+    private static boolean containsTagContent(ItemStack itemStack, String tagName) {
+        CompoundTag nbt = itemStack.getOrCreateTag();
+        return nbt.contains(tagName);
+    }
+
+    private static String getTagContent(ItemStack itemStack, String tagName) {
+        CompoundTag nbt = itemStack.getOrCreateTag();
+        if (nbt.contains(tagName)) {
+            return nbt.getString(tagName);
+        }
+        return null;
+    }
+
+    private static ItemStack setTagContent(ItemStack itemStack, String tagName, String tagContent) {
+        ItemStack result = itemStack.copy();
+        CompoundTag nbt = result.getOrCreateTag();
+        nbt.putString(tagName, tagContent);
+        result.setTag(nbt);
+        return result;
+    }
+
+    private static ItemStack removeTagContent(ItemStack itemStack, String tagName) {
+        ItemStack result = itemStack.copy();
+        CompoundTag nbt = result.getOrCreateTag();
+        if (nbt.contains(tagName)) {
+            nbt.remove(tagName);
+            result.setTag(nbt);
+        }
+        return result;
+    }
+
     public static ResourceLocation getContent(ItemStack itemStack) {
-        CompoundTag nbt = itemStack.getTag();
-        if (nbt != null && nbt.contains("BucketContent")) {
-            return new ResourceLocation(nbt.getString("BucketContent"));
+        String content = getTagContent(itemStack, "BucketContent");
+        if (content != null) {
+            return new ResourceLocation(content);
         }
         return null;
     }
 
     public static ItemStack addContent(ItemStack itemStack, ResourceLocation content) {
-        ItemStack result = itemStack.copy();
-        CompoundTag nbt = result.getTag();
-        if (nbt == null) {
-            nbt = new CompoundTag();
-        }
-        if (!nbt.contains("BucketContent")) {
-            nbt.putString("BucketContent", content.toString());
-        }
-        result.setTag(nbt);
-        return result;
+        return setTagContent(itemStack, "BucketContent", content.toString());
     }
 
     public static ItemStack removeContent(ItemStack itemStack) {
-        ItemStack result = itemStack.copy();
-        CompoundTag nbt = result.getTag();
-        if (nbt != null && nbt.contains("BucketContent")) {
-            nbt.remove("BucketContent");
-            result.setTag(nbt);
-        }
-        return result;
+        return removeTagContent(itemStack, "BucketContent");
     }
 
     public static InteractionResult tryMilkLivingEntity(ItemStack itemStack, LivingEntity entity, Player player, InteractionHand interactionHand) {
@@ -103,12 +115,12 @@ public class BucketLibUtil {
     }
 
     public static boolean containsMilk(ItemStack itemStack) {
-        CompoundTag nbt = itemStack.getTag();
-        if (nbt != null && nbt.contains("BucketContent") && nbt.getString("BucketContent").equals(MILK_LOCATION.toString())) {
+        ResourceLocation bucketContent = getContent(itemStack);
+        if (bucketContent != null && bucketContent.equals(MILK_LOCATION)) {
             return true;
         }
         if (ForgeMod.MILK.isPresent()) {
-            return FluidUtil.getFluidContained(itemStack).orElse(FluidStack.EMPTY).getFluid() == ForgeMod.MILK.get();
+            return getFluid(itemStack) == ForgeMod.MILK.get();
         }
         return false;
     }
@@ -128,6 +140,15 @@ public class BucketLibUtil {
         return removeFluid(itemStack);
     }
 
+    public static boolean containsFluid(ItemStack itemStack) {
+        Fluid fluid = FluidUtil.getFluidContained(itemStack).orElse(FluidStack.EMPTY).getFluid();
+        return fluid != Fluids.EMPTY;
+    }
+
+    public static Fluid getFluid(ItemStack itemStack) {
+        return FluidUtil.getFluidContained(itemStack).orElse(FluidStack.EMPTY).getFluid();
+    }
+
     public static ItemStack addFluid(ItemStack itemStack, Fluid fluid) {
         AtomicReference<ItemStack> resultItemStack = new AtomicReference<>(itemStack.copy());
         FluidUtil.getFluidHandler(resultItemStack.get()).ifPresent(fluidHandler -> {
@@ -145,5 +166,26 @@ public class BucketLibUtil {
         });
         return resultItemStack.get();
     }
+
+    public static boolean containsEntityType(ItemStack itemStack) {
+        return containsTagContent(itemStack, "EntityType");
+    }
+
+    public static EntityType<?> getEntityType(ItemStack itemStack) {
+        String content = getTagContent(itemStack, "EntityType");
+        if (content != null) {
+            return ForgeRegistries.ENTITIES.getValue(new ResourceLocation(content));
+        }
+        return null;
+    }
+
+    public static ItemStack addEntityType(ItemStack itemStack, EntityType<?> entityType) {
+        return setTagContent(itemStack, "EntityType", entityType.getRegistryName().toString());
+    }
+
+    public static ItemStack removeEntityType(ItemStack itemStack) {
+        return removeTagContent(itemStack, "EntityType");
+    }
+
 
 }

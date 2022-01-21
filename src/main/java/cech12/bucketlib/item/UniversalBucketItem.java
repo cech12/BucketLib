@@ -4,6 +4,7 @@ import cech12.bucketlib.api.BucketLibTags;
 import cech12.bucketlib.config.ServerConfig;
 import cech12.bucketlib.util.BucketLibUtil;
 import cech12.bucketlib.util.ColorUtil;
+import cech12.bucketlib.util.EntityUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -12,14 +13,19 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -38,6 +44,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractCauldronBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
@@ -59,7 +66,6 @@ import java.util.List;
 
 public class UniversalBucketItem extends Item {
 
-    //TODO Entity
     //TODO Blocks
 
     private final Properties properties;
@@ -80,6 +86,9 @@ public class UniversalBucketItem extends Item {
         if (BucketLibUtil.containsMilk(stack)) {
             tooltip.add(new TextComponent("Contains Milk").withStyle(ChatFormatting.WHITE));
         }
+        if (BucketLibUtil.containsEntityType(stack)) {
+            tooltip.add(new TextComponent("EntityType: " + BucketLibUtil.getEntityType(stack)).withStyle(ChatFormatting.GREEN));
+        }
     }
 
     public boolean isCracked(ItemStack stack) {
@@ -99,7 +108,7 @@ public class UniversalBucketItem extends Item {
 
     public boolean canHoldFluid(Fluid fluid) {
         Item bucket = fluid.getBucket();
-        if (!(bucket instanceof BucketItem) || ((BucketItem) bucket).getFluid() != fluid) { //TODO forge milk fluid
+        if (!(bucket instanceof BucketItem) || ((BucketItem) bucket).getFluid() != fluid) {
             return false;
         }
         if (this.properties.allowedFluidsTag != null || this.properties.allowedFluids != null) {
@@ -113,6 +122,19 @@ public class UniversalBucketItem extends Item {
         Integer minTemperature = getMinTemperature();
         return (maxTemperature == null || fluidTemperature <= maxTemperature)
                 && (minTemperature == null || fluidTemperature >= minTemperature);
+    }
+
+    public boolean canHoldEntity(EntityType<?> entityType) {
+        if (this.canObtainEntities()) {
+            if (this.properties.allowedEntitiesTag != null || this.properties.allowedEntities != null) {
+                return isAllowedEntity(entityType);
+            }
+            if (this.properties.blockedEntitiesTag != null || this.properties.blockedEntities != null) {
+                return !isBlockedEntity(entityType);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -156,7 +178,7 @@ public class UniversalBucketItem extends Item {
             } else if (BucketLibUtil.containsFluid(itemstack)) {
                 //place fluid interaction
                 FluidStack fluidStack = FluidUtil.getFluidContained(itemstack).orElse(FluidStack.EMPTY);
-                if (hitBlockState.getBlock() instanceof AbstractCauldronBlock) {
+                if (hitBlockState.getBlock() instanceof AbstractCauldronBlock && !BucketLibUtil.containsEntityType(itemstack)) {
                     //fake vanilla bucket using on cauldron
                     player.setItemSlot(equipmentSlot, new ItemStack(fluidStack.getFluid().getBucket()));
                     InteractionResult interactionResult = hitBlockState.use(level, player, interactionHand, blockHitResult);
@@ -167,10 +189,18 @@ public class UniversalBucketItem extends Item {
                 }
                 FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, relativeBlockPos, itemstack, fluidStack);
                 if (fluidActionResult.isSuccess()) {
-                    return InteractionResultHolder.sidedSuccess(this.createEmptyResult(itemstack, player, fluidActionResult.getResult()), level.isClientSide());
+                    ItemStack emptyBucket = fluidActionResult.getResult();
+                    if (BucketLibUtil.containsEntityType(emptyBucket)) {
+                        //place entity if exists
+                        emptyBucket = spawnEntityFromBucket(player, level, emptyBucket, relativeBlockPos);
+                    }
+                    return InteractionResultHolder.sidedSuccess(this.createEmptyResult(itemstack, player, emptyBucket), level.isClientSide());
                 }
+            } else if (BucketLibUtil.containsEntityType(itemstack)) {
+                //place entity interaction
+                ItemStack emptyBucket = spawnEntityFromBucket(player, level, itemstack, relativeBlockPos);
+                return InteractionResultHolder.sidedSuccess(this.createEmptyResult(itemstack, player, emptyBucket), level.isClientSide());
             }
-            //TODO Entity interaction
             //TODO Block interaction
         }
         if (BucketLibUtil.containsMilk(itemstack)) {
@@ -179,15 +209,59 @@ public class UniversalBucketItem extends Item {
         return InteractionResultHolder.pass(itemstack);
     }
 
+    private ItemStack spawnEntityFromBucket(@Nonnull Player player, Level level, ItemStack itemStack, BlockPos pos) {
+        if (level instanceof ServerLevel serverLevel) {
+            EntityType<?> entityType = BucketLibUtil.getEntityType(itemStack);
+            if (entityType != null) {
+                Entity entity = entityType.spawn(serverLevel, itemStack, null, pos, MobSpawnType.BUCKET, true, false);
+                if (entity instanceof Bucketable bucketable) {
+                    bucketable.loadFromBucketTag(itemStack.getOrCreateTag());
+                    bucketable.setFromBucket(true);
+                }
+                serverLevel.gameEvent(player, GameEvent.ENTITY_PLACE, pos);
+                return BucketLibUtil.removeEntityType(itemStack);
+            }
+        }
+        return itemStack.copy();
+    }
+
     @Override
     @Nonnull
     public InteractionResult interactLivingEntity(@Nonnull ItemStack itemStack, @Nonnull Player player, @Nonnull LivingEntity entity, @Nonnull InteractionHand interactionHand) {
+        if (entity instanceof Bucketable && !BucketLibUtil.containsEntityType(itemStack)) {
+            InteractionResult result = this.pickupEntityWithBucket(player, interactionHand, (LivingEntity & Bucketable) entity);
+            if (result.consumesAction()) {
+                return result;
+            }
+        }
         if (this.canMilkEntities() && BucketLibUtil.isEmpty(itemStack)) {
             return BucketLibUtil.tryMilkLivingEntity(itemStack, entity, player, interactionHand);
         }
+        //TODO feed axolotl?
         return super.interactLivingEntity(itemStack, player, entity, interactionHand);
     }
 
+    private <T extends LivingEntity & Bucketable> InteractionResult pickupEntityWithBucket(Player player, InteractionHand interactionHand, T entity) {
+        ItemStack itemStack = player.getItemInHand(interactionHand).copy(); //copy to avoid changing the real item stack
+        Fluid containedFluid = FluidUtil.getFluidContained(itemStack).orElse(FluidStack.EMPTY).getFluid();
+        Fluid entityBucketFluid = ((BucketItem) entity.getBucketItemStack().getItem()).getFluid();
+        if (itemStack.getItem() instanceof UniversalBucketItem
+                && entity.isAlive()
+                && entityBucketFluid == containedFluid) {
+            entity.playSound(entity.getPickupSound(), 1.0F, 1.0F);
+            ItemStack filledItemStack = BucketLibUtil.addEntityType(itemStack, entity.getType());
+            entity.saveToBucketTag(filledItemStack);
+            Level level = entity.level;
+            ItemStack handItemStack = ItemUtils.createFilledResult(itemStack, player, filledItemStack, false);
+            player.setItemInHand(interactionHand, handItemStack);
+            if (!level.isClientSide) {
+                CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, filledItemStack);
+            }
+            entity.discard();
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+        return InteractionResult.PASS;
+    }
 
     @Override
     @Nonnull
@@ -245,7 +319,14 @@ public class UniversalBucketItem extends Item {
             if (!ForgeMod.MILK.isPresent() && this.canMilkEntities()) {
                 items.add(BucketLibUtil.addMilk(emptyBucket));
             }
-            //TODO add entity buckets
+            //add entity buckets
+            for (EntityUtil.BucketEntity bucketEntity : EntityUtil.getBucketEntities()) {
+                if (canHoldEntity(bucketEntity.getEntityType()) && canHoldFluid(bucketEntity.getFluid())) {
+                    ItemStack filledBucket = BucketLibUtil.addFluid(emptyBucket, bucketEntity.getFluid());
+                    filledBucket = BucketLibUtil.addEntityType(filledBucket, bucketEntity.getEntityType());
+                    items.add(filledBucket);
+                }
+            }
             //TODO add block buckets
         }
     }
@@ -307,11 +388,11 @@ public class UniversalBucketItem extends Item {
         return defaultValue;
     }
 
-    private boolean isFluidListedInProperty(Fluid fluid, Tag<Fluid> tag, List<Fluid> defaultList) {
+    private <T> boolean isElementListedInProperty(T element, Tag<T> tag, List<T> defaultList) {
         if (tag != null) {
-            return tag.contains(fluid);
+            return tag.contains(element);
         }
-        return defaultList != null && defaultList.contains(fluid);
+        return defaultList != null && defaultList.contains(element);
     }
     
     public boolean isDyeable() {
@@ -339,19 +420,31 @@ public class UniversalBucketItem extends Item {
     }
 
     private boolean isCrackingFluid(Fluid fluid) {
-        return isFluidListedInProperty(fluid, this.properties.crackingFluidsTag, this.properties.crackingFluids);
+        return isElementListedInProperty(fluid, this.properties.crackingFluidsTag, this.properties.crackingFluids);
     }
 
     private boolean isBlockedFluid(Fluid fluid) {
-        return isFluidListedInProperty(fluid, this.properties.blockedFluidsTag, this.properties.blockedFluids);
+        return isElementListedInProperty(fluid, this.properties.blockedFluidsTag, this.properties.blockedFluids);
     }
 
     private boolean isAllowedFluid(Fluid fluid) {
-        return isFluidListedInProperty(fluid, this.properties.allowedFluidsTag, this.properties.allowedFluids);
+        return isElementListedInProperty(fluid, this.properties.allowedFluidsTag, this.properties.allowedFluids);
     }
 
     private boolean canMilkEntities() {
         return getBooleanProperty(this.properties.milkingConfig, this.properties.milking);
+    }
+
+    private boolean canObtainEntities() {
+        return getBooleanProperty(this.properties.entityObtainingConfig, this.properties.entityObtaining);
+    }
+
+    private boolean isBlockedEntity(EntityType<?> entityType) {
+        return isElementListedInProperty(entityType, this.properties.blockedEntitiesTag, this.properties.blockedEntities);
+    }
+
+    private boolean isAllowedEntity(EntityType<?> entityType) {
+        return isElementListedInProperty(entityType, this.properties.allowedEntitiesTag, this.properties.allowedEntities);
     }
 
     public static class Properties {
@@ -380,6 +473,13 @@ public class UniversalBucketItem extends Item {
 
         boolean milking = true;
         ForgeConfigSpec.BooleanValue milkingConfig = null;
+
+        boolean entityObtaining = true;
+        ForgeConfigSpec.BooleanValue entityObtainingConfig = null;
+        List<EntityType<?>> blockedEntities = null;
+        Tag<EntityType<?>> blockedEntitiesTag = null;
+        List<EntityType<?>> allowedEntities = null;
+        Tag<EntityType<?>> allowedEntitiesTag = null;
 
         public Properties tab(CreativeModeTab tab) {
             this.tab = tab;
@@ -483,6 +583,36 @@ public class UniversalBucketItem extends Item {
 
         public Properties milking(ForgeConfigSpec.BooleanValue milkingConfig) {
             this.milkingConfig = milkingConfig;
+            return this;
+        }
+
+        public Properties disableEntityObtaining() {
+            this.entityObtaining = false;
+            return this;
+        }
+
+        public Properties entityObtaining(ForgeConfigSpec.BooleanValue entityObtainingConfig) {
+            this.entityObtainingConfig = entityObtainingConfig;
+            return this;
+        }
+
+        public Properties blockedEntities(List<EntityType<?>> blockedEntities) {
+            this.blockedEntities = blockedEntities;
+            return this;
+        }
+
+        public Properties blockedEntities(Tag<EntityType<?>> blockedEntitiesTag) {
+            this.blockedEntitiesTag = blockedEntitiesTag;
+            return this;
+        }
+
+        public Properties allowedEntities(List<EntityType<?>> allowedEntities) {
+            this.allowedEntities = allowedEntities;
+            return this;
+        }
+
+        public Properties allowedEntities(Tag<EntityType<?>> allowedEntitiesTag) {
+            this.allowedEntitiesTag = allowedEntitiesTag;
             return this;
         }
 
