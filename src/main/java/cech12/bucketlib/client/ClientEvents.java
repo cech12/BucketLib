@@ -3,7 +3,7 @@ package cech12.bucketlib.client;
 import cech12.bucketlib.api.BucketLibApi;
 import cech12.bucketlib.client.model.UniversalBucketModel;
 import cech12.bucketlib.util.BucketLibUtil;
-import cech12.bucketlib.util.EntityUtil;
+import cech12.bucketlib.util.RegistryUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.api.distmarker.Dist;
@@ -26,12 +26,15 @@ public class ClientEvents {
     @SubscribeEvent
     public static void onTextureStitch(TextureStitchEvent.Pre event){
         if (event.getAtlas().location().equals(InventoryMenu.BLOCK_ATLAS)) {
-            //TODO powder snow bucket & other mod contents
             //register texture of milk bucket
             event.addSprite(UniversalBucketModel.getContentTexture(BucketLibUtil.MILK_LOCATION));
+            //register block buckets
+            for (RegistryUtil.BucketBlock bucketEntity : RegistryUtil.getBucketBlocks()) {
+                event.addSprite(UniversalBucketModel.getContentTexture(bucketEntity.block().getRegistryName()));
+            }
             //register textures for mob buckets
-            for (EntityUtil.BucketEntity bucketEntity : EntityUtil.getBucketEntities()) {
-                event.addSprite(UniversalBucketModel.getContentTexture(bucketEntity.getEntityType().getRegistryName()));
+            for (RegistryUtil.BucketEntity bucketEntity : RegistryUtil.getBucketEntities()) {
+                event.addSprite(UniversalBucketModel.getContentTexture(bucketEntity.entityType().getRegistryName()));
             }
         }
     }

@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.ForgeMod;
@@ -33,7 +34,7 @@ public class BucketLibUtil {
     private BucketLibUtil() {}
 
     public static boolean isEmpty(ItemStack itemStack) {
-        return !containsFluid(itemStack) && !containsMilk(itemStack) && !containsEntityType(itemStack);
+        return !containsFluid(itemStack) && !containsMilk(itemStack) && !containsEntityType(itemStack) && !containsBlock(itemStack);
     }
 
     /**
@@ -83,6 +84,10 @@ public class BucketLibUtil {
             result.setTag(nbt);
         }
         return result;
+    }
+
+    public static boolean containsContent(ItemStack itemStack) {
+        return containsTagContent(itemStack, "BucketContent");
     }
 
     public static ResourceLocation getContent(ItemStack itemStack) {
@@ -187,5 +192,32 @@ public class BucketLibUtil {
         return removeTagContent(itemStack, "EntityType");
     }
 
+    public static boolean containsBlock(ItemStack itemStack) {
+        return containsContent(itemStack) && !containsMilk(itemStack);
+    }
+
+    public static Block getBlock(ItemStack itemStack) {
+        if (!containsMilk(itemStack)) {
+            ResourceLocation content = getContent(itemStack);
+            if (content != null) {
+                return ForgeRegistries.BLOCKS.getValue(content);
+            }
+        }
+        return null;
+    }
+
+    public static ItemStack addBlock(ItemStack itemStack, Block block) {
+        if (block.getRegistryName() != null) {
+            return addContent(itemStack, block.getRegistryName());
+        }
+        return itemStack.copy();
+    }
+
+    public static ItemStack removeBlock(ItemStack itemStack) {
+        if (!containsMilk(itemStack)) {
+            return removeContent(itemStack);
+        }
+        return itemStack.copy();
+    }
 
 }
