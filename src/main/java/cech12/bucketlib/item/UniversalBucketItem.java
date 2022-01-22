@@ -5,7 +5,6 @@ import cech12.bucketlib.config.ServerConfig;
 import cech12.bucketlib.util.BucketLibUtil;
 import cech12.bucketlib.util.ColorUtil;
 import cech12.bucketlib.util.RegistryUtil;
-import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -13,6 +12,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
@@ -32,7 +32,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -50,8 +49,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.ForgeMod;
@@ -75,22 +72,30 @@ public class UniversalBucketItem extends Item {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(@Nonnull ItemStack stack, @Nullable Level worldIn, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flagIn) {
-        super.appendHoverText(stack, worldIn, tooltip, flagIn);
-        //TODO only for debugging
-        FluidUtil.getFluidContained(stack).ifPresent(fluidStack ->
-                tooltip.add(new TextComponent("Fluid: " + fluidStack.getRawFluid().getRegistryName()).withStyle(ChatFormatting.BLUE))
-        );
-        if (BucketLibUtil.containsMilk(stack)) {
-            tooltip.add(new TextComponent("Contains Milk").withStyle(ChatFormatting.WHITE));
-        }
+    @Nonnull
+    public Component getName(@Nonnull ItemStack stack) {
+        String descriptionId = this.getDescriptionId(stack);
+        Component argument;
         if (BucketLibUtil.containsEntityType(stack)) {
-            tooltip.add(new TextComponent("EntityType: " + BucketLibUtil.getEntityType(stack)).withStyle(ChatFormatting.GREEN));
+            descriptionId += ".entity";
+            EntityType<?> entityType = BucketLibUtil.getEntityType(stack);
+            argument = (entityType != null) ? entityType.getDescription() : new TextComponent("?");
+        } else if (BucketLibUtil.containsFluid(stack)) {
+            descriptionId += ".filled";
+            Fluid fluid = BucketLibUtil.getFluid(stack);
+            argument = new TranslatableComponent(fluid.getAttributes().getTranslationKey());
+        } else if (BucketLibUtil.containsBlock(stack)) {
+            descriptionId += ".filled";
+            Block block = BucketLibUtil.getBlock(stack);
+            argument = (block != null) ? block.getName() : new TextComponent("?");
+        } else if (BucketLibUtil.containsMilk(stack)) {
+            descriptionId += ".filled";
+            argument = new TranslatableComponent("fluid.minecraft.milk");
+        } else {
+            //is empty
+            return new TranslatableComponent(descriptionId);
         }
-        if (BucketLibUtil.containsBlock(stack)) {
-            tooltip.add(new TextComponent("Block: " + BucketLibUtil.getBlock(stack)).withStyle(ChatFormatting.RED));
-        }
+        return new TranslatableComponent(descriptionId, argument);
     }
 
     public boolean isCracked(ItemStack stack) {

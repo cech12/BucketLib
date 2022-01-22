@@ -1,0 +1,40 @@
+{
+  "item.bucketlibtest.test_bucket": "Test Bucket",
+  "item.bucketlibtest.test_bucket.entity": "Test Bucket of %s",
+  "item.bucketlibtest.test_bucket.filled": "Test %s Bucket",
+
+  "item.bucketlibtest.temperature_bucket": "Temperature Bucket",
+  "item.bucketlibtest.temperature_bucket.entity": "Temperature Bucket of %s",
+  "item.bucketlibtest.temperature_bucket.filled": "Temperature %s Bucket",
+
+  "item.bucketlibtest.water_blocking_bucket": "Water Blocking Bucket",
+  "item.bucketlibtest.water_blocking_bucket.entity": "Water Blocking Bucket of %s",
+  "item.bucketlibtest.water_blocking_bucket.filled": "Water Blocking %s Bucket",
+
+  "item.bucketlibtest.cracking_bucket": "Cracking Bucket",
+  "item.bucketlibtest.cracking_bucket.entity": "Cracking Bucket of %s",
+  "item.bucketlibtest.cracking_bucket.filled": "Cracking %s Bucket",
+
+  "item.bucketlibtest.colored_bucket": "Colored Bucket",
+  "item.bucketlibtest.colored_bucket.entity": "Colored Bucket of %s",
+  "item.bucketlibtest.colored_bucket.filled": "Colored %s Bucket",
+
+  "item.bucketlibtest.anti_milk_bucket": "Anti Milk Bucket",
+  "item.bucketlibtest.anti_milk_bucket.entity": "Anti Milk Bucket of %s",
+  "item.bucketlibtest.anti_milk_bucket.filled": "Anti Milk %s Bucket",
+
+  "item.bucketlibtest.no_entities_bucket": "No Entity Bucket",
+  "item.bucketlibtest.no_entities_bucket.filled": "No Entity %s Bucket",
+
+  "item.bucketlibtest.anti_salmon_bucket": "Anti Salmon Bucket",
+  "item.bucketlibtest.anti_salmon_bucket.entity": "Anti Salmon Bucket of %s",
+  "item.bucketlibtest.anti_salmon_bucket.filled": "Anti Salmon %s Bucket",
+
+  "item.bucketlibtest.only_puffer_bucket": "Only Pufferfish Bucket",
+  "item.bucketlibtest.only_puffer_bucket.entity": "Only Pufferfish Bucket of %s",
+  "item.bucketlibtest.only_puffer_bucket.filled": "Only Pufferfish %s Bucket",
+
+  "item.bucketlibtest.no_blocks_bucket": "No Blocks Bucket",
+  "item.bucketlibtest.no_blocks_bucket.entity": "No Blocks Bucket of %s",
+  "item.bucketlibtest.no_blocks_bucket.filled": "No Blocks %s Bucket"
+}
