@@ -37,6 +37,10 @@ public class BucketLibUtil {
         return !containsFluid(itemStack) && !containsMilk(itemStack) && !containsEntityType(itemStack) && !containsBlock(itemStack);
     }
 
+    public static ItemStack createEmptyResult(ItemStack initialStack, Player player, ItemStack resultStack) {
+        return player.getAbilities().instabuild ? initialStack : resultStack;
+    }
+
     /**
      * Checks if the given bucket is affected by Infinity enchantment.
      * @param itemStack checked item stack

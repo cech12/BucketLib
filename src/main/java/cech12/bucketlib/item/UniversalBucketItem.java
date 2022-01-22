@@ -5,6 +5,7 @@ import cech12.bucketlib.config.ServerConfig;
 import cech12.bucketlib.util.BucketLibUtil;
 import cech12.bucketlib.util.ColorUtil;
 import cech12.bucketlib.util.RegistryUtil;
+import cech12.bucketlib.util.WorldInteractionUtil;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -40,9 +41,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.AbstractCauldronBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
@@ -175,27 +174,16 @@ public class UniversalBucketItem extends Item {
             Direction hitDirection = blockHitResult.getDirection();
             BlockPos relativeBlockPos = hitBlockPos.relative(hitDirection);
             if (isEmpty) {
-                //pickup fluid interaction
-                if (hitBlockState.getBlock() instanceof AbstractCauldronBlock) {
-                    //check if bucket can hold cauldron content
-                    if (hitBlockState.getBlock() == Blocks.LAVA_CAULDRON && canHoldFluid(Fluids.LAVA)
-                            || hitBlockState.getBlock() == Blocks.WATER_CAULDRON && canHoldFluid(Fluids.WATER)) {
-                        //fake vanilla bucket using on cauldron
-                        player.setItemInHand(interactionHand, new ItemStack(Items.BUCKET));
-                        InteractionResult interactionResult = hitBlockState.use(level, player, interactionHand, blockHitResult);
-                        FluidStack resultFluidStack = FluidUtil.getFluidContained(player.getItemInHand(interactionHand)).orElse(FluidStack.EMPTY);
-                        player.setItemInHand(interactionHand, itemstack);
-                        if (interactionResult.consumesAction()) {
-                            return new InteractionResultHolder<>(interactionResult, ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addFluid(itemstack, resultFluidStack.getFluid())));
-                        }
-                    }
+                //pickup from cauldron interaction
+                InteractionResultHolder<ItemStack> caldronInteractionResult = WorldInteractionUtil.tryPickupFromCauldron(level, player, interactionHand, blockHitResult);
+                if (caldronInteractionResult.getResult().consumesAction()) {
+                    return caldronInteractionResult;
                 }
                 FluidActionResult fluidActionResult = FluidUtil.tryPickUpFluid(itemstack, player, level, hitBlockPos, hitDirection);
                 if (fluidActionResult.isSuccess()) {
                     return InteractionResultHolder.sidedSuccess(ItemUtils.createFilledResult(itemstack, player, fluidActionResult.getResult()), level.isClientSide());
                 }
                 //pickup block interaction
-                //TODO Cauldron interaction
                 RegistryUtil.BucketBlock bucketBlock = RegistryUtil.getBucketBlock(hitBlockState.getBlock());
                 if (bucketBlock != null && canHoldBlock(bucketBlock.block())) {
                     //fake vanilla bucket use
@@ -207,44 +195,41 @@ public class UniversalBucketItem extends Item {
                         return new InteractionResultHolder<>(interactionResult.getResult(), ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addBlock(itemstack, bucketBlock.block())));
                     }
                 }
-            } else if (BucketLibUtil.containsFluid(itemstack)) {
-                //place fluid interaction
-                FluidStack fluidStack = FluidUtil.getFluidContained(itemstack).orElse(FluidStack.EMPTY);
-                if (hitBlockState.getBlock() instanceof AbstractCauldronBlock && !BucketLibUtil.containsEntityType(itemstack)) {
-                    //fake vanilla bucket using on cauldron
-                    player.setItemInHand(interactionHand, new ItemStack(fluidStack.getFluid().getBucket()));
-                    InteractionResult interactionResult = hitBlockState.use(level, player, interactionHand, blockHitResult);
-                    player.setItemInHand(interactionHand, itemstack);
-                    if (interactionResult.consumesAction()) {
-                        return new InteractionResultHolder<>(interactionResult, createEmptyResult(itemstack, player, BucketLibUtil.removeFluid(itemstack)));
-                    }
+            } else {
+                //place into cauldron interaction
+                InteractionResultHolder<ItemStack> caldronInteractionResult = WorldInteractionUtil.tryPlaceIntoCauldron(level, player, interactionHand, blockHitResult);
+                if (caldronInteractionResult.getResult().consumesAction()) {
+                    return caldronInteractionResult;
                 }
-                FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, relativeBlockPos, itemstack, fluidStack);
-                if (fluidActionResult.isSuccess()) {
-                    ItemStack emptyBucket = fluidActionResult.getResult();
-                    if (BucketLibUtil.containsEntityType(emptyBucket)) {
-                        //place entity if exists
-                        emptyBucket = spawnEntityFromBucket(player, level, emptyBucket, relativeBlockPos);
+                if (BucketLibUtil.containsFluid(itemstack)) {
+                    //place fluid interaction
+                    FluidStack fluidStack = FluidUtil.getFluidContained(itemstack).orElse(FluidStack.EMPTY);
+                    FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, relativeBlockPos, itemstack, fluidStack);
+                    if (fluidActionResult.isSuccess()) {
+                        ItemStack emptyBucket = fluidActionResult.getResult();
+                        if (BucketLibUtil.containsEntityType(emptyBucket)) {
+                            //place entity if exists
+                            emptyBucket = spawnEntityFromBucket(player, level, emptyBucket, relativeBlockPos);
+                        }
+                        return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, emptyBucket), level.isClientSide());
                     }
-                    return InteractionResultHolder.sidedSuccess(this.createEmptyResult(itemstack, player, emptyBucket), level.isClientSide());
-                }
-            } else if (BucketLibUtil.containsEntityType(itemstack)) {
-                //place entity interaction
-                ItemStack emptyBucket = spawnEntityFromBucket(player, level, itemstack, relativeBlockPos);
-                return InteractionResultHolder.sidedSuccess(this.createEmptyResult(itemstack, player, emptyBucket), level.isClientSide());
-            } else if (BucketLibUtil.containsBlock(itemstack)) {
-                //place block interaction
-                //TODO Cauldron interaction
-                Block block = BucketLibUtil.getBlock(itemstack);
-                RegistryUtil.BucketBlock bucketBlock = RegistryUtil.getBucketBlock(block);
-                if (block != null && bucketBlock != null) {
-                    //fake vanilla bucket use
-                    ItemStack fakeStack = new ItemStack(bucketBlock.bucketItem());
-                    player.setItemInHand(interactionHand, fakeStack);
-                    InteractionResult interactionResult = fakeStack.useOn(new UseOnContext(player, interactionHand, blockHitResult));
-                    player.setItemInHand(interactionHand, itemstack);
-                    if (interactionResult.consumesAction()) {
-                        return new InteractionResultHolder<>(interactionResult, createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack)));
+                } else if (BucketLibUtil.containsEntityType(itemstack)) {
+                    //place entity interaction
+                    ItemStack emptyBucket = spawnEntityFromBucket(player, level, itemstack, relativeBlockPos);
+                    return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, emptyBucket), level.isClientSide());
+                } else if (BucketLibUtil.containsBlock(itemstack)) {
+                    //place block interaction
+                    Block block = BucketLibUtil.getBlock(itemstack);
+                    RegistryUtil.BucketBlock bucketBlock = RegistryUtil.getBucketBlock(block);
+                    if (block != null && bucketBlock != null) {
+                        //fake vanilla bucket use
+                        ItemStack fakeStack = new ItemStack(bucketBlock.bucketItem());
+                        player.setItemInHand(interactionHand, fakeStack);
+                        InteractionResult interactionResult = fakeStack.useOn(new UseOnContext(player, interactionHand, blockHitResult));
+                        player.setItemInHand(interactionHand, itemstack);
+                        if (interactionResult.consumesAction()) {
+                            return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack)));
+                        }
                     }
                 }
             }
@@ -340,10 +325,6 @@ public class UniversalBucketItem extends Item {
             return UseAnim.DRINK;
         }
         return super.getUseAnimation(itemStack);
-    }
-
-    private ItemStack createEmptyResult(ItemStack initialStack, Player player, ItemStack resultStack) {
-        return player.getAbilities().instabuild ? initialStack : resultStack;
     }
 
     /**
