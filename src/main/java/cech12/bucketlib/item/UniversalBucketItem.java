@@ -266,7 +266,7 @@ public class UniversalBucketItem extends Item {
             }
         }
         if (this.canMilkEntities() && BucketLibUtil.isEmpty(itemStack)) {
-            return BucketLibUtil.tryMilkLivingEntity(itemStack, entity, player, interactionHand);
+            return WorldInteractionUtil.tryMilkLivingEntity(itemStack, entity, player, interactionHand);
         }
         //TODO feed axolotl?
         return super.interactLivingEntity(itemStack, player, entity, interactionHand);

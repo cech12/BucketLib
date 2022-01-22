@@ -73,7 +73,7 @@ public class BucketLib {
                 if (bucketItem instanceof UniversalBucketItem bucket) {
                     buckets.add(bucket);
                     //register dispense behaviour
-                    //TODO dispense powder snow
+                    //TODO dispense powder snow & milk entities
                     DispenserBlock.registerBehavior(bucket, DispenseFluidContainer.getInstance());
                 } else {
                     LOGGER.info("Bucket could not be registered. The item \"{}\" is not a {}.", bucketLocation, UniversalBucketItem.class.getName());

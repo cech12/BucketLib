@@ -1,10 +1,12 @@
 package cech12.bucketlib.util;
 
+import cech12.bucketlib.api.BucketLibTags;
 import cech12.bucketlib.item.UniversalBucketItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
@@ -23,6 +25,20 @@ import net.minecraftforge.fluids.FluidUtil;
 public class WorldInteractionUtil {
 
     private WorldInteractionUtil() {}
+
+    public static InteractionResult tryMilkLivingEntity(ItemStack itemStack, LivingEntity entity, Player player, InteractionHand interactionHand) {
+        if (!BucketLibTags.EntityTypes.MILKABLE.contains(entity.getType())) {
+            return InteractionResult.PASS;
+        }
+        player.setItemInHand(interactionHand, new ItemStack(Items.BUCKET));
+        InteractionResult result = player.interactOn(entity, interactionHand);
+        //TODO bug: milking entity in creative mode adds a vanilla milk bucket to inventory
+        if (result.consumesAction()) {
+            itemStack = BucketLibUtil.addMilk(itemStack);
+        }
+        player.setItemInHand(interactionHand, itemStack);
+        return result;
+    }
 
     public static InteractionResultHolder<ItemStack> tryPickupFromCauldron(Level level, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         ItemStack itemstack = player.getItemInHand(interactionHand);
