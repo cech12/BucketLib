@@ -5,15 +5,12 @@ import cech12.bucketlib.item.UniversalBucketItem;
 import cech12.bucketlib.util.ColorUtil;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ColorHandlerEvent;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.DispenseFluidContainer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -58,15 +55,6 @@ public class BucketLibTestMod {
     public static void sendImc(InterModEnqueueEvent evt) {
         for (RegistryObject<Item> item : ITEMS.getEntries()) {
             BucketLibApi.registerBucket(item.getId());
-        }
-    }
-
-    @SubscribeEvent
-    public static void registerItems(RegistryEvent.Register<Item> event) {
-        if (!ENABLED) return;
-        //TODO For each item, a Dispense behaviour must be registered
-        for (RegistryObject<Item> item : ITEMS.getEntries()) {
-            DispenserBlock.registerBehavior(item.get(), DispenseFluidContainer.getInstance());
         }
     }
 

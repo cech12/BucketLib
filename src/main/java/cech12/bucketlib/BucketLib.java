@@ -8,8 +8,10 @@ import cech12.bucketlib.item.crafting.BucketDyeingRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fluids.DispenseFluidContainer;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -70,6 +72,9 @@ public class BucketLib {
                 }
                 if (bucketItem instanceof UniversalBucketItem bucket) {
                     buckets.add(bucket);
+                    //register dispense behaviour
+                    //TODO dispense powder snow
+                    DispenserBlock.registerBehavior(bucket, DispenseFluidContainer.getInstance());
                 } else {
                     LOGGER.info("Bucket could not be registered. The item \"{}\" is not a {}.", bucketLocation, UniversalBucketItem.class.getName());
                 }
