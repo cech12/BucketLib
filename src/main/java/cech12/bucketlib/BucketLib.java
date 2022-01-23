@@ -13,7 +13,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.DispenseFluidContainer;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -33,7 +33,6 @@ import java.util.Collections;
 import java.util.List;
 
 @Mod(BucketLibApi.MOD_ID)
-@Mod.EventBusSubscriber(modid= BucketLibApi.MOD_ID, bus= Mod.EventBusSubscriber.Bus.MOD)
 public class BucketLib {
 
     private static final Logger LOGGER = LogManager.getLogger();
@@ -45,8 +44,10 @@ public class BucketLib {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfig.SERVER_CONFIG);
         ServerConfig.loadConfig(ServerConfig.SERVER_CONFIG, FMLPaths.GAMEDIR.get().resolve(FMLConfig.defaultConfigPath()).resolve(BucketLibApi.MOD_ID + "-server.toml"));
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
+        final IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        eventBus.addListener(this::commonSetup);
+        eventBus.addListener(this::processIMC);
+        eventBus.addGenericListener(RecipeSerializer.class, this::registerRecipeSerializers);
     }
 
     public static List<UniversalBucketItem> getRegisteredBuckets() {
@@ -96,9 +97,7 @@ public class BucketLib {
         }
     }
 
-    @SubscribeEvent
-    public static void registerRecipeSerializers(RegistryEvent.Register<RecipeSerializer<?>> event) {
-        LOGGER.info("registerRecipeSerializers called"); //TODO
+    private void registerRecipeSerializers(RegistryEvent.Register<RecipeSerializer<?>> event) {
         //dye recipe serializer
         event.getRegistry().register(BucketDyeingRecipe.SERIALIZER);
     }
