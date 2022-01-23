@@ -5,13 +5,17 @@ import cech12.bucketlib.api.BucketLibTags;
 import cech12.bucketlib.config.ServerConfig;
 import cech12.bucketlib.item.UniversalBucketItem;
 import cech12.bucketlib.item.crafting.BucketDyeingRecipe;
+import cech12.bucketlib.util.ColorUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.DispenseFluidContainer;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -71,10 +75,7 @@ public class BucketLib {
                     return;
                 }
                 if (bucketItem instanceof UniversalBucketItem bucket) {
-                    buckets.add(bucket);
-                    //register dispense behaviour
-                    //TODO dispense powder snow & milk entities
-                    DispenserBlock.registerBehavior(bucket, DispenseFluidContainer.getInstance());
+                    registerBucket(bucket);
                 } else {
                     LOGGER.info("Bucket could not be registered. The item \"{}\" is not a {}.", bucketLocation, UniversalBucketItem.class.getName());
                 }
@@ -82,6 +83,17 @@ public class BucketLib {
                 LOGGER.warn("Bucket could not be registered. The message supplier of the IMCMessage does not contain a ResourceLocation");
             }
         });
+    }
+
+    private void registerBucket(UniversalBucketItem bucket) {
+        buckets.add(bucket);
+        //register dispense behaviour
+        //TODO dispense powder snow & milk entities
+        DispenserBlock.registerBehavior(bucket, DispenseFluidContainer.getInstance());
+        //register color
+        if (bucket.isDyeable()) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> Minecraft.getInstance().getItemColors().register((stack, color) -> (color > 0) ? -1 : ColorUtil.getColor(stack, bucket.getDefaultColor()), bucket));
+        }
     }
 
     @SubscribeEvent

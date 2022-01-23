@@ -2,13 +2,9 @@ package cech12.bucketlibtest;
 
 import cech12.bucketlib.api.BucketLibApi;
 import cech12.bucketlib.item.UniversalBucketItem;
-import cech12.bucketlib.util.ColorUtil;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -53,21 +49,9 @@ public class BucketLibTestMod {
 
     @SubscribeEvent
     public static void sendImc(InterModEnqueueEvent evt) {
-        for (RegistryObject<Item> item : ITEMS.getEntries()) {
-            BucketLibApi.registerBucket(item.getId());
-        }
-    }
-
-    @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    public static void registerItemColors(ColorHandlerEvent.Item event) {
-        LOGGER.info("registerItemColors called"); //TODO
         if (!ENABLED) return;
         for (RegistryObject<Item> item : ITEMS.getEntries()) {
-            UniversalBucketItem bucketItem = (UniversalBucketItem) item.get();
-            if (bucketItem.isDyeable()) {
-                event.getItemColors().register((stack, color) -> (color > 0) ? -1 : ColorUtil.getColor(stack, bucketItem.getDefaultColor()), bucketItem);
-            }
+            BucketLibApi.registerBucket(item.getId());
         }
     }
 
