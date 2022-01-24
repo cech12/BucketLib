@@ -1,5 +1,6 @@
 package cech12.bucketlib.item;
 
+import cech12.bucketlib.api.item.UniversalBucketItem;
 import cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;

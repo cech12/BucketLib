@@ -3,7 +3,7 @@ package cech12.bucketlib;
 import cech12.bucketlib.api.BucketLibApi;
 import cech12.bucketlib.api.BucketLibTags;
 import cech12.bucketlib.config.ServerConfig;
-import cech12.bucketlib.item.UniversalBucketItem;
+import cech12.bucketlib.api.item.UniversalBucketItem;
 import cech12.bucketlib.item.crafting.BucketDyeingRecipe;
 import cech12.bucketlib.util.ColorUtil;
 import net.minecraft.client.Minecraft;

@@ -1,7 +1,7 @@
 package cech12.bucketlib.client.model;
 
 import cech12.bucketlib.api.BucketLibApi;
-import cech12.bucketlib.item.UniversalBucketItem;
+import cech12.bucketlib.api.item.UniversalBucketItem;
 import cech12.bucketlib.util.BucketLibUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

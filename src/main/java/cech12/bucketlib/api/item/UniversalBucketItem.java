@@ -1,7 +1,8 @@
-package cech12.bucketlib.item;
+package cech12.bucketlib.api.item;
 
 import cech12.bucketlib.api.BucketLibTags;
 import cech12.bucketlib.config.ServerConfig;
+import cech12.bucketlib.item.UniversalBucketFluidHandler;
 import cech12.bucketlib.util.BucketLibUtil;
 import cech12.bucketlib.util.ColorUtil;
 import cech12.bucketlib.util.RegistryUtil;

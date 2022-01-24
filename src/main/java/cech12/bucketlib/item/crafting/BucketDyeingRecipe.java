@@ -1,7 +1,7 @@
 package cech12.bucketlib.item.crafting;
 
 import cech12.bucketlib.api.BucketLibApi;
-import cech12.bucketlib.item.UniversalBucketItem;
+import cech12.bucketlib.api.item.UniversalBucketItem;
 import cech12.bucketlib.util.ColorUtil;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;

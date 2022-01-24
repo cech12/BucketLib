@@ -1,7 +1,7 @@
 package cech12.bucketlib.util;
 
 import cech12.bucketlib.api.BucketLibTags;
-import cech12.bucketlib.item.UniversalBucketItem;
+import cech12.bucketlib.api.item.UniversalBucketItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;

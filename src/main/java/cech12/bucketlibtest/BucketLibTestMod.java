@@ -1,7 +1,7 @@
 package cech12.bucketlibtest;
 
 import cech12.bucketlib.api.BucketLibApi;
-import cech12.bucketlib.item.UniversalBucketItem;
+import cech12.bucketlib.api.item.UniversalBucketItem;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.Fluids;
@@ -18,8 +18,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
 
-@Mod(BucketLibTestMod.MOD_ID)
-@Mod.EventBusSubscriber(modid= BucketLibTestMod.MOD_ID, bus= Mod.EventBusSubscriber.Bus.MOD)
+//@Mod(BucketLibTestMod.MOD_ID)
+//@Mod.EventBusSubscriber(modid= BucketLibTestMod.MOD_ID, bus= Mod.EventBusSubscriber.Bus.MOD)
 public class BucketLibTestMod {
 
     private static final Logger LOGGER = LogManager.getLogger();

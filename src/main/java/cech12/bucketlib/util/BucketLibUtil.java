@@ -2,7 +2,7 @@ package cech12.bucketlib.util;
 
 import cech12.bucketlib.api.BucketLibTags;
 import cech12.bucketlib.config.ServerConfig;
-import cech12.bucketlib.item.UniversalBucketItem;
+import cech12.bucketlib.api.item.UniversalBucketItem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
