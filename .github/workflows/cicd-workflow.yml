@@ -30,6 +30,8 @@ jobs:
       java-version: 17
       mod-name: Bucket Lib
       mod-id: bucketlib
+      publish-api: true
+      publish-sources: true
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 #  publish-curseforge:

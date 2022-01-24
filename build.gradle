@@ -131,8 +131,23 @@ jar {
     }
 }
 
-// Example configuration to allow publishing using the maven-publish task
-// This is the preferred method to reobfuscate your jar file
+task apiJar(type: Jar) {
+    archiveClassifier.set('api')
+    include 'cech12/bucketlib/api/**/*'
+    from sourceSets.main.allSource
+    from sourceSets.main.output
+}
+
+task sourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allJava
+}
+
+artifacts {
+    archives apiJar
+    archives sourcesJar
+}
+
 jar.finalizedBy('reobfJar')
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
 //publish.dependsOn('reobfJar')
@@ -157,6 +172,8 @@ curseforge {
         id = "${curseforge_id}"
         changelog = file('CHANGELOG.md')
         changelogType = "markdown"
+        addArtifact(sourcesJar)
+        addArtifact(apiJar)
         releaseType = "${curseforge_release}"
         "${curseforge_versions}".split(',').each {
             addGameVersion "${it}"
