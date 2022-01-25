@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.18.1-0.3.0.0] - 2022-01-??
+### Added
+- add bucket content textures of Alex Mobs, Aquaculture, Quark, Quicksand, The Undergarden
+
 ## [1.18.1-0.2.2.0] - 2022-01-25
 ### Fixed
 - library mod could not be started because the mods.toml was wrong
