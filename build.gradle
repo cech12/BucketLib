@@ -155,13 +155,24 @@ jar.finalizedBy('reobfJar')
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
+            from components.java
+            artifact apiJar
+            artifact sourcesJar
+
+            groupId = 'com.github.cech12'
+            artifactId = "BucketLib"
+            version = "${version}"
+
+            // Filter any dependencies from appearing in the pom.xml
+            pom.withXml {
+                asNode().dependencies.dependency.each { dep ->
+                    assert dep.parent().remove(dep)
+                }
+            }
         }
     }
     repositories {
-        maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
-        }
+        mavenLocal()
     }
 }
 
