@@ -155,13 +155,13 @@ jar.finalizedBy('reobfJar')
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            from components.java
+            artifact jar
             artifact apiJar
             artifact sourcesJar
 
             groupId = 'com.github.cech12'
-            artifactId = "BucketLib"
-            version = "${version}"
+            artifactId project.archivesBaseName
+            version project.version
 
             // Filter any dependencies from appearing in the pom.xml
             pom.withXml {
