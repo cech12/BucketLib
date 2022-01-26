@@ -155,7 +155,7 @@ jar.finalizedBy('reobfJar')
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
+            from components.java
             artifact apiJar
             artifact sourcesJar
 
