@@ -465,7 +465,7 @@ public class UniversalBucketItem extends Item {
         return isElementListedInProperty(fluid, this.properties.allowedFluidsTag, this.properties.allowedFluids);
     }
 
-    private boolean canMilkEntities() {
+    public boolean canMilkEntities() {
         return getBooleanProperty(this.properties.milkingConfig, this.properties.milking);
     }
 

@@ -1,0 +1,21 @@
+{
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "create"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "create:wheat_flour"
+    },
+    {
+      "type": "bucketlib:fluid",
+      "fluid": "minecraft:water"
+    }
+  ],
+  "result": {
+    "item": "create:dough"
+  }
+}
