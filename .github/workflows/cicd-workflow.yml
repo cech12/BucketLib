@@ -23,7 +23,7 @@ jobs:
       java-version: 17
   publish-github:
     needs: codeql
-    if: ${{ env.GITHUB_REF_TYPE == 'tag' }}
+    if: github.event.ref_type == 'tag'
     name: Publish Github
     uses: cech12/MinecraftModActions/.github/workflows/publish-github.yml@main
     with:
@@ -36,7 +36,7 @@ jobs:
       github-token: ${{ secrets.GITHUB_TOKEN }}
   publish-curseforge:
     needs: publish-github
-    if: ${{ env.GITHUB_REF_TYPE == 'tag' }}
+    if: github.event.ref_type == 'tag'
     name: Publish Curseforge
     uses: cech12/MinecraftModActions/.github/workflows/publish-curseforge.yml@main
     with:
@@ -45,7 +45,7 @@ jobs:
       curseforge-token: ${{ secrets.CURSEFORGE_API_KEY }}
   trigger-jitpack:
     needs: publish-github
-    if: ${{ env.GITHUB_REF_TYPE == 'tag' }}
+    if: github.event.ref_type == 'tag'
     name: Trigger Jitpack
     uses: cech12/MinecraftModActions/.github/workflows/trigger-jitpack.yml@main
 
