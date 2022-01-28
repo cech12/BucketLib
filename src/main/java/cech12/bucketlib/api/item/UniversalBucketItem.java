@@ -159,7 +159,7 @@ public class UniversalBucketItem extends Item {
 
     @Override
     public int getItemStackLimit(ItemStack stack) {
-        return BucketLibUtil.containsFluid(stack) ? 1 : this.properties.maxStackSize;
+        return BucketLibUtil.isEmpty(stack) ? this.properties.maxStackSize : 1;
     }
 
     @Override
@@ -241,7 +241,7 @@ public class UniversalBucketItem extends Item {
         return InteractionResultHolder.pass(itemstack);
     }
 
-    private ItemStack spawnEntityFromBucket(@Nonnull Player player, Level level, ItemStack itemStack, BlockPos pos) {
+    public ItemStack spawnEntityFromBucket(@Nullable Player player, Level level, ItemStack itemStack, BlockPos pos) {
         if (level instanceof ServerLevel serverLevel) {
             EntityType<?> entityType = BucketLibUtil.getEntityType(itemStack);
             if (entityType != null) {
@@ -250,7 +250,9 @@ public class UniversalBucketItem extends Item {
                     bucketable.loadFromBucketTag(itemStack.getOrCreateTag());
                     bucketable.setFromBucket(true);
                 }
-                serverLevel.gameEvent(player, GameEvent.ENTITY_PLACE, pos);
+                if (player != null) {
+                    serverLevel.gameEvent(player, GameEvent.ENTITY_PLACE, pos);
+                }
                 return BucketLibUtil.removeEntityType(itemStack);
             }
         }

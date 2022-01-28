@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.18.1-0.3.1.0] - 2022-01-28
+### Added
+- add dispense behaviour for buckets filled with entities or blocks 
+
+### Fixed
+- filled buckets could be stacked in special cases
+
 ## [1.18.1-0.3.0.3] - 2022-01-27
 ### Fixed
 - Jitpack publishing fixed

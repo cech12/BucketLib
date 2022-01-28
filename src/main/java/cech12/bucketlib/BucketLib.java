@@ -6,6 +6,7 @@ import cech12.bucketlib.api.crafting.FluidIngredient;
 import cech12.bucketlib.api.crafting.MilkIngredient;
 import cech12.bucketlib.config.ServerConfig;
 import cech12.bucketlib.api.item.UniversalBucketItem;
+import cech12.bucketlib.item.UniversalBucketDispenseBehaviour;
 import cech12.bucketlib.item.crafting.BucketDyeingRecipe;
 import cech12.bucketlib.util.ColorUtil;
 import net.minecraft.client.Minecraft;
@@ -17,7 +18,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fluids.DispenseFluidContainer;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -92,8 +92,7 @@ public class BucketLib {
     private void registerBucket(UniversalBucketItem bucket) {
         buckets.add(bucket);
         //register dispense behaviour
-        //TODO dispense powder snow & milk entities
-        DispenserBlock.registerBehavior(bucket, DispenseFluidContainer.getInstance());
+        DispenserBlock.registerBehavior(bucket, UniversalBucketDispenseBehaviour.getInstance());
         //register color
         if (bucket.isDyeable()) {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> Minecraft.getInstance().getItemColors().register((stack, color) -> (color > 0) ? -1 : ColorUtil.getColor(stack, bucket.getDefaultColor()), bucket));
