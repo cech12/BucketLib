@@ -29,8 +29,8 @@ public class ClientEvents {
             //register texture of milk bucket
             event.addSprite(UniversalBucketModel.getContentTexture(BucketLibUtil.MILK_LOCATION));
             //register block buckets
-            for (RegistryUtil.BucketBlock bucketEntity : RegistryUtil.getBucketBlocks()) {
-                event.addSprite(UniversalBucketModel.getContentTexture(bucketEntity.block().getRegistryName()));
+            for (RegistryUtil.BucketBlock bucketBlock : RegistryUtil.getBucketBlocks()) {
+                event.addSprite(UniversalBucketModel.getContentTexture(bucketBlock.block().getRegistryName()));
             }
             //register textures for mob buckets
             for (RegistryUtil.BucketEntity bucketEntity : RegistryUtil.getBucketEntities()) {

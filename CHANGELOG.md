@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.18.1-0.3.2.0] - 2022-01-29
+### Fixed
+- Textures of entity buckets of other mods did not work correctly
+- Milk bucket was not registered correctly when a mod enables milk fluid
+
 ## [1.18.1-0.3.1.0] - 2022-01-28
 ### Added
 - add dispense behaviour for buckets filled with entities or blocks 

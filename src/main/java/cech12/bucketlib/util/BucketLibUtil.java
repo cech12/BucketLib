@@ -118,18 +118,19 @@ public class BucketLibUtil {
     }
 
     public static ItemStack addMilk(ItemStack itemStack) {
+        ItemStack filledStack = itemStack;
         if (ForgeMod.MILK.isPresent()) {
-            return addFluid(itemStack, ForgeMod.MILK.get());
+            filledStack = addFluid(filledStack, ForgeMod.MILK.get());
         }
-        return addContent(itemStack, MILK_LOCATION);
+        return addContent(filledStack, MILK_LOCATION);
     }
 
     public static ItemStack removeMilk(ItemStack itemStack) {
-        CompoundTag nbt = itemStack.getTag();
-        if (nbt != null && nbt.contains("BucketContent")) {
-            return removeContent(itemStack);
+        ItemStack emptyStack = itemStack;
+        if (containsFluid(emptyStack)) {
+            emptyStack = removeFluid(itemStack);
         }
-        return removeFluid(itemStack);
+        return removeContent(emptyStack);
     }
 
     public static boolean containsFluid(ItemStack itemStack) {

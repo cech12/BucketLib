@@ -341,14 +341,16 @@ public class UniversalBucketItem extends Item {
             items.add(emptyBucket);
             //add fluid buckets
             for (Fluid fluid : ForgeRegistries.FLUIDS) {
+                if (ForgeMod.MILK.isPresent() && fluid.isSame(ForgeMod.MILK.get())) {
+                    //skip milk fluid
+                    continue;
+                }
                 if (canHoldFluid(fluid)) {
                     items.add(BucketLibUtil.addFluid(emptyBucket, fluid));
                 }
             }
-            //add milk bucket if fluid does not exist
-            if (!ForgeMod.MILK.isPresent() && this.canMilkEntities()) {
-                items.add(BucketLibUtil.addMilk(emptyBucket));
-            }
+            //add milk bucket
+            items.add(BucketLibUtil.addMilk(emptyBucket));
             //add entity buckets
             for (RegistryUtil.BucketEntity bucketEntity : RegistryUtil.getBucketEntities()) {
                 if (canHoldEntity(bucketEntity.entityType()) && canHoldFluid(bucketEntity.fluid())) {

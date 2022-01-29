@@ -29,7 +29,7 @@ public class RegistryUtil {
             }
             if (item instanceof MobBucketItem bucket) {
                 try {
-                    Method method = bucket.getClass().getDeclaredMethod("getFishType");
+                    Method method = MobBucketItem.class.getDeclaredMethod("getFishType");
                     method.setAccessible(true);
                     EntityType<?> entityType = (EntityType<?>) method.invoke(bucket);
                     if (entityType != null) {
