@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.Tag;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -163,6 +164,29 @@ public class UniversalBucketItem extends Item {
     }
 
     @Override
+    public boolean isDamageable(ItemStack stack) {
+        return this.getDurability() > 0;
+    }
+
+    @Override
+    public int getMaxDamage(ItemStack stack) {
+        return this.getDurability();
+    }
+
+    @Override
+    public int getBarWidth(ItemStack stack) {
+        //overwrite hardcoded maxDamage
+        return Math.round(13.0F - (float)stack.getDamageValue() * 13.0F / (float)this.getMaxDamage(stack));
+    }
+
+    @Override
+    public int getBarColor(@Nonnull ItemStack stack) {
+        //overwrite hardcoded maxDamage
+        float f = Math.max(0.0F, ((float)this.getMaxDamage(stack) - (float)stack.getDamageValue()) / (float)this.getMaxDamage(stack));
+        return Mth.hsvToRgb(f / 3.0F, 1.0F, 1.0F);
+    }
+
+    @Override
     @Nonnull
     public InteractionResultHolder<ItemStack> use(@Nonnull Level level, @Nonnull Player player, @Nonnull InteractionHand interactionHand) {
         ItemStack itemstack = player.getItemInHand(interactionHand);
@@ -210,14 +234,14 @@ public class UniversalBucketItem extends Item {
                         ItemStack emptyBucket = fluidActionResult.getResult();
                         if (BucketLibUtil.containsEntityType(emptyBucket)) {
                             //place entity if exists
-                            emptyBucket = spawnEntityFromBucket(player, level, emptyBucket, relativeBlockPos);
+                            emptyBucket = spawnEntityFromBucket(player, level, emptyBucket, relativeBlockPos, false);
                         }
-                        return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, emptyBucket), level.isClientSide());
+                        return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, emptyBucket, interactionHand), level.isClientSide());
                     }
                 } else if (BucketLibUtil.containsEntityType(itemstack)) {
                     //place entity interaction
-                    ItemStack emptyBucket = spawnEntityFromBucket(player, level, itemstack, relativeBlockPos);
-                    return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, emptyBucket), level.isClientSide());
+                    ItemStack emptyBucket = spawnEntityFromBucket(player, level, itemstack, relativeBlockPos, true);
+                    return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, emptyBucket, interactionHand), level.isClientSide());
                 } else if (BucketLibUtil.containsBlock(itemstack)) {
                     //place block interaction
                     Block block = BucketLibUtil.getBlock(itemstack);
@@ -229,7 +253,7 @@ public class UniversalBucketItem extends Item {
                         InteractionResult interactionResult = fakeStack.useOn(new UseOnContext(player, interactionHand, blockHitResult));
                         player.setItemInHand(interactionHand, itemstack);
                         if (interactionResult.consumesAction()) {
-                            return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack)));
+                            return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack), interactionHand));
                         }
                     }
                 }
@@ -241,7 +265,7 @@ public class UniversalBucketItem extends Item {
         return InteractionResultHolder.pass(itemstack);
     }
 
-    public ItemStack spawnEntityFromBucket(@Nullable Player player, Level level, ItemStack itemStack, BlockPos pos) {
+    public ItemStack spawnEntityFromBucket(@Nullable Player player, Level level, ItemStack itemStack, BlockPos pos, boolean damage) {
         if (level instanceof ServerLevel serverLevel) {
             EntityType<?> entityType = BucketLibUtil.getEntityType(itemStack);
             if (entityType != null) {
@@ -253,7 +277,7 @@ public class UniversalBucketItem extends Item {
                 if (player != null) {
                     serverLevel.gameEvent(player, GameEvent.ENTITY_PLACE, pos);
                 }
-                return BucketLibUtil.removeEntityType(itemStack);
+                return BucketLibUtil.removeEntityType(itemStack, damage);
             }
         }
         return itemStack.copy();
@@ -432,7 +456,11 @@ public class UniversalBucketItem extends Item {
         }
         return defaultList != null && defaultList.contains(element);
     }
-    
+
+    public int getDurability() {
+        return getIntProperty(this.properties.durabilityConfig, this.properties.durability);
+    }
+
     public boolean isDyeable() {
         return this.properties.dyeable;
     }
@@ -502,6 +530,9 @@ public class UniversalBucketItem extends Item {
         CreativeModeTab tab = CreativeModeTab.TAB_MISC;
         int maxStackSize = 16;
 
+        int durability = 0;
+        ForgeConfigSpec.IntValue durabilityConfig = null;
+
         boolean dyeable = false;
         int defaultColor = -1;
 
@@ -548,6 +579,19 @@ public class UniversalBucketItem extends Item {
                 throw new RuntimeException("Unable to have stack size lower than 1.");
             }
             this.maxStackSize = maxStackSize;
+            return this;
+        }
+
+        public Properties durability(int durability) {
+            if (durability < 0) {
+                throw new RuntimeException("Unable to have a durability lower than 0.");
+            }
+            this.durability = durability;
+            return this;
+        }
+
+        public Properties durability(ForgeConfigSpec.IntValue durabilityConfig) {
+            this.durabilityConfig = durabilityConfig;
             return this;
         }
 

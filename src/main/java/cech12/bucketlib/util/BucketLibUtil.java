@@ -5,6 +5,9 @@ import cech12.bucketlib.config.ServerConfig;
 import cech12.bucketlib.api.item.UniversalBucketItem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -21,11 +24,14 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class BucketLibUtil {
 
     public static final ResourceLocation MILK_LOCATION = new ResourceLocation("milk");
+
+    private static final Random RANDOM = new Random();
 
     private BucketLibUtil() {}
 
@@ -33,8 +39,40 @@ public class BucketLibUtil {
         return !containsFluid(itemStack) && !containsMilk(itemStack) && !containsEntityType(itemStack) && !containsBlock(itemStack);
     }
 
-    public static ItemStack createEmptyResult(ItemStack initialStack, Player player, ItemStack resultStack) {
-        return player.getAbilities().instabuild ? initialStack : resultStack;
+    public static ItemStack createEmptyResult(ItemStack initialStack, Player player, ItemStack resultStack, InteractionHand hand) {
+        if (player.getAbilities().instabuild) {
+            return initialStack;
+        }
+        //TODO break event does not work here
+        if (resultStack.isEmpty() && !player.getLevel().isClientSide()) {
+            player.broadcastBreakEvent(hand);
+            player.awardStat(Stats.ITEM_BROKEN.get(initialStack.getItem()));
+        }
+        return resultStack;
+    }
+
+    /**
+     * Adds damage to the bucket if damaging is enabled.
+     * @param stack item stack which gets damage
+     * @param random Random object
+     * @param player ServerPlayer object or null if no player is involved
+     */
+    public static void damageByOne(ItemStack stack, Random random, ServerPlayer player) {
+        if (!stack.isEmpty() && stack.isDamageableItem()
+                && !BucketLibUtil.isAffectedByInfinityEnchantment(stack)
+                && stack.hurt(1, random, player)) {
+            stack.shrink(1);
+            stack.setDamageValue(0);
+        }
+    }
+
+    /**
+     * Adds damage to the bucket if damaging is enabled.
+     * If there is a player context, please use {@link #damageByOne(ItemStack, Random, ServerPlayer)}
+     * @param stack item stack which gets damage
+     */
+    public static void damageByOne(ItemStack stack) {
+        damageByOne(stack, RANDOM, null);
     }
 
     /**
@@ -103,7 +141,13 @@ public class BucketLibUtil {
     }
 
     public static ItemStack removeContent(ItemStack itemStack) {
-        return removeTagContent(itemStack, "BucketContent");
+        return removeContent(itemStack, true);
+    }
+
+    private static ItemStack removeContent(ItemStack itemStack, boolean damage) {
+        ItemStack emptyStack = removeTagContent(itemStack, "BucketContent");
+        if (damage) damageByOne(emptyStack);
+        return emptyStack;
     }
 
     public static boolean containsMilk(ItemStack itemStack) {
@@ -126,11 +170,7 @@ public class BucketLibUtil {
     }
 
     public static ItemStack removeMilk(ItemStack itemStack) {
-        ItemStack emptyStack = itemStack;
-        if (containsFluid(emptyStack)) {
-            emptyStack = removeFluid(itemStack);
-        }
-        return removeContent(emptyStack);
+        return removeFluid(itemStack);
     }
 
     public static boolean containsFluid(ItemStack itemStack) {
@@ -153,8 +193,12 @@ public class BucketLibUtil {
 
     public static ItemStack removeFluid(ItemStack itemStack) {
         AtomicReference<ItemStack> resultItemStack = new AtomicReference<>(itemStack.copy());
+        if (containsMilk(itemStack)) {
+            resultItemStack.set(removeContent(resultItemStack.get(), !containsFluid(resultItemStack.get())));
+        }
         FluidUtil.getFluidHandler(resultItemStack.get()).ifPresent(fluidHandler -> {
             fluidHandler.drain(new FluidStack(fluidHandler.getFluidInTank(0).getFluid(), FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
+            //damaging is done by fluid handler
             resultItemStack.set(fluidHandler.getContainer());
         });
         return resultItemStack.get();
@@ -176,8 +220,10 @@ public class BucketLibUtil {
         return setTagContent(itemStack, "EntityType", entityType.getRegistryName().toString());
     }
 
-    public static ItemStack removeEntityType(ItemStack itemStack) {
-        return removeTagContent(itemStack, "EntityType");
+    public static ItemStack removeEntityType(ItemStack itemStack, boolean damage) {
+        ItemStack emptyStack = removeTagContent(itemStack, "EntityType");
+        if (damage) damageByOne(emptyStack);
+        return emptyStack;
     }
 
     public static boolean containsBlock(ItemStack itemStack) {

@@ -94,13 +94,15 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
         } else if (BucketLibUtil.containsEntityType(stack)) {
             //place entity
             ItemStack resultStack = stack;
+            boolean fluidPlaced = false;
             if (BucketLibUtil.containsFluid(resultStack)) {
                 //place fluid
                 resultStack = dispenseFluidBehavior.execute(source, stack);
+                fluidPlaced = true;
             }
             if (!BucketLibUtil.containsFluid(resultStack) && stack.getItem() instanceof UniversalBucketItem bucketItem) {
                 //if fluid placement was successful or not needed, spawn entity
-                return bucketItem.spawnEntityFromBucket(null, source.getLevel(), resultStack, placePosition);
+                return bucketItem.spawnEntityFromBucket(null, source.getLevel(), resultStack, placePosition, !fluidPlaced);
             }
             return resultStack;
         }

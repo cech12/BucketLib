@@ -87,14 +87,14 @@ public class WorldInteractionUtil {
                 InteractionResult interactionResult = hitBlockState.use(level, player, interactionHand, blockHitResult);
                 player.setItemInHand(interactionHand, itemstack);
                 if (interactionResult.consumesAction()) {
-                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeFluid(itemstack)));
+                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeFluid(itemstack), interactionHand));
                 }
             } else if (bucketBlock == Blocks.POWDER_SNOW) {
                 player.setItemInHand(interactionHand, new ItemStack(Items.POWDER_SNOW_BUCKET));
                 InteractionResult interactionResult = hitBlockState.use(level, player, interactionHand, blockHitResult);
                 player.setItemInHand(interactionHand, itemstack);
                 if (interactionResult.consumesAction()) {
-                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack)));
+                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack), interactionHand));
                 }
             }
         }

@@ -51,6 +51,8 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
         super.setContainerToEmpty();
         if (wasCracked) {
             container.shrink(1);
+        } else {
+            BucketLibUtil.damageByOne(container);
         }
     }
 
