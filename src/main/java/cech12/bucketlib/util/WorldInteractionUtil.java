@@ -21,6 +21,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 public class WorldInteractionUtil {
 
@@ -34,7 +35,7 @@ public class WorldInteractionUtil {
         InteractionResult result = player.interactOn(entity, interactionHand);
         //TODO bug: milking entity in creative mode adds a vanilla milk bucket to inventory
         if (result.consumesAction()) {
-            itemStack = BucketLibUtil.addMilk(itemStack);
+            itemStack = ItemUtils.createFilledResult(itemStack, player, BucketLibUtil.addMilk(ItemHandlerHelper.copyStackWithSize(itemStack, 1)));
         }
         player.setItemInHand(interactionHand, itemStack);
         return result;
@@ -57,12 +58,13 @@ public class WorldInteractionUtil {
                 InteractionResult interactionResult = hitBlockState.use(level, player, interactionHand, blockHitResult);
                 ItemStack resultItemStack = player.getItemInHand(interactionHand);
                 player.setItemInHand(interactionHand, itemstack);
+                //TODO bug: pickup something from cauldron in creative mode adds a vanilla milk bucket to inventory
                 if (interactionResult.consumesAction()) {
                     if (resultItemStack.getItem() == Items.POWDER_SNOW_BUCKET) {
-                        return new InteractionResultHolder<>(interactionResult, ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addBlock(itemstack, Blocks.POWDER_SNOW)));
+                        return new InteractionResultHolder<>(interactionResult, ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addBlock(ItemHandlerHelper.copyStackWithSize(itemstack, 1), Blocks.POWDER_SNOW)));
                     } else {
                         FluidStack resultFluidStack = FluidUtil.getFluidContained(resultItemStack).orElse(FluidStack.EMPTY);
-                        return new InteractionResultHolder<>(interactionResult, ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addFluid(itemstack, resultFluidStack.getFluid())));
+                        return new InteractionResultHolder<>(interactionResult, ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addFluid(ItemHandlerHelper.copyStackWithSize(itemstack, 1), resultFluidStack.getFluid())));
                     }
                 }
             }
