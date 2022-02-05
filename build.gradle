@@ -153,26 +153,15 @@ jar.finalizedBy('reobfJar')
 //publish.dependsOn('reobfJar')
 
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact jar
-            artifact apiJar
-            artifact sourcesJar
-
-            groupId = 'com.github.cech12'
-            artifactId project.archivesBaseName
-            version project.version
-
-            // Filter any dependencies from appearing in the pom.xml
-            pom.withXml {
-                asNode().dependencies.dependency.each { dep ->
-                    assert dep.parent().remove(dep)
-                }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/cech12/bucketlib"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
             }
         }
-    }
-    repositories {
-        mavenLocal()
     }
 }
 
