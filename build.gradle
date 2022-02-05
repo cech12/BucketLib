@@ -153,6 +153,13 @@ jar.finalizedBy('reobfJar')
 //publish.dependsOn('reobfJar')
 
 publishing {
+    publications {
+        gpr(MavenPublication) {
+            artifact jar
+            artifact apiJar
+            artifact sourcesJar
+        }
+    }
     repositories {
         maven {
             name = "GitHubPackages"
