@@ -30,11 +30,21 @@ Add the following to your `build.gradle` file:
 
 ```groovy
 repositories {
-    maven { url 'https://jitpack.io' }
+    maven {
+        name 'BucketLib'
+        url 'https://maven.pkg.github.com/cech12/bucketlib'
+        //Github Packages need credentials to access public repositories. You can use your own or the following credentials: 
+        credentials {
+            username = "cech12machine"
+            password = "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"
+        }
+    }
 }
 
 dependencies {
+    // compile against the BucketLib API but do not include it at runtime
     compileOnly fg.deobf("com.github.cech12:bucketlib:${project.bucketlib_version}:api")
+    // at runtime, use the full BucketLib jar
     runtimeOnly fg.deobf("com.github.cech12:bucketlib:${project.bucketlib_version}")
 }
 ```
