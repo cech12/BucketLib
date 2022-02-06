@@ -24,7 +24,7 @@ without having trouble implementing all special cases.
 
 ## Adding it to your project:
 
-[![](https://jitpack.io/v/cech12/BucketLib.svg)](https://jitpack.io/#cech12/BucketLib)
+[![GitHub Package Registry version](https://img.shields.io/github/release/cech12/bucketlib.svg?label=GPR&logo=github)](https://github.com/cech12/bucketlib/packages)
 
 Add the following to your `build.gradle` file:
 
