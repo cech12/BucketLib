@@ -24,27 +24,17 @@ without having trouble implementing all special cases.
 
 ## Adding it to your project:
 
-[![GitHub Package Registry version](https://img.shields.io/github/release/cech12/bucketlib.svg?label=GPR&logo=github)](https://github.com/cech12/bucketlib/packages)
+[![](https://jitpack.io/v/cech12/BucketLib.svg)](https://jitpack.io/#cech12/BucketLib)
 
 Add the following to your `build.gradle` file:
 
 ```groovy
 repositories {
-    maven {
-        name 'BucketLib'
-        url 'https://maven.pkg.github.com/cech12/bucketlib'
-        //Github Packages need credentials to access public repositories. You can use your own or the following credentials: 
-        credentials {
-            username = "cech12machine"
-            password = "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"
-        }
-    }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    // compile against the BucketLib API but do not include it at runtime
     compileOnly fg.deobf("com.github.cech12:bucketlib:${project.bucketlib_version}:api")
-    // at runtime, use the full BucketLib jar
     runtimeOnly fg.deobf("com.github.cech12:bucketlib:${project.bucketlib_version}")
 }
 ```

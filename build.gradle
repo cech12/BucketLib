@@ -154,6 +154,24 @@ jar.finalizedBy('reobfJar')
 
 publishing {
     publications {
+        //Jitpack publishing
+        mavenJava(MavenPublication) {
+            artifact jar
+            artifact apiJar
+            artifact sourcesJar
+
+            groupId = 'com.github.cech12'
+            artifactId project.archivesBaseName
+            version project.version
+
+            // Filter any dependencies from appearing in the pom.xml
+            pom.withXml {
+                asNode().dependencies.dependency.each { dep ->
+                    assert dep.parent().remove(dep)
+                }
+            }
+        }
+        //Github Package publishing
         gpr(MavenPublication) {
             artifact jar
             artifact apiJar

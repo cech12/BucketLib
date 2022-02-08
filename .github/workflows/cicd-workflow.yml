@@ -43,6 +43,13 @@ jobs:
       java-version: 17
     secrets:
       curseforge-token: ${{ secrets.CURSEFORGE_API_KEY }}
+  trigger-jitpack:
+    needs: publish-github
+    if: startsWith(github.ref, 'refs/tags/')
+    name: Trigger Jitpack
+    uses: cech12/MinecraftModActions/.github/workflows/trigger-jitpack.yml@main
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
   publish-github-package:
     needs: publish-github
     if: startsWith(github.ref, 'refs/tags/')
