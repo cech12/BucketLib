@@ -4,6 +4,7 @@ import cech12.bucketlib.api.BucketLibApi;
 import cech12.bucketlib.api.item.UniversalBucketItem;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -41,6 +42,8 @@ public class BucketLibTestMod {
     public static final RegistryObject<Item> ONLY_PUFFER_BUCKET = ITEMS.register("only_puffer_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().allowedEntities(Collections.singletonList(EntityType.PUFFERFISH))));
     public static final RegistryObject<Item> NO_BLOCKS_BUCKET = ITEMS.register("no_blocks_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().disableBlockObtaining()));
     public static final RegistryObject<Item> DURABILITY_BUCKET = ITEMS.register("durability_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().durability(5)));
+    public static final RegistryObject<Item> BURNING_BUCKET = ITEMS.register("burning_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().burningTemperature(1000).burningBlocks(Collections.singletonList(Blocks.POWDER_SNOW))));
+    public static final RegistryObject<Item> FREEZING_BUCKET = ITEMS.register("freezing_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().freezingTemperature(500).freezingBlocks(Collections.singletonList(Blocks.POWDER_SNOW))));
 
     public BucketLibTestMod() {
         if (!ENABLED) return;

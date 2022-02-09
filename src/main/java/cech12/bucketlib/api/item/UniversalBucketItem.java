@@ -18,11 +18,13 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -184,6 +186,37 @@ public class UniversalBucketItem extends Item {
         //overwrite hardcoded maxDamage
         float f = Math.max(0.0F, ((float)this.getMaxDamage(stack) - (float)stack.getDamageValue()) / (float)this.getMaxDamage(stack));
         return Mth.hsvToRgb(f / 3.0F, 1.0F, 1.0F);
+    }
+
+    @Override
+    public void inventoryTick(@Nonnull ItemStack itemStack, @Nonnull Level level, @Nonnull Entity entity, int position, boolean selected) {
+        if (!level.isClientSide) {
+            if (!entity.fireImmune() && this.hasBurningContent(itemStack)) {
+                entity.setTicksFrozen(0); //avoid extinguish sounds
+                entity.setSecondsOnFire(5);
+            } else if (!entity.isOnFire() && entity.canFreeze() && this.hasFreezingContent(itemStack)) {
+                int ticks = entity.getTicksFrozen() + (entity.isInPowderSnow ? 1 : 3); //2 are subtracted when not in powder snow
+                entity.setTicksFrozen(Math.min(entity.getTicksRequiredToFreeze(), ticks));
+                //damaging here because, the vanilla mechanic is reducing the freeze ticks below fully freezing
+                if (entity.tickCount % 40 == 0 && entity.isFullyFrozen()) {
+                    entity.hurt(DamageSource.FREEZE, entity.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
+                }
+            }
+        }
+    }
+
+    private boolean hasBurningContent(@Nonnull ItemStack itemStack) {
+        Integer burningTemperature = this.getBurningTemperature();
+        Fluid fluid = BucketLibUtil.getFluid(itemStack);
+        return fluid != Fluids.EMPTY && (burningTemperature != null && fluid.getAttributes().getTemperature() >= burningTemperature || this.isBurningFluid(fluid))
+                || this.isBurningBlock(BucketLibUtil.getBlock(itemStack));
+    }
+
+    private boolean hasFreezingContent(@Nonnull ItemStack itemStack) {
+        Integer freezingTemperature = this.getFreezingTemperature();
+        Fluid fluid = BucketLibUtil.getFluid(itemStack);
+        return fluid != Fluids.EMPTY && (freezingTemperature != null && fluid.getAttributes().getTemperature() <= freezingTemperature || this.isFreezingFluid(fluid))
+                || this.isFreezingBlock(BucketLibUtil.getBlock(itemStack));
     }
 
     @Override
@@ -489,6 +522,30 @@ public class UniversalBucketItem extends Item {
         return isElementListedInProperty(fluid, this.properties.crackingFluidsTag, this.properties.crackingFluids);
     }
 
+    public Integer getBurningTemperature() {
+        return getIntProperty(this.properties.burningTemperatureConfig, this.properties.burningTemperature);
+    }
+
+    public boolean isBurningFluid(Fluid fluid) {
+        return isElementListedInProperty(fluid, this.properties.burningFluidsTag, this.properties.burningFluids);
+    }
+
+    public boolean isBurningBlock(Block block) {
+        return isElementListedInProperty(block, this.properties.burningBlocksTag, this.properties.burningBlocks);
+    }
+
+    public Integer getFreezingTemperature() {
+        return getIntProperty(this.properties.freezingTemperatureConfig, this.properties.freezingTemperature);
+    }
+
+    public boolean isFreezingFluid(Fluid fluid) {
+        return isElementListedInProperty(fluid, this.properties.freezingFluidsTag, this.properties.freezingFluids);
+    }
+
+    public boolean isFreezingBlock(Block block) {
+        return isElementListedInProperty(block, this.properties.freezingBlocksTag, this.properties.freezingBlocks);
+    }
+
     private boolean isBlockedFluid(Fluid fluid) {
         return isElementListedInProperty(fluid, this.properties.blockedFluidsTag, this.properties.blockedFluids);
     }
@@ -551,6 +608,20 @@ public class UniversalBucketItem extends Item {
         Tag<Fluid> blockedFluidsTag = null;
         List<Fluid> allowedFluids = null;
         Tag<Fluid> allowedFluidsTag = null;
+
+        Integer burningTemperature = null;
+        ForgeConfigSpec.IntValue burningTemperatureConfig = null;
+        List<Fluid> burningFluids = null;
+        Tag<Fluid> burningFluidsTag = null;
+        List<Block> burningBlocks = null;
+        Tag<Block> burningBlocksTag = null;
+
+        Integer freezingTemperature = null;
+        ForgeConfigSpec.IntValue freezingTemperatureConfig = null;
+        List<Fluid> freezingFluids = null;
+        Tag<Fluid> freezingFluidsTag = null;
+        List<Block> freezingBlocks = null;
+        Tag<Block> freezingBlocksTag = null;
 
         boolean milking = true;
         ForgeConfigSpec.BooleanValue milkingConfig = null;
@@ -654,6 +725,66 @@ public class UniversalBucketItem extends Item {
 
         public Properties crackingFluids(Tag<Fluid> crackingFluidsTag) {
             this.crackingFluidsTag = crackingFluidsTag;
+            return this;
+        }
+
+        public Properties burningTemperature(int burningTemperature) {
+            this.burningTemperature = burningTemperature;
+            return this;
+        }
+
+        public Properties burningTemperature(ForgeConfigSpec.IntValue burningTemperatureConfig) {
+            this.burningTemperatureConfig = burningTemperatureConfig;
+            return this;
+        }
+
+        public Properties burningFluids(List<Fluid> burningFluids) {
+            this.burningFluids = burningFluids;
+            return this;
+        }
+
+        public Properties burningFluids(Tag<Fluid> burningFluidsTag) {
+            this.burningFluidsTag = burningFluidsTag;
+            return this;
+        }
+
+        public Properties burningBlocks(List<Block> burningBlocks) {
+            this.burningBlocks = burningBlocks;
+            return this;
+        }
+
+        public Properties burningBlocks(Tag<Block> burningBlocksTag) {
+            this.burningBlocksTag = burningBlocksTag;
+            return this;
+        }
+
+        public Properties freezingTemperature(int freezingTemperature) {
+            this.freezingTemperature = freezingTemperature;
+            return this;
+        }
+
+        public Properties freezingTemperature(ForgeConfigSpec.IntValue freezingTemperatureConfig) {
+            this.freezingTemperatureConfig = freezingTemperatureConfig;
+            return this;
+        }
+
+        public Properties freezingFluids(List<Fluid> freezingFluids) {
+            this.freezingFluids = freezingFluids;
+            return this;
+        }
+
+        public Properties freezingFluids(Tag<Fluid> freezingFluidsTag) {
+            this.freezingFluidsTag = freezingFluidsTag;
+            return this;
+        }
+
+        public Properties freezingBlocks(List<Block> freezingBlocks) {
+            this.freezingBlocks = freezingBlocks;
+            return this;
+        }
+
+        public Properties freezingBlocks(Tag<Block> freezingBlocksTag) {
+            this.freezingBlocksTag = freezingBlocksTag;
             return this;
         }
 
