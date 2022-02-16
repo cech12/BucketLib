@@ -45,7 +45,7 @@ public class BucketLibUtil {
     }
 
     public static ItemStack createEmptyResult(ItemStack initialStack, Player player, ItemStack resultStack, InteractionHand hand) {
-        if (BucketLibUtil.notCreative(player)) {
+        if (!BucketLibUtil.notCreative(player)) {
             return initialStack;
         }
         //TODO break event does not work here
