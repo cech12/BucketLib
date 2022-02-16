@@ -194,12 +194,16 @@ public class UniversalBucketItem extends Item {
             if (!entity.fireImmune() && this.hasBurningContent(itemStack)) {
                 entity.setTicksFrozen(0); //avoid extinguish sounds
                 entity.setSecondsOnFire(5);
+                if (BucketLibUtil.notCreative(entity) && entity.tickCount % 20 == 0) {
+                    BucketLibUtil.damageByOne(itemStack);
+                }
             } else if (!entity.isOnFire() && entity.canFreeze() && this.hasFreezingContent(itemStack)) {
                 int ticks = entity.getTicksFrozen() + (entity.isInPowderSnow ? 1 : 3); //2 are subtracted when not in powder snow
                 entity.setTicksFrozen(Math.min(entity.getTicksRequiredToFreeze(), ticks));
                 //damaging here because, the vanilla mechanic is reducing the freeze ticks below fully freezing
-                if (entity.tickCount % 40 == 0 && entity.isFullyFrozen()) {
+                if (BucketLibUtil.notCreative(entity) && entity.tickCount % 40 == 0 && entity.isFullyFrozen()) {
                     entity.hurt(DamageSource.FREEZE, entity.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
+                    BucketLibUtil.damageByOne(itemStack);
                 }
             }
         }
@@ -364,7 +368,7 @@ public class UniversalBucketItem extends Item {
             CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, new ItemStack(Items.MILK_BUCKET));
             serverPlayer.awardStat(Stats.ITEM_USED.get(Items.MILK_BUCKET));
         }
-        if (player instanceof Player && !((Player)player).getAbilities().instabuild) {
+        if (BucketLibUtil.notCreative(player)) {
             return BucketLibUtil.removeMilk(itemStack);
         }
         return itemStack;

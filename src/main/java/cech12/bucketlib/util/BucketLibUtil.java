@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -35,12 +36,16 @@ public class BucketLibUtil {
 
     private BucketLibUtil() {}
 
+    public static boolean notCreative(Entity entity) {
+        return !(entity instanceof Player player) || !player.getAbilities().instabuild;
+    }
+
     public static boolean isEmpty(ItemStack itemStack) {
         return !containsFluid(itemStack) && !containsMilk(itemStack) && !containsEntityType(itemStack) && !containsBlock(itemStack);
     }
 
     public static ItemStack createEmptyResult(ItemStack initialStack, Player player, ItemStack resultStack, InteractionHand hand) {
-        if (player.getAbilities().instabuild) {
+        if (BucketLibUtil.notCreative(player)) {
             return initialStack;
         }
         //TODO break event does not work here
