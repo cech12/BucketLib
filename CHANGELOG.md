@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 - Updated bucket content textures of Alex's Mobs mod #1
 
+### Fixed
+- fixed support of mob buckets without fluid #1
+
 ## [1.18.1-0.4.1.1] - 2022-02-16
 ### Fixed
 - Jitpack Maven publishing fixed

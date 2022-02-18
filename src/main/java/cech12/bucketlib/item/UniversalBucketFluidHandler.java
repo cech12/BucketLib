@@ -4,6 +4,7 @@ import cech12.bucketlib.api.item.UniversalBucketItem;
 import cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -60,7 +61,7 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
     public boolean canFillFluidType(FluidStack fluid) {
         Item item = container.getItem();
         if (item instanceof UniversalBucketItem bucketItem) {
-            return bucketItem.canHoldFluid(fluid.getFluid());
+            return fluid.getFluid() != Fluids.EMPTY && bucketItem.canHoldFluid(fluid.getFluid());
         }
         return super.canFillFluidType(fluid);
     }

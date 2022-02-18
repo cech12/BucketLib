@@ -117,6 +117,9 @@ public class UniversalBucketItem extends Item {
     }
 
     public boolean canHoldFluid(Fluid fluid) {
+        if (fluid == Fluids.EMPTY) {
+            return true;
+        }
         Item bucket = fluid.getBucket();
         if (!(bucket instanceof BucketItem) || ((BucketItem) bucket).getFluid() != fluid) {
             return false;
@@ -402,6 +405,9 @@ public class UniversalBucketItem extends Item {
             items.add(emptyBucket);
             //add fluid buckets
             for (Fluid fluid : ForgeRegistries.FLUIDS) {
+                if (fluid == Fluids.EMPTY) {
+                    continue;
+                }
                 if (ForgeMod.MILK.isPresent() && fluid.isSame(ForgeMod.MILK.get())) {
                     //skip milk fluid
                     continue;

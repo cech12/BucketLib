@@ -91,7 +91,8 @@ public class BucketLibUtil {
         }
         if (itemStack.getItem() instanceof UniversalBucketItem bucket) {
             Fluid fluid = FluidUtil.getFluidContained(itemStack).orElse(FluidStack.EMPTY).getFluid();
-            return fluid.is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)
+            return fluid != Fluids.EMPTY
+                    && fluid.is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)
                     && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, itemStack) > 0
                     && bucket.canHoldFluid(fluid);
         }

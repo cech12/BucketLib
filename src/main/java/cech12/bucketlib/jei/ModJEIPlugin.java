@@ -19,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
@@ -52,7 +53,7 @@ public class ModJEIPlugin implements IModPlugin {
             List<Object> recipes = new ArrayList<>();
             for (UniversalBucketItem bucketItem : BucketLib.getRegisteredBuckets()) {
                 for (Fluid fluid : ForgeRegistries.FLUIDS) {
-                    if (bucketItem.canHoldFluid(fluid) && fluid.is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {
+                    if (fluid != Fluids.EMPTY && bucketItem.canHoldFluid(fluid) && fluid.is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {
                         ItemStack bucket = BucketLibUtil.addFluid(new ItemStack(bucketItem), fluid);
                         ItemStack enchantedBucket = bucket.copy();
                         enchantedBucket.enchant(data.enchantment, data.level);
