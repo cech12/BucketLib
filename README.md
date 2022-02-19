@@ -40,3 +40,5 @@ dependencies {
 ```
 
 Replace `${project.bucketlib_version}` with the version of BucketLib that you want to use. The actual versions can be found on the Github Releases page.
+
+For detailed information please see the [Developer Guide](https://github.com/cech12/BucketLib/wiki/Developer-Guide).
