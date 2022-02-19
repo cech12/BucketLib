@@ -24,7 +24,7 @@ without having trouble implementing all special cases.
 
 ## Adding it to your project:
 
-[![](https://jitpack.io/v/cech12/BucketLib.svg)](https://jitpack.io/#cech12/BucketLib)
+[![](https://jitpack.io/v/cech12/bucketlib.svg)](https://jitpack.io/#cech12/bucketlib)
 
 Add the following to your `build.gradle` file:
 
