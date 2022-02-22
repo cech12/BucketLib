@@ -92,8 +92,8 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
     public static ResourceLocation getContentTexture(ResourceLocation otherContentLocation) {
         ResourceLocation texture = TEXTURE_MAP.get(otherContentLocation);
         if (texture == null) {
-            String textureLocation = String.format("item/bucket_content/%s/%s", otherContentLocation.getNamespace(), otherContentLocation.getPath());
-            texture = new ResourceLocation(BucketLibApi.MOD_ID, textureLocation);
+            String textureLocation = String.format("item/bucket_content/%s", otherContentLocation.getPath());
+            texture = new ResourceLocation(otherContentLocation.getNamespace(), textureLocation);
             TEXTURE_MAP.put(otherContentLocation, texture);
         }
         return texture;
