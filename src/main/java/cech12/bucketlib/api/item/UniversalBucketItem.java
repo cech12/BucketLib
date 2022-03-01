@@ -408,7 +408,7 @@ public class UniversalBucketItem extends Item {
                 if (fluid == Fluids.EMPTY) {
                     continue;
                 }
-                if (ForgeMod.MILK.isPresent() && fluid.isSame(ForgeMod.MILK.get())) {
+                if (ForgeMod.MILK.isPresent() && ForgeMod.MILK.get().isSame(fluid)) {
                     //skip milk fluid
                     continue;
                 }

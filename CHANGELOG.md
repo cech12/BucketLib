@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.18.1-0.5.0.1] - 2022-03-01
+### Fixed
+- fixed possible startup crash when another mod uses tags in `issame` method of fluid #6
+
+### Removed
+- Quicksand mod added reusable textures -> removed own textures
+
 ## [1.18.1-0.5.0.0] - 2022-02-22
 ### Changed
 - Move bucket content textures to mod side to let mods add & change their bucket content textures #4
