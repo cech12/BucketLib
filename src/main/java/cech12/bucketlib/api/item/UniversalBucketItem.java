@@ -19,7 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -468,7 +468,7 @@ public class UniversalBucketItem extends Item {
         if (enchantment == Enchantments.INFINITY_ARROWS
                 && ServerConfig.INFINITY_ENCHANTMENT_ENABLED.get()
                 && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, stack) <= 0
-                && FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY).getFluid().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {
+                && FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY).getFluid().defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {
             return true;
         }
         return super.canApplyAtEnchantingTable(stack, enchantment);
@@ -493,9 +493,15 @@ public class UniversalBucketItem extends Item {
         return defaultValue;
     }
 
-    private <T> boolean isElementListedInProperty(T element, Tag<T> tag, List<T> defaultList) {
+    private <T> boolean isElementListedInProperty(T element, TagKey<T> tag, List<T> defaultList) {
         if (tag != null) {
-            return tag.contains(element);
+            if (element instanceof Block block) {
+                return block.defaultBlockState().is((TagKey<Block>) tag);
+            } else if (element instanceof Fluid fluid) {
+                return fluid.is((TagKey<Fluid>) tag);
+            } else if (element instanceof EntityType<?> entityType) {
+                return entityType.is((TagKey<EntityType<?>>) tag);
+            }
         }
         return defaultList != null && defaultList.contains(element);
     }
@@ -613,25 +619,25 @@ public class UniversalBucketItem extends Item {
         ForgeConfigSpec.IntValue minTemperatureConfig = null;
 
         List<Fluid> crackingFluids = null;
-        Tag<Fluid> crackingFluidsTag = null;
+        TagKey<Fluid> crackingFluidsTag = null;
         List<Fluid> blockedFluids = null;
-        Tag<Fluid> blockedFluidsTag = null;
+        TagKey<Fluid> blockedFluidsTag = null;
         List<Fluid> allowedFluids = null;
-        Tag<Fluid> allowedFluidsTag = null;
+        TagKey<Fluid> allowedFluidsTag = null;
 
         Integer burningTemperature = null;
         ForgeConfigSpec.IntValue burningTemperatureConfig = null;
         List<Fluid> burningFluids = null;
-        Tag<Fluid> burningFluidsTag = null;
+        TagKey<Fluid> burningFluidsTag = null;
         List<Block> burningBlocks = null;
-        Tag<Block> burningBlocksTag = null;
+        TagKey<Block> burningBlocksTag = null;
 
         Integer freezingTemperature = null;
         ForgeConfigSpec.IntValue freezingTemperatureConfig = null;
         List<Fluid> freezingFluids = null;
-        Tag<Fluid> freezingFluidsTag = null;
+        TagKey<Fluid> freezingFluidsTag = null;
         List<Block> freezingBlocks = null;
-        Tag<Block> freezingBlocksTag = null;
+        TagKey<Block> freezingBlocksTag = null;
 
         boolean milking = true;
         ForgeConfigSpec.BooleanValue milkingConfig = null;
@@ -639,16 +645,16 @@ public class UniversalBucketItem extends Item {
         boolean entityObtaining = true;
         ForgeConfigSpec.BooleanValue entityObtainingConfig = null;
         List<EntityType<?>> blockedEntities = null;
-        Tag<EntityType<?>> blockedEntitiesTag = null;
+        TagKey<EntityType<?>> blockedEntitiesTag = null;
         List<EntityType<?>> allowedEntities = null;
-        Tag<EntityType<?>> allowedEntitiesTag = null;
+        TagKey<EntityType<?>> allowedEntitiesTag = null;
 
         boolean blockObtaining = true;
         ForgeConfigSpec.BooleanValue blockObtainingConfig = null;
         List<Block> blockedBlocks = null;
-        Tag<Block> blockedBlocksTag = null;
+        TagKey<Block> blockedBlocksTag = null;
         List<Block> allowedBlocks = null;
-        Tag<Block> allowedBlocksTag = null;
+        TagKey<Block> allowedBlocksTag = null;
 
         public Properties tab(CreativeModeTab tab) {
             this.tab = tab;
@@ -733,7 +739,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties crackingFluids(Tag<Fluid> crackingFluidsTag) {
+        public Properties crackingFluids(TagKey<Fluid> crackingFluidsTag) {
             this.crackingFluidsTag = crackingFluidsTag;
             return this;
         }
@@ -753,7 +759,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties burningFluids(Tag<Fluid> burningFluidsTag) {
+        public Properties burningFluids(TagKey<Fluid> burningFluidsTag) {
             this.burningFluidsTag = burningFluidsTag;
             return this;
         }
@@ -763,7 +769,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties burningBlocks(Tag<Block> burningBlocksTag) {
+        public Properties burningBlocks(TagKey<Block> burningBlocksTag) {
             this.burningBlocksTag = burningBlocksTag;
             return this;
         }
@@ -783,7 +789,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties freezingFluids(Tag<Fluid> freezingFluidsTag) {
+        public Properties freezingFluids(TagKey<Fluid> freezingFluidsTag) {
             this.freezingFluidsTag = freezingFluidsTag;
             return this;
         }
@@ -793,7 +799,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties freezingBlocks(Tag<Block> freezingBlocksTag) {
+        public Properties freezingBlocks(TagKey<Block> freezingBlocksTag) {
             this.freezingBlocksTag = freezingBlocksTag;
             return this;
         }
@@ -803,7 +809,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties blockedFluids(Tag<Fluid> blockedFluidsTag) {
+        public Properties blockedFluids(TagKey<Fluid> blockedFluidsTag) {
             this.blockedFluidsTag = blockedFluidsTag;
             return this;
         }
@@ -813,7 +819,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties allowedFluids(Tag<Fluid> allowedFluidsTag) {
+        public Properties allowedFluids(TagKey<Fluid> allowedFluidsTag) {
             this.allowedFluidsTag = allowedFluidsTag;
             return this;
         }
@@ -843,7 +849,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties blockedEntities(Tag<EntityType<?>> blockedEntitiesTag) {
+        public Properties blockedEntities(TagKey<EntityType<?>> blockedEntitiesTag) {
             this.blockedEntitiesTag = blockedEntitiesTag;
             return this;
         }
@@ -853,7 +859,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties allowedEntities(Tag<EntityType<?>> allowedEntitiesTag) {
+        public Properties allowedEntities(TagKey<EntityType<?>> allowedEntitiesTag) {
             this.allowedEntitiesTag = allowedEntitiesTag;
             return this;
         }
@@ -873,7 +879,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties blockedBlocks(Tag<Block> blockedBlocksTag) {
+        public Properties blockedBlocks(TagKey<Block> blockedBlocksTag) {
             this.blockedBlocksTag = blockedBlocksTag;
             return this;
         }
@@ -883,7 +889,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties allowedBlocks(Tag<Block> allowedBlocksTag) {
+        public Properties allowedBlocks(TagKey<Block> allowedBlocksTag) {
             this.allowedBlocksTag = allowedBlocksTag;
             return this;
         }

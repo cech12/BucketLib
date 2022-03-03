@@ -28,7 +28,7 @@ public class WorldInteractionUtil {
     private WorldInteractionUtil() {}
 
     public static InteractionResult tryMilkLivingEntity(ItemStack itemStack, LivingEntity entity, Player player, InteractionHand interactionHand) {
-        if (!BucketLibTags.EntityTypes.MILKABLE.contains(entity.getType())) {
+        if (!entity.getType().is(BucketLibTags.EntityTypes.MILKABLE)) {
             return InteractionResult.PASS;
         }
         player.setItemInHand(interactionHand, new ItemStack(Items.BUCKET));

@@ -1,8 +1,8 @@
 package cech12.bucketlib.api;
 
-import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.material.Fluid;
 
@@ -20,26 +20,26 @@ public class BucketLibTags {
 
     public static class EntityTypes {
 
-        public static final Tag.Named<EntityType<?>> MILKABLE = tag("milkable");
+        public static final TagKey<EntityType<?>> MILKABLE = tag("milkable");
 
         private static void init() {
         }
 
-        private static Tag.Named<EntityType<?>> tag(@Nonnull String name) {
-            return EntityTypeTags.bind(BucketLibApi.MOD_ID + ":" + name);
+        private static TagKey<EntityType<?>> tag(@Nonnull String name) {
+            return TagKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation(BucketLibApi.MOD_ID, name));
         }
 
     }
 
     public static class Fluids {
 
-        public static final Tag.Named<Fluid> INFINITY_ENCHANTABLE = tag("infinity_enchantable");
+        public static final TagKey<Fluid> INFINITY_ENCHANTABLE = tag("infinity_enchantable");
 
         private static void init() {
         }
 
-        private static Tag.Named<Fluid> tag(@Nonnull String name) {
-            return FluidTags.bind(BucketLibApi.MOD_ID + ":" + name);
+        private static TagKey<Fluid> tag(@Nonnull String name) {
+            return TagKey.create(Registry.FLUID_REGISTRY, new ResourceLocation(BucketLibApi.MOD_ID, name));
         }
 
     }

@@ -8,8 +8,7 @@ import com.google.gson.JsonSyntaxException;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.SerializationTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -26,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -34,10 +32,10 @@ import java.util.stream.Stream;
 public class FluidIngredient extends Ingredient {
 
     protected final Fluid fluid;
-    protected final Tag<Fluid> tag;
+    protected final TagKey<Fluid> tag;
     private ItemStack[] matchingStacks;
 
-    private FluidIngredient(Fluid fluid, Tag<Fluid> tag) {
+    private FluidIngredient(Fluid fluid, TagKey<Fluid> tag) {
         super(Stream.of());
         this.fluid = fluid;
         this.tag = tag;
@@ -47,14 +45,14 @@ public class FluidIngredient extends Ingredient {
         this(fluid, null);
     }
 
-    public FluidIngredient(Tag<Fluid> tag) {
+    public FluidIngredient(TagKey<Fluid> tag) {
         this(null, tag);
     }
 
     private boolean isFluidCorrect(Fluid fluid) {
         return fluid != null && (
                 (this.fluid != null && fluid.isSame(this.fluid))
-                        || (this.tag != null && fluid.is(this.tag))
+                        || (this.tag != null && fluid.defaultFluidState().is(this.tag))
         );
     }
 
@@ -80,7 +78,12 @@ public class FluidIngredient extends Ingredient {
             ArrayList<ItemStack> stacks = new ArrayList<>();
             BucketLib.getRegisteredBuckets().forEach(universalBucketItem -> {
                 ItemStack stack = new ItemStack(universalBucketItem);
-                List<Fluid> fluids = this.tag != null ? this.tag.getValues() : Collections.singletonList(this.fluid);
+                List<Fluid> fluids = new ArrayList<>();
+                if (this.tag != null) {
+                    Registry.FLUID.getTagOrEmpty(this.tag).forEach(fluidHolder -> fluids.add(fluidHolder.value()));
+                } else if (this.fluid != null) {
+                    fluids.add(this.fluid);
+                }
                 for (Fluid fluid : fluids) {
                     Item bucketItem = fluid.getBucket();
                     if (!(bucketItem instanceof BucketItem) || ((BucketItem) bucketItem).getFluid() != fluid) {
@@ -130,7 +133,7 @@ public class FluidIngredient extends Ingredient {
             jsonObject.addProperty("fluid", this.fluid.getRegistryName().toString());
         }
         if (this.tag != null) {
-            jsonObject.addProperty("tag", SerializationTags.getInstance().getIdOrThrow(Registry.FLUID_REGISTRY, this.tag, () -> new IllegalStateException("Unknown fluid tag: " + this.tag)).toString());
+            jsonObject.addProperty("tag", this.tag.location().toString());
         }
         return jsonObject;
     }
@@ -147,7 +150,7 @@ public class FluidIngredient extends Ingredient {
             String fluid = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
-                Tag<Fluid> tag = SerializationTags.getInstance().getOrEmpty(Registry.FLUID_REGISTRY).getTag(new ResourceLocation(tagId));
+                TagKey<Fluid> tag = TagKey.create(Registry.FLUID_REGISTRY, new ResourceLocation(tagId));
                 return new FluidIngredient(tag);
             }
             return new FluidIngredient(ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluid)));
@@ -158,10 +161,7 @@ public class FluidIngredient extends Ingredient {
         public FluidIngredient parse(@Nonnull JsonObject json) {
             if (json.has("tag")) {
                 ResourceLocation tagId = new ResourceLocation(json.get("tag").getAsString());
-                Tag<Fluid> tag = SerializationTags.getInstance().getOrEmpty(Registry.FLUID_REGISTRY).getTag(tagId);
-                if (tag == null) {
-                    throw new JsonSyntaxException("Unknown fluid tag: " + tagId);
-                }
+                TagKey<Fluid> tag = TagKey.create(Registry.FLUID_REGISTRY, tagId);
                 return new FluidIngredient(tag);
             } else {
                 ResourceLocation fluid = new ResourceLocation(json.get("fluid").getAsString());
@@ -175,7 +175,7 @@ public class FluidIngredient extends Ingredient {
         @Override
         public void write(FriendlyByteBuf buffer, FluidIngredient ingredient) {
             buffer.writeUtf(ingredient.fluid != null ? ingredient.fluid.toString() : "");
-            buffer.writeUtf(ingredient.tag != null ? SerializationTags.getInstance().getIdOrThrow(Registry.FLUID_REGISTRY, ingredient.tag, () -> new IllegalStateException("Unknown fluid tag: " + ingredient.tag)).toString() : "");
+            buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }
     }
 }

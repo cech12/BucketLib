@@ -19,7 +19,7 @@ public class ServerConfig {
         builder.push("Balance Options");
 
         INFINITY_ENCHANTMENT_ENABLED = builder
-                .comment("Whether or not Infinity enchantment for modded buckets filled with fluids of the tag \"" + BucketLibTags.Fluids.INFINITY_ENCHANTABLE.getName() + "\" should be enabled.")
+                .comment("Whether or not Infinity enchantment for modded buckets filled with fluids of the tag \"" + BucketLibTags.Fluids.INFINITY_ENCHANTABLE.location() + "\" should be enabled.")
                 .define("infinityEnchantmentEnabled", false);
 
         builder.pop();
