@@ -20,7 +20,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -176,19 +175,6 @@ public class UniversalBucketItem extends Item {
     @Override
     public int getMaxDamage(ItemStack stack) {
         return this.getDurability();
-    }
-
-    @Override
-    public int getBarWidth(ItemStack stack) {
-        //overwrite hardcoded maxDamage
-        return Math.round(13.0F - (float)stack.getDamageValue() * 13.0F / (float)this.getMaxDamage(stack));
-    }
-
-    @Override
-    public int getBarColor(@Nonnull ItemStack stack) {
-        //overwrite hardcoded maxDamage
-        float f = Math.max(0.0F, ((float)this.getMaxDamage(stack) - (float)stack.getDamageValue()) / (float)this.getMaxDamage(stack));
-        return Mth.hsvToRgb(f / 3.0F, 1.0F, 1.0F);
     }
 
     @Override
