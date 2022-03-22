@@ -15,7 +15,7 @@ license="The MIT License (MIT)"
 [[dependencies.bucketlib]]
     modId="forge"
     mandatory=true
-    versionRange="[40.0.2,)"
+    versionRange="[40.0.8,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.bucketlib]]

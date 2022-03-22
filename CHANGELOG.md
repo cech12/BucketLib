@@ -3,8 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
-## [1.18.2-0.5.1.1] - 2022-03-??
+## [1.18.2-0.5.1.1] - 2022-??-??
 ### Changed
+- simplify code of durability bar (Forge 40.0.8)
 - added first game tests
 
 ## [1.18.2-0.5.1.0] - 2022-03-03
