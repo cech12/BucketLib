@@ -7,9 +7,13 @@
   "item.bucketlibtest.temperature_bucket.entity": "Temperature Bucket of %s",
   "item.bucketlibtest.temperature_bucket.filled": "Temperature %s Bucket",
 
-  "item.bucketlibtest.water_blocking_bucket": "Water Blocking Bucket",
-  "item.bucketlibtest.water_blocking_bucket.entity": "Water Blocking Bucket of %s",
-  "item.bucketlibtest.water_blocking_bucket.filled": "Water Blocking %s Bucket",
+  "item.bucketlibtest.water_denying_bucket": "Water Denying Bucket",
+  "item.bucketlibtest.water_denying_bucket.entity": "Water Denying Bucket of %s",
+  "item.bucketlibtest.water_denying_bucket.filled": "Water Denying %s Bucket",
+
+  "item.bucketlibtest.water_denying_tag_bucket": "Water Denying (Tag) Bucket",
+  "item.bucketlibtest.water_denying_tag_bucket.entity": "Water Denying (Tag) Bucket of %s",
+  "item.bucketlibtest.water_denying_tag_bucket.filled": "Water Denying (Tag) %s Bucket",
 
   "item.bucketlibtest.cracking_bucket": "Cracking Bucket",
   "item.bucketlibtest.cracking_bucket.entity": "Cracking Bucket of %s",
