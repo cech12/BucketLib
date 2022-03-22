@@ -1,0 +1,7 @@
+modLoader="javafml"
+loaderVersion="[40,)"
+license="The MIT License (MIT)"
+[[mods]]
+    modId="bucketlib"
+[[mods]]
+    modId="bucketlibtest"

@@ -12,16 +12,6 @@ license="The MIT License (MIT)"
     description='''
     A library mod for custom buckets.
     '''
-#[[mods]]
-#    modId="bucketlibtest"
-#    version="${file.jarVersion}"
-#    displayName="BucketLibTest"
-#    displayURL="https://github.com/cech12/BucketLib"
-#    logoFile="logo.png"
-#    authors="Cech12"
-#    description='''
-#    A test mod for the BucketLib library mod.
-#    '''
 [[dependencies.bucketlib]]
     modId="forge"
     mandatory=true

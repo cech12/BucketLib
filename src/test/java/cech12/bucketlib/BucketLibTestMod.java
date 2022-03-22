@@ -1,4 +1,4 @@
-package cech12.bucketlibtest;
+package cech12.bucketlib;
 
 import cech12.bucketlib.api.BucketLibApi;
 import cech12.bucketlib.api.item.UniversalBucketItem;
@@ -14,20 +14,14 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
 
-//@Mod(BucketLibTestMod.MOD_ID)
-//@Mod.EventBusSubscriber(modid= BucketLibTestMod.MOD_ID, bus= Mod.EventBusSubscriber.Bus.MOD)
+@Mod(BucketLibTestMod.MOD_ID)
+@Mod.EventBusSubscriber(modid= BucketLibTestMod.MOD_ID, bus= Mod.EventBusSubscriber.Bus.MOD)
 public class BucketLibTestMod {
 
-    private static final Logger LOGGER = LogManager.getLogger();
-
     public static final String MOD_ID = "bucketlibtest";
-
-    public static final boolean ENABLED = true;
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, BucketLibTestMod.MOD_ID);
 
@@ -46,14 +40,12 @@ public class BucketLibTestMod {
     public static final RegistryObject<Item> FREEZING_BUCKET = ITEMS.register("freezing_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().durability(20).freezingTemperature(500).freezingBlocks(Collections.singletonList(Blocks.POWDER_SNOW))));
 
     public BucketLibTestMod() {
-        if (!ENABLED) return;
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ITEMS.register(modEventBus);
     }
 
     @SubscribeEvent
     public static void sendImc(InterModEnqueueEvent evt) {
-        if (!ENABLED) return;
         for (RegistryObject<Item> item : ITEMS.getEntries()) {
             BucketLibApi.registerBucket(item.getId());
         }
