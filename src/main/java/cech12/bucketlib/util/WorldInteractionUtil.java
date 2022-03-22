@@ -35,7 +35,7 @@ public class WorldInteractionUtil {
         InteractionResult result = player.interactOn(entity, interactionHand);
         //TODO bug: milking entity in creative mode adds a vanilla milk bucket to inventory
         if (result.consumesAction()) {
-            itemStack = ItemUtils.createFilledResult(itemStack, player, BucketLibUtil.addMilk(ItemHandlerHelper.copyStackWithSize(itemStack, 1)));
+            itemStack = ItemUtils.createFilledResult(itemStack.copy(), player, BucketLibUtil.addMilk(ItemHandlerHelper.copyStackWithSize(itemStack, 1)));
         }
         player.setItemInHand(interactionHand, itemStack);
         return result;
