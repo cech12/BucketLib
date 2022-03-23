@@ -3,8 +3,10 @@ package cech12.bucketlib;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Player;
@@ -16,8 +18,8 @@ import java.util.function.Function;
 
 public class BucketLibTestHelper {
 
-    public static Player makeMockCreativePlayer(GameTestHelper helper) {
-        return new Player(helper.getLevel(), BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-survival-player")) {
+    public static ServerPlayer makeMockCreativePlayer(GameTestHelper helper) {
+        return new ServerPlayer(helper.getLevel().getServer(), helper.getLevel(), new GameProfile(UUID.randomUUID(), "test-mock-creative-player")) {
             public boolean isSpectator() {
                 return false;
             }
@@ -36,8 +38,8 @@ public class BucketLibTestHelper {
         };
     }
 
-    public static Player makeMockSurvivalPlayer(GameTestHelper helper) {
-        return new Player(helper.getLevel(), BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-survival-player")) {
+    public static ServerPlayer makeMockSurvivalPlayer(GameTestHelper helper) {
+        return new ServerPlayer(helper.getLevel().getServer(), helper.getLevel(), new GameProfile(UUID.randomUUID(), "test-mock-survival-player")) {
             public boolean isSpectator() {
                 return false;
             }
@@ -63,7 +65,11 @@ public class BucketLibTestHelper {
         player.setItemInHand(InteractionHand.MAIN_HAND, itemStack.copy());
         //centered one block above looking down
         player.absMoveTo(blockpos.getX() + 0.5D, blockpos.getY() + 1.0D, blockpos.getZ() + 0.5D, 0F, 90F);
-        return new PlayerInteractionResult(player, itemStack.use(helper.getLevel(), player, InteractionHand.MAIN_HAND));
+        InteractionResultHolder<ItemStack> result = itemStack.use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+        if (!isCreative && result.getResult().consumesAction()) {
+            player.setItemInHand(InteractionHand.MAIN_HAND, result.getObject());
+        }
+        return new PlayerInteractionResult(player, result);
     }
 
     public static PlayerInteractionResult useItemOnEntity(GameTestHelper helper, ItemStack stack, Entity entity, boolean isCreative) {

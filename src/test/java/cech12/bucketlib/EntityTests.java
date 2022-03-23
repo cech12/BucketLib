@@ -45,7 +45,7 @@ public class EntityTests {
                                 Entity entity = test.spawn(entityType, ENTITY_POSITION);
                                 PlayerInteractionResult result = BucketLibTestHelper.useItemOnEntity(test, bucket, entity, isCreative);
                                 if (!result.getResult().consumesAction()) {
-                                    test.fail("Wrong InteractionResult after using an empty bucket on a goat: " + result.getResult());
+                                    test.fail("Wrong InteractionResult after using an empty bucket on a " + entityName + ": " + result.getResult());
                                 }
                                 if (BucketLibUtil.containsMilk(result.getObject()) == (isCreative || stackSize > 1)) {
                                     test.fail("The bucket in main hand does " + (isCreative ? "" : "not ") + "contain milk after " + (isCreative ? "creative" : "survival") + " interacting with a " + entityName + " with a stack size of " + stackSize);
@@ -59,7 +59,7 @@ public class EntityTests {
                                 if ((isCreative || stackSize > 1) && !BucketLibTestHelper.hasSpecificBucket(result.getPlayer(), BucketLibUtil::isEmpty)) {
                                     test.fail("The player doesn't have an empty bucket after " + (isCreative ? "creative" : "survival") + " interacting with a " + entityName + " with a stack size of " + stackSize);
                                 }
-                                if (!isCreative && !BucketLibTestHelper.hasSpecificBucket(result.getPlayer(), BucketLibUtil::containsMilk)) { //in creatice mode, a vanilla milk bucket is generated
+                                if (!isCreative && !BucketLibTestHelper.hasSpecificBucket(result.getPlayer(), itemStack -> itemStack.getCount() == 1 && BucketLibUtil.containsMilk(itemStack))) { //in creatice mode, a vanilla milk bucket is generated
                                     test.fail("The player doesn't have bucket filled with milk after survival interacting with a " + entityName + " with a stack size of " + stackSize);
                                 }
                                 test.succeed();

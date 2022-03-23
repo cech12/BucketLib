@@ -58,6 +58,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
@@ -243,7 +244,7 @@ public class UniversalBucketItem extends Item {
                     InteractionResultHolder<ItemStack> interactionResult = fakeStack.use(level, player, interactionHand);
                     player.setItemInHand(interactionHand, itemstack);
                     if (interactionResult.getResult().consumesAction()) {
-                        return new InteractionResultHolder<>(interactionResult.getResult(), ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addBlock(itemstack, bucketBlock.block())));
+                        return new InteractionResultHolder<>(interactionResult.getResult(), ItemUtils.createFilledResult(itemstack.copy(), player, BucketLibUtil.addBlock(ItemHandlerHelper.copyStackWithSize(itemstack, 1), bucketBlock.block())));
                     }
                 }
             } else {
