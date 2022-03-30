@@ -153,6 +153,9 @@ public class FluidIngredient extends Ingredient {
                 TagKey<Fluid> tag = TagKey.create(Registry.FLUID_REGISTRY, new ResourceLocation(tagId));
                 return new FluidIngredient(tag);
             }
+            if (fluid.isEmpty()) {
+                throw new IllegalArgumentException("Cannot create a fluid ingredient with no fluid or tag.");
+            }
             return new FluidIngredient(ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluid)));
         }
 
@@ -174,7 +177,7 @@ public class FluidIngredient extends Ingredient {
 
         @Override
         public void write(FriendlyByteBuf buffer, FluidIngredient ingredient) {
-            buffer.writeUtf(ingredient.fluid != null ? ingredient.fluid.toString() : "");
+            buffer.writeUtf(ingredient.fluid != null ? ingredient.fluid.getRegistryName().toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }
     }
