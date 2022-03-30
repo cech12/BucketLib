@@ -10,6 +10,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Quaternion;
 import com.mojang.math.Transformation;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
@@ -39,6 +40,7 @@ import net.minecraftforge.client.model.ItemLayerModel;
 import net.minecraftforge.client.model.ItemMultiLayerBakedModel;
 import net.minecraftforge.client.model.ItemTextureQuadConverter;
 import net.minecraftforge.client.model.PerspectiveMapWrapper;
+import net.minecraftforge.client.model.SimpleModelState;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
 
 import javax.annotation.Nonnull;
@@ -147,15 +149,11 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
         if (particleSprite == null) particleSprite = fluidSprite;
 
         // if the fluid is lighter than air, will manipulate the initial state to be rotated 180deg to turn it upside down
-        //TODO
-        /*
-        if (fluid != Fluids.EMPTY && fluid.getAttributes().isLighterThanAir())
-        {
-            modelTransform = new SimpleModelTransform(
+        if (fluid != Fluids.EMPTY && fluid.getAttributes().isLighterThanAir()) {
+            modelTransform = new SimpleModelState(
                     modelTransform.getRotation().blockCornerToCenter().compose(
                             new Transformation(null, new Quaternion(0, 0, 1, 0), null, null)).blockCenterToCorner());
         }
-         */
 
         Transformation transform = modelTransform.getRotation();
 

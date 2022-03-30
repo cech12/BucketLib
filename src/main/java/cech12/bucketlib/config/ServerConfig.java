@@ -9,7 +9,7 @@ import java.nio.file.Path;
 
 public class ServerConfig {
 
-    public static ForgeConfigSpec SERVER_CONFIG;
+    public static final ForgeConfigSpec SERVER_CONFIG;
 
     public static final ForgeConfigSpec.BooleanValue INFINITY_ENCHANTMENT_ENABLED;
 
