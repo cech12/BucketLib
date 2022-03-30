@@ -10,6 +10,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.gametest.GameTestHolder;
 
 import java.util.ArrayList;
@@ -61,6 +63,51 @@ public class EntityTests {
                                 }
                                 if (!isCreative && !BucketLibTestHelper.hasSpecificBucket(result.getPlayer(), itemStack -> itemStack.getCount() == 1 && BucketLibUtil.containsMilk(itemStack))) { //in creatice mode, a vanilla milk bucket is generated
                                     test.fail("The player doesn't have bucket filled with milk after survival interacting with a " + entityName + " with a stack size of " + stackSize);
+                                }
+                                test.succeed();
+                            }
+                    ));
+                }
+            }
+        }
+        return testFunctions;
+    }
+
+    @GameTestGenerator
+    public static List<TestFunction> generatePickupEntityTests() {
+        List<TestFunction> testFunctions = new ArrayList<>();
+        EntityType<?>[] entityTypes = {EntityType.AXOLOTL, EntityType.COD, EntityType.PUFFERFISH, EntityType.SALMON, EntityType.TROPICAL_FISH};
+        Fluid[] fluids = {Fluids.EMPTY, Fluids.WATER, Fluids.LAVA };
+        boolean[] creativeStates = { false, true };
+        for (EntityType<?> entityType : entityTypes) {
+            for (Fluid fluid : fluids) {
+                for (boolean isCreative : creativeStates) {
+                    String entityName = Objects.requireNonNull(entityType.getRegistryName()).getPath();
+                    String fluidName = fluid != Fluids.EMPTY ? Objects.requireNonNull(fluid.getRegistryName()).getPath() : "empty";
+                    String testName = "test" + ((isCreative) ? "creative" : "survival") + "pickup" + entityName + "with" + fluidName + "bucket";
+                    testFunctions.add(new TestFunction(
+                            "defaultBatch",
+                            testName,
+                            new ResourceLocation(BucketLibApi.MOD_ID, "entitytests.waterpit").toString(),
+                            Rotation.NONE,
+                            100,
+                            0,
+                            true,
+                            test -> {
+                                ItemStack bucket = new ItemStack(BucketLibTestMod.TEST_BUCKET.get());
+                                if (fluid != Fluids.EMPTY) {
+                                    bucket = BucketLibUtil.addFluid(bucket, fluid);
+                                }
+                                Entity entity = test.spawn(entityType, ENTITY_POSITION);
+                                PlayerInteractionResult result = BucketLibTestHelper.useItemOnEntity(test, bucket, entity, isCreative);
+                                if (result.getResult().consumesAction() == (fluid != Fluids.WATER)) {
+                                    test.fail("Wrong InteractionResult after using " + fluidName + " bucket on a " + entityName + ": " + result.getResult());
+                                }
+                                if ((BucketLibUtil.getEntityType(result.getObject()) == entityType) == (isCreative || fluid != Fluids.WATER)) {
+                                    test.fail("The bucket in main hand does " + ((isCreative || fluid != Fluids.WATER) ? "" : "not ") + "contain a " + entityName + " after " + (isCreative ? "creative" : "survival") + " interacting with it with " + fluidName + " bucket");
+                                }
+                                if (result.getObject().getCount() != 1) {
+                                    test.fail("The bucket stack size " + result.getObject().getCount() + " in main hand after " + (isCreative ? "creative" : "survival") + " interacting with a " + entityName + " with " + fluidName + " bucket is not the same as before");
                                 }
                                 test.succeed();
                             }
