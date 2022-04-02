@@ -64,6 +64,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 
 public class UniversalBucketItem extends Item {
 
@@ -480,14 +481,15 @@ public class UniversalBucketItem extends Item {
         return defaultValue;
     }
 
+    @SuppressWarnings("unchecked")
     private <T> boolean isElementListedInProperty(T element, TagKey<T> tag, List<T> defaultList) {
         if (tag != null) {
             if (element instanceof Block block) {
-                return block.defaultBlockState().is((TagKey<Block>) tag);
+                return Objects.requireNonNull(ForgeRegistries.BLOCKS.tags()).getTag((TagKey<Block>) tag).contains(block);
             } else if (element instanceof Fluid fluid) {
-                return fluid.is((TagKey<Fluid>) tag);
+                return Objects.requireNonNull(ForgeRegistries.FLUIDS.tags()).getTag((TagKey<Fluid>) tag).contains(fluid);
             } else if (element instanceof EntityType<?> entityType) {
-                return entityType.is((TagKey<EntityType<?>>) tag);
+                return Objects.requireNonNull(ForgeRegistries.ENTITIES.tags()).getTag((TagKey<EntityType<?>>) tag).contains(entityType);
             }
         }
         return defaultList != null && defaultList.contains(element);

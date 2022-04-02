@@ -21,12 +21,15 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.tags.ITag;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+@SuppressWarnings("unused")
 @JeiPlugin
 public class ModJEIPlugin implements IModPlugin {
 
@@ -51,9 +54,10 @@ public class ModJEIPlugin implements IModPlugin {
             IVanillaRecipeFactory factory = registration.getVanillaRecipeFactory();
             EnchantmentInstance data = new EnchantmentInstance(Enchantments.INFINITY_ARROWS, Enchantments.INFINITY_ARROWS.getMaxLevel());
             List<Object> recipes = new ArrayList<>();
+            ITag<Fluid> infinityTag = Objects.requireNonNull(ForgeRegistries.FLUIDS.tags()).getTag(BucketLibTags.Fluids.INFINITY_ENCHANTABLE);
             for (UniversalBucketItem bucketItem : BucketLib.getRegisteredBuckets()) {
                 for (Fluid fluid : ForgeRegistries.FLUIDS) {
-                    if (fluid != Fluids.EMPTY && bucketItem.canHoldFluid(fluid) && fluid.is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {
+                    if (fluid != Fluids.EMPTY && bucketItem.canHoldFluid(fluid) && infinityTag.contains(fluid)) {
                         ItemStack bucket = BucketLibUtil.addFluid(new ItemStack(bucketItem), fluid);
                         ItemStack enchantedBucket = bucket.copy();
                         enchantedBucket.enchant(data.enchantment, data.level);

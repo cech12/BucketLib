@@ -25,6 +25,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -92,7 +93,7 @@ public class BucketLibUtil {
         if (itemStack.getItem() instanceof UniversalBucketItem bucket) {
             Fluid fluid = FluidUtil.getFluidContained(itemStack).orElse(FluidStack.EMPTY).getFluid();
             return fluid != Fluids.EMPTY
-                    && fluid.is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)
+                    && Objects.requireNonNull(ForgeRegistries.FLUIDS.tags()).getTag(BucketLibTags.Fluids.INFINITY_ENCHANTABLE).contains(fluid)
                     && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, itemStack) > 0
                     && bucket.canHoldFluid(fluid);
         }

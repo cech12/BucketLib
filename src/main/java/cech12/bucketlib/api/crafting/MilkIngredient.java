@@ -11,7 +11,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -86,20 +85,20 @@ public class MilkIngredient extends Ingredient {
 
         private Serializer() {}
 
-        @NotNull
+        @Nonnull
         @Override
-        public MilkIngredient parse(FriendlyByteBuf buffer) {
+        public MilkIngredient parse(@Nonnull FriendlyByteBuf buffer) {
             return new MilkIngredient();
         }
 
-        @NotNull
+        @Nonnull
         @Override
         public MilkIngredient parse(@Nonnull JsonObject json) {
             return new MilkIngredient();
         }
 
         @Override
-        public void write(FriendlyByteBuf buffer, MilkIngredient ingredient) {
+        public void write(@Nonnull FriendlyByteBuf buffer, @Nonnull MilkIngredient ingredient) {
         }
     }
 }

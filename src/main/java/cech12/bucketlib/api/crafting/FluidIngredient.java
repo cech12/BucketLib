@@ -21,11 +21,12 @@ import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
+import net.minecraftforge.registries.tags.ITagManager;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -79,8 +80,9 @@ public class FluidIngredient extends Ingredient {
             BucketLib.getRegisteredBuckets().forEach(universalBucketItem -> {
                 ItemStack stack = new ItemStack(universalBucketItem);
                 List<Fluid> fluids = new ArrayList<>();
-                if (this.tag != null) {
-                    Registry.FLUID.getTagOrEmpty(this.tag).forEach(fluidHolder -> fluids.add(fluidHolder.value()));
+                ITagManager<Fluid> fluidTags = ForgeRegistries.FLUIDS.tags();
+                if (this.tag != null && fluidTags != null) {
+                    fluidTags.getTag(this.tag).forEach(fluids::add);
                 } else if (this.fluid != null) {
                     fluids.add(this.fluid);
                 }
@@ -130,7 +132,7 @@ public class FluidIngredient extends Ingredient {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("type", Serializer.NAME.toString());
         if (this.fluid != null) {
-            jsonObject.addProperty("fluid", this.fluid.getRegistryName().toString());
+            jsonObject.addProperty("fluid", Objects.requireNonNull(this.fluid.getRegistryName()).toString());
         }
         if (this.tag != null) {
             jsonObject.addProperty("tag", this.tag.location().toString());
@@ -144,9 +146,9 @@ public class FluidIngredient extends Ingredient {
 
         private Serializer() {}
 
-        @NotNull
+        @Nonnull
         @Override
-        public FluidIngredient parse(FriendlyByteBuf buffer) {
+        public FluidIngredient parse(@Nonnull FriendlyByteBuf buffer) {
             String fluid = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
@@ -159,7 +161,7 @@ public class FluidIngredient extends Ingredient {
             return new FluidIngredient(ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluid)));
         }
 
-        @NotNull
+        @Nonnull
         @Override
         public FluidIngredient parse(@Nonnull JsonObject json) {
             if (json.has("tag")) {
@@ -176,8 +178,8 @@ public class FluidIngredient extends Ingredient {
         }
 
         @Override
-        public void write(FriendlyByteBuf buffer, FluidIngredient ingredient) {
-            buffer.writeUtf(ingredient.fluid != null ? ingredient.fluid.getRegistryName().toString() : "");
+        public void write(@Nonnull FriendlyByteBuf buffer, @Nonnull FluidIngredient ingredient) {
+            buffer.writeUtf(ingredient.fluid != null ? Objects.requireNonNull(ingredient.fluid.getRegistryName()).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }
     }

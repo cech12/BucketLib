@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "type": "bucketlib:fluid",
+      "tag": "minecraft:water"
+    },
+    {
+      "type": "bucketlib:fluid",
+      "fluid": "minecraft:lava"
+    }
+  ],
+  "result": {
+    "item": "minecraft:obsidian"
+  }
+}

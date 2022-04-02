@@ -40,5 +40,17 @@
 
   "item.bucketlibtest.no_blocks_bucket": "No Blocks Bucket",
   "item.bucketlibtest.no_blocks_bucket.entity": "No Blocks Bucket of %s",
-  "item.bucketlibtest.no_blocks_bucket.filled": "No Blocks %s Bucket"
+  "item.bucketlibtest.no_blocks_bucket.filled": "No Blocks %s Bucket",
+
+  "item.bucketlibtest.durability_bucket": "Durability Bucket",
+  "item.bucketlibtest.durability_bucket.entity": "Durability Bucket of %s",
+  "item.bucketlibtest.durability_bucket.filled": "Durability %s Bucket",
+
+  "item.bucketlibtest.burning_bucket": "Burning Bucket",
+  "item.bucketlibtest.burning_bucket.entity": "Burning Bucket of %s",
+  "item.bucketlibtest.burning_bucket.filled": "Burning %s Bucket",
+
+  "item.bucketlibtest.freezing_bucket": "Freezing Bucket",
+  "item.bucketlibtest.freezing_bucket.entity": "Freezing Bucket of %s",
+  "item.bucketlibtest.freezing_bucket.filled": "Freezing %s Bucket"
 }
