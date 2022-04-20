@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 - Flipped bucket model if the bucket contains a fluid that is lighter than air
 
+### Fixed
+- Fixed a bug where a bucket with an entity could have the burn time of its fluid.
+
 ## [1.18.2-0.5.2.1] - 2022-03-30
 ### Fixed
 - FluidIngredient throws errors on clientside when it contained a fluid #8

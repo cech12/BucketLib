@@ -425,12 +425,14 @@ public class UniversalBucketItem extends Item {
 
     @Override
     public int getBurnTime(ItemStack itemStack, @Nullable RecipeType<?> recipeType) {
-        //TODO block & entity buckets have no burn time
-        Fluid fluid = FluidUtil.getFluidContained(itemStack).orElse(FluidStack.EMPTY).getFluid();
-        if (fluid != Fluids.EMPTY) {
-            //all fluids have their burn time in their bucket item.
-            //get the burn time via ForgeHooks.getBurnTime to let other mods change burn times of buckets of vanilla and other fluids.
-            return ForgeHooks.getBurnTime(new ItemStack(fluid.getBucket()), recipeType);
+        //entity buckets should not use the burn time of its fluid
+        if (!BucketLibUtil.containsEntityType(itemStack)) {
+            Fluid fluid = FluidUtil.getFluidContained(itemStack).orElse(FluidStack.EMPTY).getFluid();
+            if (fluid != Fluids.EMPTY) {
+                //all fluids have their burn time in their bucket item.
+                //get the burn time via ForgeHooks.getBurnTime to let other mods change burn times of buckets of vanilla and other fluids.
+                return ForgeHooks.getBurnTime(new ItemStack(fluid.getBucket()), recipeType);
+            }
         }
         return super.getBurnTime(itemStack, recipeType);
     }
@@ -447,7 +449,7 @@ public class UniversalBucketItem extends Item {
         if (BucketLibUtil.isAffectedByInfinityEnchantment(itemStack)) {
             return itemStack.copy();
         }
-        //TODO remove other content (Entity, Blocks, ...)
+        // AFAIK this method is only used by fluid handling. Other things like entities, blocks, etc. should not be affected by this.
         return BucketLibUtil.removeFluid(itemStack);
     }
 
