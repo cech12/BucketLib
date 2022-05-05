@@ -6,6 +6,7 @@ import cech12.bucketlib.api.item.UniversalBucketItem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -49,9 +50,14 @@ public class BucketLibUtil {
         if (!BucketLibUtil.notCreative(player)) {
             return initialStack;
         }
-        //TODO break event does not work here
-        if (resultStack.isEmpty() && !player.getLevel().isClientSide()) {
-            player.broadcastBreakEvent(hand);
+        if (resultStack.isEmpty()) {
+            //player.broadcastBreakEvent(hand); //does not work here to play the sound, because the hand is empty until this event gotten
+            if (!initialStack.isEmpty()) {
+                if (!player.isSilent()) {
+                    player.getLevel().playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK, player.getSoundSource(), 0.8F, 0.8F + player.getLevel().getRandom().nextFloat() * 0.4F, false);
+                }
+                player.spawnItemParticles(initialStack, 5);
+            }
             player.awardStat(Stats.ITEM_BROKEN.get(initialStack.getItem()));
         }
         return resultStack;
