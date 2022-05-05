@@ -128,8 +128,8 @@ public class UniversalBucketItem extends Item {
         if (this.properties.allowedFluidsTag != null || this.properties.allowedFluids != null) {
             return isAllowedFluid(fluid);
         }
-        if (this.properties.blockedFluidsTag != null || this.properties.blockedFluids != null) {
-            return !isBlockedFluid(fluid);
+        if (this.properties.deniedFluidsTag != null || this.properties.deniedFluids != null) {
+            return !isDeniedFluid(fluid);
         }
         int fluidTemperature = fluid.getAttributes().getTemperature();
         Integer maxTemperature = getMaxTemperature();
@@ -143,8 +143,8 @@ public class UniversalBucketItem extends Item {
             if (this.properties.allowedEntitiesTag != null || this.properties.allowedEntities != null) {
                 return isAllowedEntity(entityType);
             }
-            if (this.properties.blockedEntitiesTag != null || this.properties.blockedEntities != null) {
-                return !isBlockedEntity(entityType);
+            if (this.properties.deniedEntitiesTag != null || this.properties.deniedEntities != null) {
+                return !isDeniedEntity(entityType);
             }
             return true;
         }
@@ -156,8 +156,8 @@ public class UniversalBucketItem extends Item {
             if (this.properties.allowedBlocksTag != null || this.properties.allowedBlocks != null) {
                 return isAllowedBlock(block);
             }
-            if (this.properties.blockedBlocksTag != null || this.properties.blockedBlocks != null) {
-                return !isBlockedBlock(block);
+            if (this.properties.deniedBlocksTag != null || this.properties.deniedBlocks != null) {
+                return !isDeniedBlock(block);
             }
             return true;
         }
@@ -553,8 +553,8 @@ public class UniversalBucketItem extends Item {
         return isElementListedInProperty(block, this.properties.freezingBlocksTag, this.properties.freezingBlocks);
     }
 
-    private boolean isBlockedFluid(Fluid fluid) {
-        return isElementListedInProperty(fluid, this.properties.blockedFluidsTag, this.properties.blockedFluids);
+    private boolean isDeniedFluid(Fluid fluid) {
+        return isElementListedInProperty(fluid, this.properties.deniedFluidsTag, this.properties.deniedFluids);
     }
 
     private boolean isAllowedFluid(Fluid fluid) {
@@ -569,8 +569,8 @@ public class UniversalBucketItem extends Item {
         return getBooleanProperty(this.properties.entityObtainingConfig, this.properties.entityObtaining);
     }
 
-    private boolean isBlockedEntity(EntityType<?> entityType) {
-        return isElementListedInProperty(entityType, this.properties.blockedEntitiesTag, this.properties.blockedEntities);
+    private boolean isDeniedEntity(EntityType<?> entityType) {
+        return isElementListedInProperty(entityType, this.properties.deniedEntitiesTag, this.properties.deniedEntities);
     }
 
     private boolean isAllowedEntity(EntityType<?> entityType) {
@@ -581,8 +581,8 @@ public class UniversalBucketItem extends Item {
         return getBooleanProperty(this.properties.blockObtainingConfig, this.properties.blockObtaining);
     }
 
-    private boolean isBlockedBlock(Block block) {
-        return isElementListedInProperty(block, this.properties.blockedBlocksTag, this.properties.blockedBlocks);
+    private boolean isDeniedBlock(Block block) {
+        return isElementListedInProperty(block, this.properties.deniedBlocksTag, this.properties.deniedBlocks);
     }
 
     private boolean isAllowedBlock(Block block) {
@@ -611,8 +611,8 @@ public class UniversalBucketItem extends Item {
 
         List<Fluid> crackingFluids = null;
         TagKey<Fluid> crackingFluidsTag = null;
-        List<Fluid> blockedFluids = null;
-        TagKey<Fluid> blockedFluidsTag = null;
+        List<Fluid> deniedFluids = null;
+        TagKey<Fluid> deniedFluidsTag = null;
         List<Fluid> allowedFluids = null;
         TagKey<Fluid> allowedFluidsTag = null;
 
@@ -635,15 +635,15 @@ public class UniversalBucketItem extends Item {
 
         boolean entityObtaining = true;
         ForgeConfigSpec.BooleanValue entityObtainingConfig = null;
-        List<EntityType<?>> blockedEntities = null;
-        TagKey<EntityType<?>> blockedEntitiesTag = null;
+        List<EntityType<?>> deniedEntities = null;
+        TagKey<EntityType<?>> deniedEntitiesTag = null;
         List<EntityType<?>> allowedEntities = null;
         TagKey<EntityType<?>> allowedEntitiesTag = null;
 
         boolean blockObtaining = true;
         ForgeConfigSpec.BooleanValue blockObtainingConfig = null;
-        List<Block> blockedBlocks = null;
-        TagKey<Block> blockedBlocksTag = null;
+        List<Block> deniedBlocks = null;
+        TagKey<Block> deniedBlocksTag = null;
         List<Block> allowedBlocks = null;
         TagKey<Block> allowedBlocksTag = null;
 
@@ -795,13 +795,23 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
+        @Deprecated(since = "0.5.3.0", forRemoval = true) //use deniedFluids() instead
         public Properties blockedFluids(List<Fluid> blockedFluids) {
-            this.blockedFluids = blockedFluids;
+            return this.deniedFluids(blockedFluids);
+        }
+
+        public Properties deniedFluids(List<Fluid> deniedFluids) {
+            this.deniedFluids = deniedFluids;
             return this;
         }
 
-        public Properties blockedFluids(TagKey<Fluid> blockedFluidsTag) {
-            this.blockedFluidsTag = blockedFluidsTag;
+        @Deprecated(since = "0.5.3.0", forRemoval = true) //use deniedFluids() instead
+        public Properties blockedFluids(TagKey<Fluid> deniedFluidsTag) {
+            return this.deniedFluids(deniedFluidsTag);
+        }
+
+        public Properties deniedFluids(TagKey<Fluid> blockedFluidsTag) {
+            this.deniedFluidsTag = blockedFluidsTag;
             return this;
         }
 
@@ -835,13 +845,23 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
+        @Deprecated(since = "0.5.3.0", forRemoval = true) //use deniedEntities() instead
         public Properties blockedEntities(List<EntityType<?>> blockedEntities) {
-            this.blockedEntities = blockedEntities;
+            return this.deniedEntities(blockedEntities);
+        }
+
+        public Properties deniedEntities(List<EntityType<?>> deniedEntities) {
+            this.deniedEntities = deniedEntities;
             return this;
         }
 
+        @Deprecated(since = "0.5.3.0", forRemoval = true) //use deniedEntities() instead
         public Properties blockedEntities(TagKey<EntityType<?>> blockedEntitiesTag) {
-            this.blockedEntitiesTag = blockedEntitiesTag;
+            return this.deniedEntities(blockedEntitiesTag);
+        }
+
+        public Properties deniedEntities(TagKey<EntityType<?>> deniedEntitiesTag) {
+            this.deniedEntitiesTag = deniedEntitiesTag;
             return this;
         }
 
@@ -865,13 +885,24 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
+
+        @Deprecated(since = "0.5.3.0", forRemoval = true) //use deniedBlocks() instead
         public Properties blockedBlocks(List<Block> blockedBlocks) {
-            this.blockedBlocks = blockedBlocks;
+            return this.deniedBlocks(blockedBlocks);
+        }
+
+        public Properties deniedBlocks(List<Block> deniedBlocks) {
+            this.deniedBlocks = deniedBlocks;
             return this;
         }
 
+        @Deprecated(since = "0.5.3.0", forRemoval = true) //use deniedBlocks() instead
         public Properties blockedBlocks(TagKey<Block> blockedBlocksTag) {
-            this.blockedBlocksTag = blockedBlocksTag;
+            return this.deniedBlocks(blockedBlocksTag);
+        }
+
+        public Properties deniedBlocks(TagKey<Block> deniedBlocksTag) {
+            this.deniedBlocksTag = deniedBlocksTag;
             return this;
         }
 
