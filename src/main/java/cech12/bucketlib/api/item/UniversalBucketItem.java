@@ -800,14 +800,14 @@ public class UniversalBucketItem extends Item {
             return this.deniedFluids(blockedFluids);
         }
 
-        public Properties deniedFluids(List<Fluid> deniedFluids) {
-            this.deniedFluids = deniedFluids;
-            return this;
-        }
-
         @Deprecated(since = "0.5.3.0", forRemoval = true) //use deniedFluids() instead
         public Properties blockedFluids(TagKey<Fluid> deniedFluidsTag) {
             return this.deniedFluids(deniedFluidsTag);
+        }
+
+        public Properties deniedFluids(List<Fluid> deniedFluids) {
+            this.deniedFluids = deniedFluids;
+            return this;
         }
 
         public Properties deniedFluids(TagKey<Fluid> blockedFluidsTag) {
@@ -850,14 +850,14 @@ public class UniversalBucketItem extends Item {
             return this.deniedEntities(blockedEntities);
         }
 
-        public Properties deniedEntities(List<EntityType<?>> deniedEntities) {
-            this.deniedEntities = deniedEntities;
-            return this;
-        }
-
         @Deprecated(since = "0.5.3.0", forRemoval = true) //use deniedEntities() instead
         public Properties blockedEntities(TagKey<EntityType<?>> blockedEntitiesTag) {
             return this.deniedEntities(blockedEntitiesTag);
+        }
+
+        public Properties deniedEntities(List<EntityType<?>> deniedEntities) {
+            this.deniedEntities = deniedEntities;
+            return this;
         }
 
         public Properties deniedEntities(TagKey<EntityType<?>> deniedEntitiesTag) {
@@ -891,14 +891,14 @@ public class UniversalBucketItem extends Item {
             return this.deniedBlocks(blockedBlocks);
         }
 
-        public Properties deniedBlocks(List<Block> deniedBlocks) {
-            this.deniedBlocks = deniedBlocks;
-            return this;
-        }
-
         @Deprecated(since = "0.5.3.0", forRemoval = true) //use deniedBlocks() instead
         public Properties blockedBlocks(TagKey<Block> blockedBlocksTag) {
             return this.deniedBlocks(blockedBlocksTag);
+        }
+
+        public Properties deniedBlocks(List<Block> deniedBlocks) {
+            this.deniedBlocks = deniedBlocks;
+            return this;
         }
 
         public Properties deniedBlocks(TagKey<Block> deniedBlocksTag) {
