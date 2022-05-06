@@ -1,5 +1,7 @@
 before_install:
   - echo $CLEAR_CACHE
-  - if [$CLEAR_CACHE == 'true']; then rm HOME_DIR/.gradle/caches; fi
+  - if $CLEAR_CACHE == 'true'
+  - then rm HOME_DIR/.gradle/caches
+  - fi
   - sdk install java 17.0.3-tem
   - sdk use java 17.0.3-tem
