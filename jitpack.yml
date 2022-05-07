@@ -1,7 +1,8 @@
 before_install:
-  - echo $CLEAR_CACHE
-  - if $CLEAR_CACHE == 'true'
-  - then rm -rf $HOME/.gradle/caches/
+  - echo clear gradle cache? $CLEAR_CACHE
+  - if $CLEAR_CACHE == true
+  - then rm $HOME/.gradle/caches
+  - else echo gradle cache was not cleared
   - fi
   - sdk install java 17.0.3-tem
   - sdk use java 17.0.3-tem
