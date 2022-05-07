@@ -1,5 +1,5 @@
 before_install:
-  - ls ..
+  - ls /.. 
   - echo ______
   - ls $HOME
   - echo clear gradle cache? $CLEAR_CACHE
