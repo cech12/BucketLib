@@ -1,9 +1,8 @@
 before_install:
   - ls /..
   - echo ______
-  - ls /../build
+  - ls ~
   - echo ___
-  - ls /../bin
   - echo clear gradle cache? $CLEAR_CACHE
   - if $CLEAR_CACHE == true
   - then rm -r ./.gradle/
