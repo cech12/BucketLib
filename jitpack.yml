@@ -1,9 +1,9 @@
 before_install:
-  - ls /../home
-  - echo $HOME ______
-  - ls $HOME
-  - echo $HOME_DIR ___
-  - ls $HOME_DIR
+  - ls /..
+  - echo ______
+  - ls /../build
+  - echo ___
+  - ls /../bin
   - echo clear gradle cache? $CLEAR_CACHE
   - if $CLEAR_CACHE == true
   - then rm -r ./.gradle/
