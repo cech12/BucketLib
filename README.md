@@ -26,7 +26,7 @@ without having trouble implementing all special cases.
 
 ## Adding it to your project:
 
-[![](https://jitpack.io/v/cech12/bucketlib.svg)](https://jitpack.io/#cech12/bucketlib)
+[![](https://jitpack.io/v/cech12/BucketLib.svg)](https://jitpack.io/#cech12/BucketLib)
 
 Add the following to your `build.gradle` file:
 
@@ -36,8 +36,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly fg.deobf("com.github.cech12:bucketlib:${project.bucketlib_version}:api")
-    runtimeOnly fg.deobf("com.github.cech12:bucketlib:${project.bucketlib_version}")
+    compileOnly fg.deobf("com.github.cech12:BucketLib:${project.bucketlib_version}:api")
+    runtimeOnly fg.deobf("com.github.cech12:BucketLib:${project.bucketlib_version}")
 }
 ```
 
