@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.util.FakePlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -18,8 +19,12 @@ import java.util.function.Function;
 
 public class BucketLibTestHelper {
 
-    public static ServerPlayer makeMockCreativePlayer(GameTestHelper helper) {
-        return new ServerPlayer(helper.getLevel().getServer(), helper.getLevel(), new GameProfile(UUID.randomUUID(), "test-mock-creative-player")) {
+    public static ServerPlayer createPlayer(GameTestHelper helper ,boolean isCreative) {
+        return isCreative ? makeMockCreativePlayer(helper) : makeMockSurvivalPlayer(helper);
+    }
+
+    private static ServerPlayer makeMockCreativePlayer(GameTestHelper helper) {
+        return new FakePlayer(helper.getLevel(), new GameProfile(UUID.randomUUID(), "test-mock-creative-player")) {
             public boolean isSpectator() {
                 return false;
             }
@@ -38,8 +43,8 @@ public class BucketLibTestHelper {
         };
     }
 
-    public static ServerPlayer makeMockSurvivalPlayer(GameTestHelper helper) {
-        return new ServerPlayer(helper.getLevel().getServer(), helper.getLevel(), new GameProfile(UUID.randomUUID(), "test-mock-survival-player")) {
+    private static ServerPlayer makeMockSurvivalPlayer(GameTestHelper helper) {
+        return new FakePlayer(helper.getLevel(), new GameProfile(UUID.randomUUID(), "test-mock-survival-player")) {
             public boolean isSpectator() {
                 return false;
             }
@@ -61,7 +66,7 @@ public class BucketLibTestHelper {
 
     public static PlayerInteractionResult useItemStackOnBlock(GameTestHelper helper, ItemStack itemStack, BlockPos pos, boolean isCreative) {
         BlockPos blockpos = helper.absolutePos(pos);
-        Player player = isCreative ? makeMockCreativePlayer(helper) : makeMockSurvivalPlayer(helper);
+        Player player = createPlayer(helper, isCreative);
         player.setItemInHand(InteractionHand.MAIN_HAND, itemStack.copy());
         //centered one block above looking down
         player.absMoveTo(blockpos.getX() + 0.5D, blockpos.getY() + 1.0D, blockpos.getZ() + 0.5D, 0F, 90F);
@@ -73,7 +78,7 @@ public class BucketLibTestHelper {
     }
 
     public static PlayerInteractionResult useItemOnEntity(GameTestHelper helper, ItemStack stack, Entity entity, boolean isCreative) {
-        Player player = isCreative ? makeMockCreativePlayer(helper) : makeMockSurvivalPlayer(helper);
+        Player player = createPlayer(helper, isCreative);
         player.setItemInHand(InteractionHand.MAIN_HAND, stack);
         InteractionResult interactionResult = player.interactOn(entity, InteractionHand.MAIN_HAND);
         return new PlayerInteractionResult(player, interactionResult, player.getItemInHand(InteractionHand.MAIN_HAND));

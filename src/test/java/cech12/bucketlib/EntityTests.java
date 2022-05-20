@@ -6,8 +6,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestGenerator;
 import net.minecraft.gametest.framework.TestFunction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.material.Fluid;
@@ -102,6 +105,38 @@ public class EntityTests {
                         }
                 ));
             }
+        }
+        return testFunctions;
+    }
+
+    @GameTestGenerator
+    public static List<TestFunction> generateDrinkMilkTests() {
+        List<TestFunction> testFunctions = new ArrayList<>();
+        boolean[] creativeStates = { false, true };
+        for (boolean isCreative : creativeStates) {
+            String testName = "test" + ((isCreative) ? "creative" : "survival") + "drinkmilk";
+            testFunctions.add(new TestFunction(
+                    "defaultBatch",
+                    testName,
+                    new ResourceLocation(BucketLibApi.MOD_ID, "entitytests.pit").toString(),
+                    Rotation.NONE,
+                    100,
+                    0,
+                    true,
+                    test -> {
+                        Player player = BucketLibTestHelper.createPlayer(test, isCreative);
+                        player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 2000, 1, false, false, true));
+                        ItemStack bucket = BucketLibUtil.addMilk(new ItemStack(BucketLibTestMod.TEST_BUCKET.get()));
+                        ItemStack result = bucket.finishUsingItem(player.getLevel(), player);
+                        if (BucketLibUtil.containsMilk(result) != isCreative) {
+                            test.fail("The bucket in main hand does " + (isCreative ? "" : "not ") + "contain milk after " + (isCreative ? "creative" : "survival") + " using a milk bucket");
+                        }
+                        if (player.getEffect(MobEffects.BLINDNESS) != null) {
+                            test.fail("The potion effects of the player were not cured after using a milk bucket.");
+                        }
+                        test.succeed();
+                    }
+            ));
         }
         return testFunctions;
     }
