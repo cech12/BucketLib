@@ -32,7 +32,7 @@ public class MilkIngredient extends Ingredient {
         if (itemStack.getItem() == Items.MILK_BUCKET) {
             return true;
         }
-        return BucketLibUtil.containsMilk(itemStack);
+        return BucketLibUtil.containsMilk(itemStack.copy());
     }
 
     @Override

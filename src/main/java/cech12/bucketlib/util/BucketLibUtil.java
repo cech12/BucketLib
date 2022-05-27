@@ -107,13 +107,13 @@ public class BucketLibUtil {
     }
 
     private static boolean containsTagContent(ItemStack itemStack, String tagName) {
-        CompoundTag nbt = itemStack.getOrCreateTag();
-        return nbt.contains(tagName);
+        CompoundTag nbt = itemStack.getTag();
+        return nbt != null && nbt.contains(tagName);
     }
 
     private static String getTagContent(ItemStack itemStack, String tagName) {
-        CompoundTag nbt = itemStack.getOrCreateTag();
-        if (nbt.contains(tagName)) {
+        CompoundTag nbt = itemStack.getTag();
+        if (nbt != null && nbt.contains(tagName)) {
             return nbt.getString(tagName);
         }
         return null;
@@ -129,10 +129,14 @@ public class BucketLibUtil {
 
     private static ItemStack removeTagContent(ItemStack itemStack, String tagName) {
         ItemStack result = itemStack.copy();
-        CompoundTag nbt = result.getOrCreateTag();
-        if (nbt.contains(tagName)) {
+        CompoundTag nbt = result.getTag();
+        if (nbt != null && nbt.contains(tagName)) {
             nbt.remove(tagName);
-            result.setTag(nbt);
+            if (nbt.isEmpty()) {
+                result.setTag(null);
+            } else {
+                result.setTag(nbt);
+            }
         }
         return result;
     }

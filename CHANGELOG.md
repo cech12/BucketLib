@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.18.2-0.5.3.4] - 2022-05-27
+### Fixed
+- fixed adding empty NBT tag to items in crafting grid #13 (thanks to Peca21 for the report)
+
 ## [1.18.2-0.5.3.3] - 2022-05-12
 ### Fixed
 - fixed potion effect curing after drinking milk #12 (thanks to AngleWyrm10 for the report)
