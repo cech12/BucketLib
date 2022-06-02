@@ -1,12 +1,66 @@
 {
   "loader": "bucketlib:universal_bucket",
-  "parent": "forge:item/default",
   "textures": {
     "base": "bucketlib:item/universal_bucket_base",
-    "lowerBase": "bucketlib:item/universal_bucket_lower_base",
     "fluidMask": "forge:item/mask/bucket_fluid",
     "crackedBase": "bucketlib:item/universal_bucket_cracked_base",
-    "crackedLowerBase": "bucketlib:item/universal_bucket_cracked_lower_base",
     "crackedFluidMask": "forge:item/mask/bucket_fluid"
-  }
+  },
+  "elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 16, 0],
+			"faces": {
+				"north": {"uv": [0, 1, 16, 17], "texture": "#base"}
+      }
+    },
+    {
+			"from": [0, 0, 0],
+			"to": [16, 16, 0],
+			"faces": {
+				"north": {"uv": [0, 1, 16, 17], "texture": "#crackedBase"}
+      }
+    },
+    {
+			"from": [0, 0, 0],
+			"to": [16, 16, 0],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#fluidMask"}
+      }
+    },
+    {
+			"from": [0, 0, 0],
+			"to": [16, 16, 0],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#crackedFluidMask"}
+      }
+    }
+  ],
+  "gui_light": "front",
+    "display": {
+        "ground": {
+            "rotation": [ 0, 0, 0 ],
+            "translation": [ 0, 2, 0],
+            "scale":[ 0.5, 0.5, 0.5 ]
+        },
+        "head": {
+            "rotation": [ 0, 180, 0 ],
+            "translation": [ 0, 13, 7],
+            "scale":[ 1, 1, 1]
+        },
+        "thirdperson_righthand": {
+            "rotation": [ 0, 0, 0 ],
+            "translation": [ 0, 3, 1 ],
+            "scale": [ 0.55, 0.55, 0.55 ]
+        },
+        "firstperson_righthand": {
+            "rotation": [ 0, -90, 25 ],
+            "translation": [ 1.13, 3.2, 1.13],
+            "scale": [ 0.68, 0.68, 0.68 ]
+        },
+        "fixed": {
+            "rotation": [ 0, 180, 0 ],
+            "scale": [ 1, 1, 1 ]
+        }
+    }
 }
