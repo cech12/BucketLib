@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [1.18.2-0.5.3.5] - ????-??-??
 ### Removed
+- removed bucket content textures of Aquaculture 2 mod. They are supported out of the box since Aquaculture-1.18.2-2.3.7.
 - removed bucket content textures of The Undergarden mod
 
 ## [1.18.2-0.5.3.4] - 2022-05-27
