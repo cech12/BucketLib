@@ -3,9 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
-## [1.18.2-0.5.3.5] - ????-??-??
+## [1.18.2-0.5.3.5] - 2022-06-30
 ### Fixed
 - fixed crafting bug with empty buckets #17 (thanks to benbenlaw for the report)
+- fixed that fluid handler could drain the fluid out of entity buckets
 
 ### Removed
 - removed bucket content textures of Aquaculture 2 mod. They are supported out of the box since Aquaculture-1.18.2-2.3.7.

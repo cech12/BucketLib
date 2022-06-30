@@ -256,15 +256,15 @@ public class UniversalBucketItem extends Item {
                 }
                 if (BucketLibUtil.containsFluid(itemstack)) {
                     //place fluid interaction
-                    FluidStack fluidStack = FluidUtil.getFluidContained(itemstack).orElse(FluidStack.EMPTY);
-                    FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, relativeBlockPos, itemstack, fluidStack);
+                    FluidStack fluidStack = FluidUtil.getFluidHandler(itemstack).map(fluidHandler -> fluidHandler.getFluidInTank(0)).orElse(FluidStack.EMPTY);
+                    //remove entity to be able to use tryPlaceFluid method
+                    FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, relativeBlockPos, BucketLibUtil.removeEntityType(itemstack, false), fluidStack);
                     if (fluidActionResult.isSuccess()) {
-                        ItemStack emptyBucket = fluidActionResult.getResult();
-                        if (BucketLibUtil.containsEntityType(emptyBucket)) {
+                        if (BucketLibUtil.containsEntityType(itemstack)) {
                             //place entity if exists
-                            emptyBucket = spawnEntityFromBucket(player, level, emptyBucket, relativeBlockPos, false);
+                            spawnEntityFromBucket(player, level, itemstack, relativeBlockPos, false);
                         }
-                        return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, emptyBucket, interactionHand), level.isClientSide());
+                        return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, fluidActionResult.getResult(), interactionHand), level.isClientSide());
                     }
                 } else if (BucketLibUtil.containsEntityType(itemstack)) {
                     //place entity interaction

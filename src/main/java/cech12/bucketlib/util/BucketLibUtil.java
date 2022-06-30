@@ -97,7 +97,7 @@ public class BucketLibUtil {
             return false;
         }
         if (itemStack.getItem() instanceof UniversalBucketItem bucket) {
-            Fluid fluid = FluidUtil.getFluidContained(itemStack).orElse(FluidStack.EMPTY).getFluid();
+            Fluid fluid = getFluid(itemStack);
             return fluid != Fluids.EMPTY
                     && Objects.requireNonNull(ForgeRegistries.FLUIDS.tags()).getTag(BucketLibTags.Fluids.INFINITY_ENCHANTABLE).contains(fluid)
                     && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, itemStack) > 0
@@ -191,12 +191,11 @@ public class BucketLibUtil {
     }
 
     public static boolean containsFluid(ItemStack itemStack) {
-        Fluid fluid = FluidUtil.getFluidContained(itemStack).orElse(FluidStack.EMPTY).getFluid();
-        return fluid != Fluids.EMPTY;
+        return getFluid(itemStack) != Fluids.EMPTY;
     }
 
     public static Fluid getFluid(ItemStack itemStack) {
-        return FluidUtil.getFluidContained(itemStack).orElse(FluidStack.EMPTY).getFluid();
+        return FluidUtil.getFluidHandler(itemStack).map(fluidHandler -> fluidHandler.getFluidInTank(0)).orElse(FluidStack.EMPTY).getFluid();
     }
 
     public static ItemStack addFluid(ItemStack itemStack, Fluid fluid) {

@@ -30,6 +30,10 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
     @Nonnull
     @Override
     public FluidStack drain(int maxDrain, FluidAction action) {
+        //only drain the bucket, if there is no entity in the bucket
+        if (BucketLibUtil.containsEntityType(getContainer())) {
+            return FluidStack.EMPTY;
+        }
         //only drain the bucket, if there is enough space to drain the bucket completely
         if (maxDrain < capacity) {
             return FluidStack.EMPTY;
