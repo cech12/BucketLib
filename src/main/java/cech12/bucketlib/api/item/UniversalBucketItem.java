@@ -446,6 +446,9 @@ public class UniversalBucketItem extends Item {
 
     @Override
     public ItemStack getContainerItem(ItemStack itemStack) {
+        if (!hasContainerItem(itemStack)) {
+            return ItemStack.EMPTY;
+        }
         if (BucketLibUtil.isAffectedByInfinityEnchantment(itemStack)) {
             return itemStack.copy();
         }
