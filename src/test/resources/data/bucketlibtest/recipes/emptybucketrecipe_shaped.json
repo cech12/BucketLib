@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BB"
+  ],
+  "key": {
+    "B": {
+      "item": "bucketlibtest:test_bucket"
+    }
+  },
+  "result": {
+    "item": "minecraft:gravel"
+  }
+}

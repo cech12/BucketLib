@@ -33,6 +33,8 @@ public class BucketLibTestMod {
 
     public static final RegistryObject<Item> TEST_BUCKET = ITEMS.register("test_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties()));
     public static final RegistryObject<Item> TEMPERATURE_BUCKET = ITEMS.register("temperature_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().maxTemperature(1000)));
+    public static final RegistryObject<Item> WATER_ALLOWING_BUCKET = ITEMS.register("water_allowing_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().allowedFluids(Collections.singletonList(Fluids.WATER))));
+    public static final RegistryObject<Item> WATER_ALLOWING_TAG_BUCKET = ITEMS.register("water_allowing_tag_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().allowedFluids(WATER_TAG)));
     public static final RegistryObject<Item> WATER_DENYING_BUCKET = ITEMS.register("water_denying_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().deniedFluids(Collections.singletonList(Fluids.WATER))));
     public static final RegistryObject<Item> WATER_DENYING_TAG_BUCKET = ITEMS.register("water_denying_tag_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().deniedFluids(WATER_TAG)));
     public static final RegistryObject<Item> CRACKING_BUCKET = ITEMS.register("cracking_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().upperCrackingTemperature(1000)));
