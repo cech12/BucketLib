@@ -440,7 +440,7 @@ public class UniversalBucketItem extends Item {
     @Override
     public boolean hasContainerItem(ItemStack stack) {
         //for using a filled bucket as fuel or in crafting recipes, an empty bucket should remain
-        return !this.isCracked(stack);
+        return !BucketLibUtil.isEmpty(stack) && !this.isCracked(stack);
     }
 
 
