@@ -29,7 +29,7 @@ public class EntityTests {
     private static final BlockPos ENTITY_POSITION = new BlockPos(1, 2, 1);
 
     private static final EntityType<?>[] MILKABLE_ENTITIES = {EntityType.COW, EntityType.GOAT};
-    private static final EntityType<?>[] BUCKETABLE_ENTITIES = {EntityType.AXOLOTL, EntityType.COD, EntityType.PUFFERFISH, EntityType.SALMON, EntityType.TROPICAL_FISH};
+    private static final EntityType<?>[] BUCKETABLE_ENTITIES = {EntityType.AXOLOTL, EntityType.COD, EntityType.PUFFERFISH, EntityType.SALMON, EntityType.TADPOLE, EntityType.TROPICAL_FISH};
 
     @GameTestGenerator
     public static List<TestFunction> generateMilkingTests() {
