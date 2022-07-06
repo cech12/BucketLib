@@ -339,7 +339,7 @@ public class UniversalBucketItem extends Item {
             ItemStack handItemStack = ItemUtils.createFilledResult(itemStack, player, filledItemStack, false);
             player.setItemInHand(interactionHand, handItemStack);
             if (!level.isClientSide) {
-                CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, filledItemStack);
+                CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, new ItemStack(entity.getBucketItemStack().getItem()));
             }
             entity.discard();
             return InteractionResult.sidedSuccess(level.isClientSide);
