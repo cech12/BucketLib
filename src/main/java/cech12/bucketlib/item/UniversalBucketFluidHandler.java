@@ -5,8 +5,8 @@ import cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStack;
 
@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
 
     public UniversalBucketFluidHandler(@Nonnull ItemStack container) {
-        super(container, FluidAttributes.BUCKET_VOLUME);
+        super(container, FluidType.BUCKET_VOLUME);
     }
 
     @Override

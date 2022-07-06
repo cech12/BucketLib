@@ -15,8 +15,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
-import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -67,7 +67,7 @@ public class FluidIngredient extends Ingredient {
                 .map(fluidHandler -> fluidHandler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE));
         if (drainedFluidOptional.isPresent() && !drainedFluidOptional.get().isEmpty()) {
             FluidStack drainedFluid = drainedFluidOptional.get();
-            return this.isFluidCorrect(drainedFluid.getFluid()) && drainedFluid.getAmount() == FluidAttributes.BUCKET_VOLUME;
+            return this.isFluidCorrect(drainedFluid.getFluid()) && drainedFluid.getAmount() == FluidType.BUCKET_VOLUME;
         }
         return false;
     }
@@ -92,10 +92,10 @@ public class FluidIngredient extends Ingredient {
                         continue;
                     }
                     stacks.add(new ItemStack(fluid.getBucket()));
-                    FluidStack fluidStack = new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME);
+                    FluidStack fluidStack = new FluidStack(fluid, FluidType.BUCKET_VOLUME);
                     FluidUtil.getFluidHandler(stack).ifPresent(fluidHandler -> {
                         int filledAmount = fluidHandler.fill(fluidStack, IFluidHandler.FluidAction.EXECUTE);
-                        if (filledAmount == FluidAttributes.BUCKET_VOLUME) {
+                        if (filledAmount == FluidType.BUCKET_VOLUME) {
                             stacks.add(fluidHandler.getContainer());
                         }
                     });
@@ -132,7 +132,7 @@ public class FluidIngredient extends Ingredient {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("type", Serializer.NAME.toString());
         if (this.fluid != null) {
-            jsonObject.addProperty("fluid", Objects.requireNonNull(this.fluid.getRegistryName()).toString());
+            jsonObject.addProperty("fluid", Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(this.fluid)).toString());
         }
         if (this.tag != null) {
             jsonObject.addProperty("tag", this.tag.location().toString());
@@ -179,7 +179,7 @@ public class FluidIngredient extends Ingredient {
 
         @Override
         public void write(@Nonnull FriendlyByteBuf buffer, @Nonnull FluidIngredient ingredient) {
-            buffer.writeUtf(ingredient.fluid != null ? Objects.requireNonNull(ingredient.fluid.getRegistryName()).toString() : "");
+            buffer.writeUtf(ingredient.fluid != null ? Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(ingredient.fluid)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }
     }

@@ -12,6 +12,7 @@ import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod.EventBusSubscriber(modid= BucketLibApi.MOD_ID, bus= Mod.EventBusSubscriber.Bus.MOD, value= Dist.CLIENT)
 public class ClientEvents {
@@ -30,11 +31,11 @@ public class ClientEvents {
             event.addSprite(UniversalBucketModel.getContentTexture(BucketLibUtil.MILK_LOCATION));
             //register block buckets
             for (RegistryUtil.BucketBlock bucketBlock : RegistryUtil.getBucketBlocks()) {
-                event.addSprite(UniversalBucketModel.getContentTexture(bucketBlock.block().getRegistryName()));
+                event.addSprite(UniversalBucketModel.getContentTexture(ForgeRegistries.BLOCKS.getKey(bucketBlock.block())));
             }
             //register textures for mob buckets
             for (RegistryUtil.BucketEntity bucketEntity : RegistryUtil.getBucketEntities()) {
-                event.addSprite(UniversalBucketModel.getContentTexture(bucketEntity.entityType().getRegistryName()));
+                event.addSprite(UniversalBucketModel.getContentTexture(ForgeRegistries.ENTITIES.getKey(bucketEntity.entityType())));
             }
         }
     }

@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,7 @@ public class EntityTests {
         for (EntityType<?> entityType : MILKABLE_ENTITIES) {
             for (int stackSize : stackSizes) {
                 for (boolean isCreative : creativeStates) {
-                    String entityName = Objects.requireNonNull(entityType.getRegistryName()).getPath();
+                    String entityName = Objects.requireNonNull(ForgeRegistries.ENTITIES.getKey(entityType)).getPath();
                     String testName = "test" + ((isCreative) ? "creative" : "survival") + "milking" + entityName + "withstack" + stackSize;
                     testFunctions.add(new TestFunction(
                             "defaultBatch",
@@ -84,7 +85,7 @@ public class EntityTests {
         List<TestFunction> testFunctions = new ArrayList<>();
         for (EntityType<?> entityType : MILKABLE_ENTITIES) {
             for (boolean isCreative : new boolean[]{false, true}) {
-                String entityName = Objects.requireNonNull(entityType.getRegistryName()).getPath();
+                String entityName = Objects.requireNonNull(ForgeRegistries.ENTITIES.getKey(entityType)).getPath();
                 String testName = "test" + ((isCreative) ? "creative" : "survival") + "milking" + entityName + "withantimilkbucket";
                 testFunctions.add(new TestFunction(
                         "defaultBatch",
@@ -148,8 +149,8 @@ public class EntityTests {
         for (EntityType<?> entityType : BUCKETABLE_ENTITIES) {
             for (Fluid fluid : fluids) {
                 for (boolean isCreative : new boolean[]{false, true}) {
-                    String entityName = Objects.requireNonNull(entityType.getRegistryName()).getPath();
-                    String fluidName = fluid != Fluids.EMPTY ? Objects.requireNonNull(fluid.getRegistryName()).getPath() : "empty";
+                    String entityName = Objects.requireNonNull(ForgeRegistries.ENTITIES.getKey(entityType)).getPath();
+                    String fluidName = fluid != Fluids.EMPTY ? Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(fluid)).getPath() : "empty";
                     String testName = "test" + ((isCreative) ? "creative" : "survival") + "pickup" + entityName + "with" + fluidName + "bucket";
                     testFunctions.add(new TestFunction(
                             "defaultBatch",
@@ -195,7 +196,7 @@ public class EntityTests {
         List<TestFunction> testFunctions = new ArrayList<>();
         for (EntityType<?> entityType : BUCKETABLE_ENTITIES) {
             for (boolean isCreative : new boolean[]{false, true}) {
-                String entityName = Objects.requireNonNull(entityType.getRegistryName()).getPath();
+                String entityName = Objects.requireNonNull(ForgeRegistries.ENTITIES.getKey(entityType)).getPath();
                 String testName = "test" + ((isCreative) ? "creative" : "survival") + "pickup" + entityName + "withnoentitybucket";
                 testFunctions.add(new TestFunction(
                         "defaultBatch",
@@ -226,7 +227,7 @@ public class EntityTests {
         List<TestFunction> testFunctions = new ArrayList<>();
         for (EntityType<?> entityType : BUCKETABLE_ENTITIES) {
             for (boolean isCreative : new boolean[]{false, true}) {
-                String entityName = Objects.requireNonNull(entityType.getRegistryName()).getPath();
+                String entityName = Objects.requireNonNull(ForgeRegistries.ENTITIES.getKey(entityType)).getPath();
                 String testName = "test" + ((isCreative) ? "creative" : "survival") + "pickup" + entityName + "withantisalmonbucket";
                 testFunctions.add(new TestFunction(
                         "defaultBatch",
@@ -257,7 +258,7 @@ public class EntityTests {
         List<TestFunction> testFunctions = new ArrayList<>();
         for (EntityType<?> entityType : BUCKETABLE_ENTITIES) {
             for (boolean isCreative : new boolean[]{false, true}) {
-                String entityName = Objects.requireNonNull(entityType.getRegistryName()).getPath();
+                String entityName = Objects.requireNonNull(ForgeRegistries.ENTITIES.getKey(entityType)).getPath();
                 String testName = "test" + ((isCreative) ? "creative" : "survival") + "pickup" + entityName + "withonlyoufferbucket";
                 testFunctions.add(new TestFunction(
                         "defaultBatch",

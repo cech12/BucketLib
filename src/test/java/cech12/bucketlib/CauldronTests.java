@@ -14,11 +14,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
+@SuppressWarnings("unused")
 @GameTestHolder(BucketLibApi.MOD_ID)
 public class CauldronTests {
 
@@ -45,7 +48,7 @@ public class CauldronTests {
         for (Item bucketItem : allBuckets) {
             for (int stackSize : stackSizes) {
                 for (boolean isCreative : creativeStates) {
-                    String testName = "test" + ((isCreative) ? "creative" : "survival") + "empty" + bucketItem.getRegistryName().getPath() + "withstack" + stackSize + "onfilledcauldron";
+                    String testName = "test" + ((isCreative) ? "creative" : "survival") + "empty" + Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(bucketItem)).getPath() + "withstack" + stackSize + "onfilledcauldron";
                     testFunctions.add(new TestFunction(
                             "defaultBatch",
                             testName,
@@ -59,7 +62,7 @@ public class CauldronTests {
                                 boolean isFailBucket = failBuckets.contains(bucketItem);
                                 PlayerInteractionResult result = BucketLibTestHelper.useItemStackOnBlock(test, bucket, CAULDRON_POSITION, isCreative);
                                 if ((test.getBlockState(CAULDRON_POSITION).getBlock() == Blocks.CAULDRON) == isFailBucket) {
-                                    test.fail("Filled water cauldron was " + (isFailBucket ? "not " : "") + "emptied after using an empty " + bucketItem.getRegistryName().getPath());
+                                    test.fail("Filled water cauldron was " + (isFailBucket ? "not " : "") + "emptied after using an empty " + Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(bucketItem)).getPath());
                                 }
                                 if ((BucketLibUtil.getFluid(result.getObject()) == Fluids.WATER) == (isFailBucket || isCreative || stackSize > 1)) {
                                     test.fail("The bucket in main hand does " + (isCreative ? "" : "not ") + "contain water after " + (isCreative ? "creative" : "survival") + " interacting with a filled water cauldron with a stack size of " + stackSize);

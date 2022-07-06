@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -19,22 +20,21 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class BucketLibUtil {
 
     public static final ResourceLocation MILK_LOCATION = new ResourceLocation("milk");
 
-    private static final Random RANDOM = new Random();
+    private static final RandomSource RANDOM = RandomSource.create();
 
     private BucketLibUtil() {}
 
@@ -69,7 +69,7 @@ public class BucketLibUtil {
      * @param random Random object
      * @param player ServerPlayer object or null if no player is involved
      */
-    public static void damageByOne(ItemStack stack, Random random, ServerPlayer player) {
+    public static void damageByOne(ItemStack stack, RandomSource random, ServerPlayer player) {
         if (!stack.isEmpty() && stack.isDamageableItem()
                 && !BucketLibUtil.isAffectedByInfinityEnchantment(stack)
                 && stack.hurt(1, random, player)) {
@@ -80,7 +80,7 @@ public class BucketLibUtil {
 
     /**
      * Adds damage to the bucket if damaging is enabled.
-     * If there is a player context, please use {@link #damageByOne(ItemStack, Random, ServerPlayer)}
+     * If there is a player context, please use {@link #damageByOne(ItemStack, RandomSource, ServerPlayer)}
      * @param stack item stack which gets damage
      */
     public static void damageByOne(ItemStack stack) {
@@ -100,7 +100,7 @@ public class BucketLibUtil {
             Fluid fluid = getFluid(itemStack);
             return fluid != Fluids.EMPTY
                     && Objects.requireNonNull(ForgeRegistries.FLUIDS.tags()).getTag(BucketLibTags.Fluids.INFINITY_ENCHANTABLE).contains(fluid)
-                    && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, itemStack) > 0
+                    && EnchantmentHelper.getTagEnchantmentLevel(Enchantments.INFINITY_ARROWS, itemStack) > 0
                     && bucket.canHoldFluid(fluid);
         }
         return false;
@@ -201,7 +201,7 @@ public class BucketLibUtil {
     public static ItemStack addFluid(ItemStack itemStack, Fluid fluid) {
         AtomicReference<ItemStack> resultItemStack = new AtomicReference<>(itemStack.copy());
         FluidUtil.getFluidHandler(resultItemStack.get()).ifPresent(fluidHandler -> {
-            fluidHandler.fill(new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
+            fluidHandler.fill(new FluidStack(fluid, FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
             resultItemStack.set(fluidHandler.getContainer());
         });
         return resultItemStack.get();
@@ -213,7 +213,7 @@ public class BucketLibUtil {
             resultItemStack.set(removeContent(resultItemStack.get(), !containsFluid(resultItemStack.get())));
         }
         FluidUtil.getFluidHandler(resultItemStack.get()).ifPresent(fluidHandler -> {
-            fluidHandler.drain(new FluidStack(fluidHandler.getFluidInTank(0).getFluid(), FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
+            fluidHandler.drain(new FluidStack(fluidHandler.getFluidInTank(0).getFluid(), FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
             //damaging is done by fluid handler
             resultItemStack.set(fluidHandler.getContainer());
         });
@@ -233,7 +233,7 @@ public class BucketLibUtil {
     }
 
     public static ItemStack addEntityType(ItemStack itemStack, EntityType<?> entityType) {
-        return setTagContent(itemStack, "EntityType", entityType.getRegistryName().toString());
+        return setTagContent(itemStack, "EntityType", Objects.requireNonNull(ForgeRegistries.ENTITIES.getKey(entityType)).toString());
     }
 
     public static ItemStack removeEntityType(ItemStack itemStack, boolean damage) {
@@ -257,8 +257,9 @@ public class BucketLibUtil {
     }
 
     public static ItemStack addBlock(ItemStack itemStack, Block block) {
-        if (block.getRegistryName() != null) {
-            return addContent(itemStack, block.getRegistryName());
+        ResourceLocation blockLocation = ForgeRegistries.BLOCKS.getKey(block);
+        if (blockLocation != null) {
+            return addContent(itemStack, blockLocation);
         }
         return itemStack.copy();
     }

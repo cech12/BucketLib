@@ -8,7 +8,8 @@ import cech12.bucketlib.api.item.UniversalBucketItem;
 import cech12.bucketlib.util.BucketLibUtil;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.constants.VanillaRecipeCategoryUid;
+import mezz.jei.api.constants.RecipeTypes;
+import mezz.jei.api.recipe.vanilla.IJeiAnvilRecipe;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
@@ -53,7 +54,7 @@ public class ModJEIPlugin implements IModPlugin {
         if (ServerConfig.INFINITY_ENCHANTMENT_ENABLED.get()) {
             IVanillaRecipeFactory factory = registration.getVanillaRecipeFactory();
             EnchantmentInstance data = new EnchantmentInstance(Enchantments.INFINITY_ARROWS, Enchantments.INFINITY_ARROWS.getMaxLevel());
-            List<Object> recipes = new ArrayList<>();
+            List<IJeiAnvilRecipe> recipes = new ArrayList<>();
             ITag<Fluid> infinityTag = Objects.requireNonNull(ForgeRegistries.FLUIDS.tags()).getTag(BucketLibTags.Fluids.INFINITY_ENCHANTABLE);
             for (UniversalBucketItem bucketItem : BucketLib.getRegisteredBuckets()) {
                 for (Fluid fluid : ForgeRegistries.FLUIDS) {
@@ -68,7 +69,7 @@ public class ModJEIPlugin implements IModPlugin {
                 }
             }
             if (!recipes.isEmpty()) {
-                registration.addRecipes(recipes, VanillaRecipeCategoryUid.ANVIL);
+                registration.addRecipes(RecipeTypes.ANVIL, recipes);
             }
         }
     }

@@ -13,8 +13,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
@@ -83,30 +81,30 @@ public class UniversalBucketItem extends Item {
         if (BucketLibUtil.containsEntityType(stack)) {
             descriptionId += ".entity";
             EntityType<?> entityType = BucketLibUtil.getEntityType(stack);
-            argument = (entityType != null) ? entityType.getDescription() : new TextComponent("?");
+            argument = (entityType != null) ? entityType.getDescription() : Component.literal("?");
         } else if (BucketLibUtil.containsFluid(stack)) {
             descriptionId += ".filled";
             Fluid fluid = BucketLibUtil.getFluid(stack);
-            argument = new TranslatableComponent(fluid.getAttributes().getTranslationKey());
+            argument = fluid.getFluidType().getDescription();
         } else if (BucketLibUtil.containsBlock(stack)) {
             descriptionId += ".filled";
             Block block = BucketLibUtil.getBlock(stack);
-            argument = (block != null) ? block.getName() : new TextComponent("?");
+            argument = (block != null) ? block.getName() : Component.literal("?");
         } else if (BucketLibUtil.containsMilk(stack)) {
             descriptionId += ".filled";
-            argument = new TranslatableComponent("fluid.minecraft.milk");
+            argument = Component.translatable("fluid.minecraft.milk");
         } else {
             //is empty
-            return new TranslatableComponent(descriptionId);
+            return Component.translatable(descriptionId);
         }
-        return new TranslatableComponent(descriptionId, argument);
+        return Component.translatable(descriptionId, argument);
     }
 
     public boolean isCracked(ItemStack stack) {
         FluidStack fluidStack = FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY);
         if (!fluidStack.isEmpty()) {
             Fluid fluid = fluidStack.getFluid();
-            int fluidTemperature = fluid.getAttributes().getTemperature();
+            int fluidTemperature = fluid.getFluidType().getTemperature();
             Integer upperCrackingTemperature = getUpperBreakTemperature();
             Integer lowerCrackingTemperature = getLowerBreakTemperature();
             return isCrackingFluid(fluid)
@@ -131,7 +129,7 @@ public class UniversalBucketItem extends Item {
         if (this.properties.deniedFluidsTag != null || this.properties.deniedFluids != null) {
             return !isDeniedFluid(fluid);
         }
-        int fluidTemperature = fluid.getAttributes().getTemperature();
+        int fluidTemperature = fluid.getFluidType().getTemperature();
         Integer maxTemperature = getMaxTemperature();
         Integer minTemperature = getMinTemperature();
         return (maxTemperature == null || fluidTemperature <= maxTemperature)
@@ -203,14 +201,14 @@ public class UniversalBucketItem extends Item {
     private boolean hasBurningContent(@Nonnull ItemStack itemStack) {
         Integer burningTemperature = this.getBurningTemperature();
         Fluid fluid = BucketLibUtil.getFluid(itemStack);
-        return fluid != Fluids.EMPTY && (burningTemperature != null && fluid.getAttributes().getTemperature() >= burningTemperature || this.isBurningFluid(fluid))
+        return fluid != Fluids.EMPTY && (burningTemperature != null && fluid.getFluidType().getTemperature() >= burningTemperature || this.isBurningFluid(fluid))
                 || this.isBurningBlock(BucketLibUtil.getBlock(itemStack));
     }
 
     private boolean hasFreezingContent(@Nonnull ItemStack itemStack) {
         Integer freezingTemperature = this.getFreezingTemperature();
         Fluid fluid = BucketLibUtil.getFluid(itemStack);
-        return fluid != Fluids.EMPTY && (freezingTemperature != null && fluid.getAttributes().getTemperature() <= freezingTemperature || this.isFreezingFluid(fluid))
+        return fluid != Fluids.EMPTY && (freezingTemperature != null && fluid.getFluidType().getTemperature() <= freezingTemperature || this.isFreezingFluid(fluid))
                 || this.isFreezingBlock(BucketLibUtil.getBlock(itemStack));
     }
 
@@ -387,7 +385,7 @@ public class UniversalBucketItem extends Item {
      */
     @Override
     public void fillItemCategory(@Nonnull CreativeModeTab group, @Nonnull NonNullList<ItemStack> items) {
-        if (this.allowdedIn(group)) {
+        if (this.allowedIn(group)) {
             ItemStack emptyBucket = new ItemStack(this);
             //add empty bucket
             items.add(emptyBucket);
@@ -460,7 +458,7 @@ public class UniversalBucketItem extends Item {
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
         if (enchantment == Enchantments.INFINITY_ARROWS
                 && ServerConfig.INFINITY_ENCHANTMENT_ENABLED.get()
-                && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, stack) <= 0
+                && EnchantmentHelper.getTagEnchantmentLevel(Enchantments.INFINITY_ARROWS, stack) <= 0
                 && FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY).getFluid().defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {
             return true;
         }

@@ -32,6 +32,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.RenderProperties;
 import net.minecraftforge.client.model.CompositeModelState;
 import net.minecraftforge.client.model.ForgeModelBakery;
 import net.minecraftforge.client.model.IModelConfiguration;
@@ -42,6 +43,7 @@ import net.minecraftforge.client.model.ItemTextureQuadConverter;
 import net.minecraftforge.client.model.PerspectiveMapWrapper;
 import net.minecraftforge.client.model.SimpleModelState;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -139,7 +141,7 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
 
         ModelState transformsFromModel = owner.getCombinedTransform();
 
-        TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? spriteGetter.apply(ForgeHooksClient.getBlockMaterial(fluid.getAttributes().getStillTexture())) : null;
+        TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? spriteGetter.apply(ForgeHooksClient.getBlockMaterial(RenderProperties.get(fluid).getStillTexture())) : null;
 
         ImmutableMap<ItemTransforms.TransformType, Transformation> transformMap =
                 PerspectiveMapWrapper.getTransforms(new CompositeModelState(transformsFromModel, modelTransform));
@@ -149,7 +151,7 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
         if (particleSprite == null) particleSprite = fluidSprite;
 
         // if the fluid is lighter than air, will manipulate the initial state to be rotated 180deg to turn it upside down
-        if (fluid != Fluids.EMPTY && fluid.getAttributes().isLighterThanAir()) {
+        if (fluid != Fluids.EMPTY && fluid.getFluidType().isLighterThanAir()) {
             modelTransform = new SimpleModelState(
                     modelTransform.getRotation().blockCornerToCenter().compose(
                             new Transformation(null, new Quaternion(0, 0, 1, 0), null, null)).blockCenterToCorner());
@@ -171,8 +173,8 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
             TextureAtlasSprite templateSprite = spriteGetter.apply(fluidMaskLocation);
             if (templateSprite != null) {
                 // build liquid layer (inside)
-                int luminosity = this.fluid.getAttributes().getLuminosity();
-                int color = this.fluid.getAttributes().getColor();
+                int luminosity = this.fluid.getFluidType().getLightLevel();
+                int color = RenderProperties.get(this.fluid).getColorTint();
                 builder.addQuads(ItemLayerModel.getLayerRenderType(true), ItemTextureQuadConverter.convertTexture(transform, templateSprite, fluidSprite, NORTH_Z_FLUID, Direction.NORTH, color, 1, luminosity));
                 builder.addQuads(ItemLayerModel.getLayerRenderType(true), ItemTextureQuadConverter.convertTexture(transform, templateSprite, fluidSprite, SOUTH_Z_FLUID, Direction.SOUTH, color, 1, luminosity));
             }
@@ -248,7 +250,7 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
                 ResourceLocation content = null;
                 EntityType<?> entityType = BucketLibUtil.getEntityType(stack);
                 if (entityType != null) {
-                    content = entityType.getRegistryName();
+                    content = ForgeRegistries.ENTITIES.getKey(entityType);
                 }
                 if (content == null) {
                     content = BucketLibUtil.getContent(stack);
@@ -256,7 +258,7 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
                 Fluid fluid = null;
                 if (content == null) {
                     fluid = BucketLibUtil.getFluid(stack);
-                    content = fluid.getRegistryName();
+                    content = ForgeRegistries.FLUIDS.getKey(fluid);
                 }
                 //reset cache if temperature config changed
                 boolean isCracked = bucket.isCracked(stack);

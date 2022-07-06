@@ -1,6 +1,5 @@
 package cech12.bucketlib.item.crafting;
 
-import cech12.bucketlib.api.BucketLibApi;
 import cech12.bucketlib.api.item.UniversalBucketItem;
 import cech12.bucketlib.util.ColorUtil;
 import com.google.common.collect.Lists;
@@ -21,8 +20,6 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class BucketDyeingRecipe extends CustomRecipe {
-
-    public static final SimpleRecipeSerializer<BucketDyeingRecipe> SERIALIZER = new Serializer();
 
     public BucketDyeingRecipe(ResourceLocation id) {
         super(id);
@@ -91,13 +88,15 @@ public class BucketDyeingRecipe extends CustomRecipe {
 
     @Nonnull
     public RecipeSerializer<?> getSerializer() {
-        return SERIALIZER;
+        return Serializer.INSTANCE;
     }
 
-    private static class Serializer extends SimpleRecipeSerializer<BucketDyeingRecipe> {
+    public static final class Serializer extends SimpleRecipeSerializer<BucketDyeingRecipe> {
+
+        public static final Serializer INSTANCE = new Serializer();
+
         public Serializer() {
             super(BucketDyeingRecipe::new);
-            this.setRegistryName(BucketLibApi.MOD_ID, "bucket_dyeing");
         }
     }
 

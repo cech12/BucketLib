@@ -16,7 +16,6 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -27,7 +26,9 @@ import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,6 +38,9 @@ import java.util.List;
 
 @Mod(BucketLibApi.MOD_ID)
 public class BucketLib {
+
+    public static DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, BucketLibApi.MOD_ID);
+    public static RegistryObject<RecipeSerializer<?>> BUCKET_DYEING_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("bucket_dyeing", () -> BucketDyeingRecipe.Serializer.INSTANCE);
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -50,7 +54,12 @@ public class BucketLib {
         final IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
         eventBus.addListener(this::commonSetup);
         eventBus.addListener(this::processIMC);
-        eventBus.addGenericListener(RecipeSerializer.class, this::registerRecipeSerializers);
+
+        //dye recipe serializer
+        RECIPE_SERIALIZERS.register(eventBus);
+        //ingredient serializer
+        CraftingHelper.register(FluidIngredient.Serializer.NAME, FluidIngredient.Serializer.INSTANCE);
+        CraftingHelper.register(MilkIngredient.Serializer.NAME, MilkIngredient.Serializer.INSTANCE);
     }
 
     public static List<UniversalBucketItem> getRegisteredBuckets() {
@@ -97,14 +106,6 @@ public class BucketLib {
         if (bucket.isDyeable()) {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> Minecraft.getInstance().getItemColors().register((stack, color) -> (color > 0) ? -1 : ColorUtil.getColor(stack, bucket.getDefaultColor()), bucket));
         }
-    }
-
-    private void registerRecipeSerializers(RegistryEvent.Register<RecipeSerializer<?>> event) {
-        //dye recipe serializer
-        event.getRegistry().register(BucketDyeingRecipe.SERIALIZER);
-        //ingredient serializer
-        CraftingHelper.register(FluidIngredient.Serializer.NAME, FluidIngredient.Serializer.INSTANCE);
-        CraftingHelper.register(MilkIngredient.Serializer.NAME, MilkIngredient.Serializer.INSTANCE);
     }
 
 }
