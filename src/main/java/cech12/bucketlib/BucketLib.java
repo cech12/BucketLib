@@ -15,8 +15,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -103,9 +105,17 @@ public class BucketLib {
         //register dispense behaviour
         DispenserBlock.registerBehavior(bucket, UniversalBucketDispenseBehaviour.getInstance());
         //register color
-        if (bucket.isDyeable()) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> Minecraft.getInstance().getItemColors().register((stack, color) -> (color > 0) ? -1 : ColorUtil.getColor(stack, bucket.getDefaultColor()), bucket));
-        }
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> Minecraft.getInstance().getItemColors().register((stack, layer) -> {
+            if (layer == 0 && bucket.isDyeable()) {
+                return ColorUtil.getColor(stack, bucket.getDefaultColor());
+            }
+            if (layer == 1) {
+                return FluidUtil.getFluidContained(stack)
+                        .map(fluidStack -> IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack))
+                        .orElse(-1);
+            }
+            return -1;
+        }, bucket));
     }
 
 }

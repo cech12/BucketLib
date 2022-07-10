@@ -4,12 +4,10 @@ import cech12.bucketlib.api.BucketLibApi;
 import cech12.bucketlib.client.model.UniversalBucketModel;
 import cech12.bucketlib.util.BucketLibUtil;
 import cech12.bucketlib.util.RegistryUtil;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -20,8 +18,8 @@ public class ClientEvents {
     private ClientEvents() {}
 
     @SubscribeEvent
-    public static void clientSetup(ModelRegistryEvent event) {
-        ModelLoaderRegistry.registerLoader(new ResourceLocation(BucketLibApi.MOD_ID, "universal_bucket"), UniversalBucketModel.Loader.INSTANCE);
+    public static void clientSetup(ModelEvent.RegisterGeometryLoaders event) {
+        event.register("universal_bucket", UniversalBucketModel.Loader.INSTANCE);
     }
 
     @SubscribeEvent
