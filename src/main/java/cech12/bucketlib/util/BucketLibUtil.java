@@ -227,13 +227,13 @@ public class BucketLibUtil {
     public static EntityType<?> getEntityType(ItemStack itemStack) {
         String content = getTagContent(itemStack, "EntityType");
         if (content != null) {
-            return ForgeRegistries.ENTITIES.getValue(new ResourceLocation(content));
+            return ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(content));
         }
         return null;
     }
 
     public static ItemStack addEntityType(ItemStack itemStack, EntityType<?> entityType) {
-        return setTagContent(itemStack, "EntityType", Objects.requireNonNull(ForgeRegistries.ENTITIES.getKey(entityType)).toString());
+        return setTagContent(itemStack, "EntityType", Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getKey(entityType)).toString());
     }
 
     public static ItemStack removeEntityType(ItemStack itemStack, boolean damage) {

@@ -33,7 +33,7 @@ public class ClientEvents {
             }
             //register textures for mob buckets
             for (RegistryUtil.BucketEntity bucketEntity : RegistryUtil.getBucketEntities()) {
-                event.addSprite(UniversalBucketModel.getContentTexture(ForgeRegistries.ENTITIES.getKey(bucketEntity.entityType())));
+                event.addSprite(UniversalBucketModel.getContentTexture(ForgeRegistries.ENTITY_TYPES.getKey(bucketEntity.entityType())));
             }
         }
     }

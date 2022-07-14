@@ -246,7 +246,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
                 ResourceLocation content = null;
                 EntityType<?> entityType = BucketLibUtil.getEntityType(stack);
                 if (entityType != null) {
-                    content = ForgeRegistries.ENTITIES.getKey(entityType);
+                    content = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
                 }
                 if (content == null) {
                     content = BucketLibUtil.getContent(stack);

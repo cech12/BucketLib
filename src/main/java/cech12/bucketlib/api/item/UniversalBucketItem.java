@@ -163,7 +163,7 @@ public class UniversalBucketItem extends Item {
     }
 
     @Override
-    public int getItemStackLimit(ItemStack stack) {
+    public int getMaxStackSize(ItemStack stack) {
         return BucketLibUtil.isEmpty(stack) ? this.properties.maxStackSize : 1;
     }
 
@@ -436,15 +436,14 @@ public class UniversalBucketItem extends Item {
     }
 
     @Override
-    public boolean hasContainerItem(ItemStack stack) {
+    public boolean hasCraftingRemainingItem(ItemStack stack) {
         //for using a filled bucket as fuel or in crafting recipes, an empty bucket should remain
         return !BucketLibUtil.isEmpty(stack) && !this.isCracked(stack);
     }
 
-
     @Override
-    public ItemStack getContainerItem(ItemStack itemStack) {
-        if (!hasContainerItem(itemStack)) {
+    public ItemStack getCraftingRemainingItem(ItemStack itemStack) {
+        if (!hasCraftingRemainingItem(itemStack)) {
             return ItemStack.EMPTY;
         }
         if (BucketLibUtil.isAffectedByInfinityEnchantment(itemStack)) {
@@ -492,7 +491,7 @@ public class UniversalBucketItem extends Item {
             } else if (element instanceof Fluid fluid) {
                 return Objects.requireNonNull(ForgeRegistries.FLUIDS.tags()).getTag((TagKey<Fluid>) tag).contains(fluid);
             } else if (element instanceof EntityType<?> entityType) {
-                return Objects.requireNonNull(ForgeRegistries.ENTITIES.tags()).getTag((TagKey<EntityType<?>>) tag).contains(entityType);
+                return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.tags()).getTag((TagKey<EntityType<?>>) tag).contains(entityType);
             }
         }
         return defaultList != null && defaultList.contains(element);
