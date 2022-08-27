@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.18.2-0.5.3.8] - 2022-08-27
+### Fixed
+- fluid handler of milk bucket interacted with other fluids as if it was empty #22 (thanks to TimeheroTH f or the report)
+
 ## [1.18.2-0.5.3.7] - 2022-07-06
 ### Fixed
 - fixed advancements when obtaining entities (axolotl, fish, ...)
