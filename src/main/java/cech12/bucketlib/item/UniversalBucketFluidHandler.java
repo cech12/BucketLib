@@ -5,6 +5,7 @@ import cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -20,6 +21,10 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
 
     @Override
     public int fill(FluidStack resource, IFluidHandler.FluidAction doFill) {
+        //only fill the bucket, if there is no milk inside it.
+        if (BucketLibUtil.containsMilk(getContainer())) {
+            return 0;
+        }
         //only fill the bucket, if there is enough fluid to fill the bucket completely
         if (resource.getAmount() < capacity) {
             return 0;
@@ -32,6 +37,10 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
     public FluidStack drain(int maxDrain, FluidAction action) {
         //only drain the bucket, if there is no entity in the bucket
         if (BucketLibUtil.containsEntityType(getContainer())) {
+            return FluidStack.EMPTY;
+        }
+        //only drain milk if the fluid is active
+        if (!ForgeMod.MILK.isPresent() && BucketLibUtil.containsMilk(getContainer())) {
             return FluidStack.EMPTY;
         }
         //only drain the bucket, if there is enough space to drain the bucket completely
