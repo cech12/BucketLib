@@ -10,6 +10,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -26,6 +27,7 @@ import java.util.Collections;
 public class BucketLibTestMod {
 
     public static final String MOD_ID = "bucketlibtest";
+    public static final boolean MILK_ENABLED = Boolean.parseBoolean(System.getProperty("bucketlibtest.milkEnabled", "false"));
 
     public static final TagKey<Fluid> WATER_TAG = TagKey.create(Registry.FLUID_REGISTRY, new ResourceLocation(MOD_ID, "water"));
 
@@ -51,6 +53,9 @@ public class BucketLibTestMod {
     public BucketLibTestMod() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ITEMS.register(modEventBus);
+        if (MILK_ENABLED) {
+            ForgeMod.enableMilkFluid();
+        }
     }
 
     @SubscribeEvent

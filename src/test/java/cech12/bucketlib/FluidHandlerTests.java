@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
@@ -26,10 +27,17 @@ public class FluidHandlerTests {
 
     private static final Fluid[] FLUIDS = { Fluids.WATER, Fluids.LAVA };
 
+    private static Fluid[] getFluids() {
+        if (BucketLibTestMod.MILK_ENABLED) {
+            return new Fluid[] { Fluids.WATER, Fluids.LAVA, ForgeMod.MILK.get() };
+        }
+        return FLUIDS;
+    }
+
     @GameTestGenerator
     public static List<TestFunction> generateEmptyBucketFluidHandlerTests() {
         List<TestFunction> testFunctions = new ArrayList<>();
-        for (Fluid fluid : FLUIDS) {
+        for (Fluid fluid : getFluids()) {
             String fluidName = Objects.requireNonNull(fluid.getRegistryName()).getPath();
             String testName = "testfluidhandlerofemptybucketwith" + fluidName;
             testFunctions.add(new TestFunction(
@@ -70,7 +78,7 @@ public class FluidHandlerTests {
     public static List<TestFunction> generateFluidBucketFluidHandlerTests() {
         List<TestFunction> testFunctions = new ArrayList<>();
         for (Fluid bucketFluid : FLUIDS) {
-            for (Fluid fluid : FLUIDS) {
+            for (Fluid fluid : getFluids()) {
                 String bucketFluidName = Objects.requireNonNull(bucketFluid.getRegistryName()).getPath();
                 String fluidName = Objects.requireNonNull(fluid.getRegistryName()).getPath();
                 String testName = "testfluidhandlerof" + bucketFluidName + "bucketwith" + fluidName;
@@ -113,7 +121,7 @@ public class FluidHandlerTests {
     @GameTestGenerator
     public static List<TestFunction> generateMilkBucketFluidHandlerTests() {
         List<TestFunction> testFunctions = new ArrayList<>();
-        for (Fluid fluid : FLUIDS) {
+        for (Fluid fluid : getFluids()) {
             String fluidName = Objects.requireNonNull(fluid.getRegistryName()).getPath();
             String testName = "testfluidhandlerofmilkbucketwith" + fluidName;
             testFunctions.add(new TestFunction(
@@ -131,10 +139,6 @@ public class FluidHandlerTests {
                             test.fail("milk bucket has no fluid handler.");
                         }
                         FluidUtil.getFluidHandler(bucket).ifPresent(fluidHandler -> {
-                            FluidStack drainedStack = fluidHandler.drain(FluidAttributes.BUCKET_VOLUME, IFluidHandler.FluidAction.EXECUTE);
-                            if (!drainedStack.isEmpty()) {
-                                test.fail("Something was drained of an milk Bucket. FluidStack: " + drainedStack.getFluid().toString() + " - " + drainedStack.getAmount());
-                            }
                             int filledAmount = fluidHandler.fill(new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME - 1), IFluidHandler.FluidAction.EXECUTE);
                             if (filledAmount > 0) {
                                 test.fail("Milk bucket could be filled with " + fluidName + " although it should not be filled. (less than the bucket volume was filled) " + fluidName + ". Amount: " + filledAmount);
@@ -143,7 +147,20 @@ public class FluidHandlerTests {
                             if (filledAmount > 0) {
                                 test.fail("Milk Bucket could be filled with " + fluidName + ". (more than the bucket volume was filled) Amount: " + filledAmount);
                             }
+                            FluidStack drainedStack = fluidHandler.drain(FluidAttributes.BUCKET_VOLUME, IFluidHandler.FluidAction.EXECUTE);
+                            if (BucketLibTestMod.MILK_ENABLED) {
+                                if (drainedStack.getFluid() != ForgeMod.MILK.get() || drainedStack.getAmount() != FluidAttributes.BUCKET_VOLUME) {
+                                    test.fail("The drained FluidStack of a milk bucket does not match the expected fluid. Drained: " + drainedStack.getFluid().toString() + " - " + drainedStack.getAmount());
+                                }
+                            } else {
+                                if (!drainedStack.isEmpty()) {
+                                    test.fail("Something was drained of an milk Bucket. FluidStack: " + drainedStack.getFluid().toString() + " - " + drainedStack.getAmount());
+                                }
+                            }
                         });
+                        if (BucketLibTestMod.MILK_ENABLED && BucketLibUtil.containsMilk(bucket)) {
+                            test.fail("Milk Bucket contains milk after it was drained.");
+                        }
                         test.succeed();
                     }
             ));
@@ -154,7 +171,7 @@ public class FluidHandlerTests {
     @GameTestGenerator
     public static List<TestFunction> generateAxolotlBucketFluidHandlerTests() {
         List<TestFunction> testFunctions = new ArrayList<>();
-        for (Fluid fluid : FLUIDS) {
+        for (Fluid fluid : getFluids()) {
             String fluidName = Objects.requireNonNull(fluid.getRegistryName()).getPath();
             String testName = "testfluidhandlerofaxolotlbucketwith" + fluidName;
             testFunctions.add(new TestFunction(
