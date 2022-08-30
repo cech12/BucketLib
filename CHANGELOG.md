@@ -3,9 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.19-1.0.3.2] - 2022-08-30
+### Fixed
+- fluid handler of milk bucket didn't work with milk fluid of Forge #22 (thanks to TimeheroTH for the report)
+
 ## [1.19-1.0.3.1] - 2022-08-27
 ### Fixed
-- fluid handler of milk bucket interacted with other fluids as if it was empty #22 (thanks to TimeheroTH f or the report)
+- fluid handler of milk bucket interacted with other fluids as if it was empty #22 (thanks to TimeheroTH for the report)
 
 ## [1.19-1.0.3.0] - 2022-07-24
 ### Changed

@@ -77,6 +77,8 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', mod_id
 
+            property 'bucketlibtest.milkEnabled', project.test_milk_enabled
+
             forceExit false
 
             mods {

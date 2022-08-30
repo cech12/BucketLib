@@ -22,6 +22,13 @@ jobs:
     uses: cech12/MinecraftModActions/.github/workflows/gametest.yml@main
     with:
       java-version: 17
+  gametestmilk:
+    needs: build
+    name: Game Test with milk fluid
+    uses: cech12/MinecraftModActions/.github/workflows/gametest.yml@main
+    with:
+      java-version: 17
+      arguments: "-Ptest_milk_enabled=true"
   codeql:
     needs: build
     name: CodeQL
@@ -29,7 +36,7 @@ jobs:
     with:
       java-version: 17
   publish-github:
-    needs: [ gametest, codeql ]
+    needs: [ gametest, gametestmilk, codeql ]
     if: startsWith(github.ref, 'refs/tags/')
     name: Publish Github
     uses: cech12/MinecraftModActions/.github/workflows/publish-github.yml@main

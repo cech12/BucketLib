@@ -2,6 +2,7 @@ package cech12.bucketlib.item;
 
 import cech12.bucketlib.api.item.UniversalBucketItem;
 import cech12.bucketlib.util.BucketLibUtil;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
@@ -17,6 +18,21 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
 
     public UniversalBucketFluidHandler(@Nonnull ItemStack container) {
         super(container, FluidType.BUCKET_VOLUME);
+    }
+
+    @Nonnull
+    @Override
+    public FluidStack getFluid() {
+        FluidStack fluidStack = super.getFluid();
+        //fill milk bucket with milk fluid if it is enabled
+        if (fluidStack.isEmpty() && ForgeMod.MILK.isPresent()) {
+            ResourceLocation bucketContent = BucketLibUtil.getContent(this.container);
+            if (bucketContent != null && bucketContent.equals(BucketLibUtil.MILK_LOCATION)) {
+                fluidStack = new FluidStack(ForgeMod.MILK.get(), FluidType.BUCKET_VOLUME);
+                setFluid(fluidStack);
+            }
+        }
+        return fluidStack;
     }
 
     @Override
@@ -66,6 +82,9 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
         if (wasCracked) {
             container.shrink(1);
         } else {
+            if (BucketLibUtil.containsContent(container)) { //remove milk content tag
+                BucketLibUtil.removeContentNoCopy(container, false);
+            }
             BucketLibUtil.damageByOne(container);
         }
     }

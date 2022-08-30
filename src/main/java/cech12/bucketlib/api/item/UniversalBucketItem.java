@@ -34,6 +34,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MilkBucketItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -120,7 +121,10 @@ public class UniversalBucketItem extends Item {
             return true;
         }
         Item bucket = fluid.getBucket();
-        if (!(bucket instanceof BucketItem) || ((BucketItem) bucket).getFluid() != fluid) {
+        if (bucket instanceof MilkBucketItem && fluid != ForgeMod.MILK.get()) {
+            return false;
+        }
+        if (!(bucket instanceof MilkBucketItem) && (!(bucket instanceof BucketItem) || ((BucketItem) bucket).getFluid() != fluid)) {
             return false;
         }
         if (this.properties.allowedFluidsTag != null || this.properties.allowedFluids != null) {

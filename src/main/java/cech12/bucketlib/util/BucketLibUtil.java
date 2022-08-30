@@ -127,18 +127,21 @@ public class BucketLibUtil {
         return result;
     }
 
-    private static ItemStack removeTagContent(ItemStack itemStack, String tagName) {
-        ItemStack result = itemStack.copy();
-        CompoundTag nbt = result.getTag();
+    private static ItemStack removeTagContentNoCopy(ItemStack itemStack, String tagName) {
+        CompoundTag nbt = itemStack.getTag();
         if (nbt != null && nbt.contains(tagName)) {
             nbt.remove(tagName);
             if (nbt.isEmpty()) {
-                result.setTag(null);
+                itemStack.setTag(null);
             } else {
-                result.setTag(nbt);
+                itemStack.setTag(nbt);
             }
         }
-        return result;
+        return itemStack;
+    }
+
+    private static ItemStack removeTagContent(ItemStack itemStack, String tagName) {
+        return removeTagContentNoCopy(itemStack.copy(), tagName);
     }
 
     public static boolean containsContent(ItemStack itemStack) {
@@ -159,6 +162,12 @@ public class BucketLibUtil {
 
     public static ItemStack removeContent(ItemStack itemStack) {
         return removeContent(itemStack, true);
+    }
+
+    public static ItemStack removeContentNoCopy(ItemStack itemStack, boolean damage) {
+        ItemStack emptyStack = removeTagContentNoCopy(itemStack, "BucketContent");
+        if (damage) damageByOne(emptyStack);
+        return emptyStack;
     }
 
     private static ItemStack removeContent(ItemStack itemStack, boolean damage) {
