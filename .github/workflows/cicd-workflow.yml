@@ -25,7 +25,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Run dependency submission
-        uses: mikepenz/gradle-dependency-submission@0.8.0
+        uses: mikepenz/gradle-dependency-submission@v0.8.0
   gametest:
     needs: build
     name: Game Test
