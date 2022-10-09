@@ -10,8 +10,9 @@ updates:
       interval: "daily"
     # Disable version updates for gradle dependencies
     open-pull-requests-limit: 0
-  #  ignore:
-  #    - dependency-name: "net.minecraftforge.gradle:ForgeGradle"
+    # Avoid errors with checking Forge Gradle
+    ignore:
+      - dependency-name: "net.minecraftforge.gradle:ForgeGradle"
 
   - package-ecosystem: "github-actions"
     directory: "/"
