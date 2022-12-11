@@ -61,22 +61,23 @@ jobs:
     uses: cech12/MinecraftModActions/.github/workflows/publish-curseforge.yml@main
     with:
       java-version: 17
+      curseforge-id: 560156
+      game-versions: |
+        1.18.2
+      release-type: release
     secrets:
       curseforge-token: ${{ secrets.CURSEFORGE_API_KEY }}
-#  trigger-jitpack:
-#    needs: publish-github
-#    if: startsWith(github.ref, 'refs/tags/')
-#    name: Trigger Jitpack
-#    uses: cech12/MinecraftModActions/.github/workflows/trigger-jitpack.yml@main
-#    secrets:
-#      github-token: ${{ secrets.GITHUB_TOKEN }}
-#  publish-github-package:
-#    needs: publish-github
-#    if: startsWith(github.ref, 'refs/tags/')
-#    name: Publish Github Package
-#    uses: cech12/MinecraftModActions/.github/workflows/publish-github-package.yml@main
-#    with:
-#      java-version: 17
-#    secrets:
-#      github-token: ${{ secrets.GITHUB_TOKEN }}
-
+  publish-modrinth:
+    needs: publish-github
+    if: startsWith(github.ref, 'refs/tags/')
+    name: Publish Modrinth
+    uses: cech12/MinecraftModActions/.github/workflows/publish-modrinth.yml@main
+    with:
+      java-version: 17
+      modrinth-id: DItE655o
+      game-versions: |
+        1.18.2
+      release-type: release
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      modrinth-token: ${{ secrets.MODRINTH_API_KEY }}
