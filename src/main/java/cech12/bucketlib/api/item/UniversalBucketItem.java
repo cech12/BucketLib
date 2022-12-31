@@ -10,7 +10,6 @@ import cech12.bucketlib.util.WorldInteractionUtil;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -30,6 +29,7 @@ import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
@@ -70,7 +70,7 @@ public class UniversalBucketItem extends Item {
     private final Properties properties;
 
     public UniversalBucketItem(Properties properties) {
-        super((new Item.Properties()).tab(properties.tab));
+        super((new Item.Properties()));
         this.properties = properties;
     }
 
@@ -384,47 +384,6 @@ public class UniversalBucketItem extends Item {
         return super.getUseAnimation(itemStack);
     }
 
-    /**
-     * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
-     */
-    @Override
-    public void fillItemCategory(@Nonnull CreativeModeTab group, @Nonnull NonNullList<ItemStack> items) {
-        if (this.allowedIn(group)) {
-            ItemStack emptyBucket = new ItemStack(this);
-            //add empty bucket
-            items.add(emptyBucket);
-            //add fluid buckets
-            for (Fluid fluid : ForgeRegistries.FLUIDS) {
-                if (fluid == Fluids.EMPTY) {
-                    continue;
-                }
-                if (ForgeMod.MILK.isPresent() && ForgeMod.MILK.get().isSame(fluid)) {
-                    //skip milk fluid
-                    continue;
-                }
-                if (canHoldFluid(fluid)) {
-                    items.add(BucketLibUtil.addFluid(emptyBucket, fluid));
-                }
-            }
-            //add milk bucket
-            items.add(BucketLibUtil.addMilk(emptyBucket));
-            //add entity buckets
-            for (RegistryUtil.BucketEntity bucketEntity : RegistryUtil.getBucketEntities()) {
-                if (canHoldEntity(bucketEntity.entityType()) && canHoldFluid(bucketEntity.fluid())) {
-                    ItemStack filledBucket = BucketLibUtil.addFluid(emptyBucket, bucketEntity.fluid());
-                    filledBucket = BucketLibUtil.addEntityType(filledBucket, bucketEntity.entityType());
-                    items.add(filledBucket);
-                }
-            }
-            //add block buckets
-            for (RegistryUtil.BucketBlock bucketBlock : RegistryUtil.getBucketBlocks()) {
-                if (canHoldBlock(bucketBlock.block())) {
-                    items.add(BucketLibUtil.addBlock(emptyBucket, bucketBlock.block()));
-                }
-            }
-        }
-    }
-
     @Override
     public int getBurnTime(ItemStack itemStack, @Nullable RecipeType<?> recipeType) {
         //entity buckets should not use the burn time of its fluid
@@ -499,6 +458,10 @@ public class UniversalBucketItem extends Item {
             }
         }
         return defaultList != null && defaultList.contains(element);
+    }
+
+    public CreativeModeTab getCreativeTab() {
+        return this.properties.tab;
     }
 
     public int getDurability() {
@@ -595,7 +558,7 @@ public class UniversalBucketItem extends Item {
 
     public static class Properties {
 
-        CreativeModeTab tab = CreativeModeTab.TAB_MISC;
+        CreativeModeTab tab = CreativeModeTabs.TOOLS_AND_UTILITIES;
         int maxStackSize = 16;
 
         int durability = 0;

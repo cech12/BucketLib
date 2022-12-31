@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.19.3-1.1.0.0] - 2022-12-31
+### Changed
+- Update mod to Forge 1.19.3-44.0.41
+- Temporary deactivation of JEI until it is ported to 1.19.3
+
 ## [1.19-1.0.3.2] - 2022-08-30
 ### Fixed
 - fluid handler of milk bucket didn't work with milk fluid of Forge #22 (thanks to TimeheroTH for the report)

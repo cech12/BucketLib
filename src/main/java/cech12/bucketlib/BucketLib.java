@@ -8,15 +8,22 @@ import cech12.bucketlib.config.ServerConfig;
 import cech12.bucketlib.api.item.UniversalBucketItem;
 import cech12.bucketlib.item.UniversalBucketDispenseBehaviour;
 import cech12.bucketlib.item.crafting.BucketDyeingRecipe;
+import cech12.bucketlib.util.BucketLibUtil;
 import cech12.bucketlib.util.ColorUtil;
+import cech12.bucketlib.util.RegistryUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fml.DistExecutor;
@@ -56,6 +63,7 @@ public class BucketLib {
         final IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
         eventBus.addListener(this::commonSetup);
         eventBus.addListener(this::processIMC);
+        eventBus.addListener(this::addItemsToTabs);
 
         //dye recipe serializer
         RECIPE_SERIALIZERS.register(eventBus);
@@ -116,6 +124,45 @@ public class BucketLib {
             }
             return -1;
         }, bucket));
+    }
+
+    private void addItemsToTabs(CreativeModeTabEvent.BuildContents event) {
+        buckets.forEach(bucket -> {
+            if (event.getTab() == bucket.getCreativeTab()) {
+                ItemStack emptyBucket = new ItemStack(bucket);
+                //add empty bucket
+                event.accept(emptyBucket);
+                //add fluid buckets
+                for (Fluid fluid : ForgeRegistries.FLUIDS) {
+                    if (fluid == Fluids.EMPTY) {
+                        continue;
+                    }
+                    if (ForgeMod.MILK.isPresent() && ForgeMod.MILK.get().isSame(fluid)) {
+                        //skip milk fluid
+                        continue;
+                    }
+                    if (bucket.canHoldFluid(fluid)) {
+                        event.accept(BucketLibUtil.addFluid(emptyBucket, fluid));
+                    }
+                }
+                //add milk bucket
+                event.accept(BucketLibUtil.addMilk(emptyBucket));
+                //add entity buckets
+                for (RegistryUtil.BucketEntity bucketEntity : RegistryUtil.getBucketEntities()) {
+                    if (bucket.canHoldEntity(bucketEntity.entityType()) && bucket.canHoldFluid(bucketEntity.fluid())) {
+                        ItemStack filledBucket = BucketLibUtil.addFluid(emptyBucket, bucketEntity.fluid());
+                        filledBucket = BucketLibUtil.addEntityType(filledBucket, bucketEntity.entityType());
+                        event.accept(filledBucket);
+                    }
+                }
+                //add block buckets
+                for (RegistryUtil.BucketBlock bucketBlock : RegistryUtil.getBucketBlocks()) {
+                    if (bucket.canHoldBlock(bucketBlock.block())) {
+                        event.accept(BucketLibUtil.addBlock(emptyBucket, bucketBlock.block()));
+                    }
+                }
+            }
+        });
     }
 
 }

@@ -10,9 +10,10 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
@@ -21,8 +22,8 @@ import java.util.List;
 
 public class BucketDyeingRecipe extends CustomRecipe {
 
-    public BucketDyeingRecipe(ResourceLocation id) {
-        super(id);
+    public BucketDyeingRecipe(ResourceLocation id, CraftingBookCategory category) {
+        super(id, category);
     }
 
     @Nullable
@@ -91,7 +92,7 @@ public class BucketDyeingRecipe extends CustomRecipe {
         return Serializer.INSTANCE;
     }
 
-    public static final class Serializer extends SimpleRecipeSerializer<BucketDyeingRecipe> {
+    public static final class Serializer extends SimpleCraftingRecipeSerializer<BucketDyeingRecipe> {
 
         public static final Serializer INSTANCE = new Serializer();
 

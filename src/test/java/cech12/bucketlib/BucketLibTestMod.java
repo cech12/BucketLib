@@ -29,7 +29,7 @@ public class BucketLibTestMod {
     public static final String MOD_ID = "bucketlibtest";
     public static final boolean MILK_ENABLED = Boolean.parseBoolean(System.getProperty("bucketlibtest.milkEnabled", "false"));
 
-    public static final TagKey<Fluid> WATER_TAG = TagKey.create(Registry.FLUID_REGISTRY, new ResourceLocation(MOD_ID, "water"));
+    public static final TagKey<Fluid> WATER_TAG = TagKey.create(ForgeRegistries.FLUIDS.getRegistryKey(), new ResourceLocation(MOD_ID, "water"));
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, BucketLibTestMod.MOD_ID);
 

@@ -5,7 +5,6 @@ import cech12.bucketlib.api.BucketLibApi;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -152,7 +151,7 @@ public class FluidIngredient extends Ingredient {
             String fluid = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
-                TagKey<Fluid> tag = TagKey.create(Registry.FLUID_REGISTRY, new ResourceLocation(tagId));
+                TagKey<Fluid> tag = TagKey.create(ForgeRegistries.FLUIDS.getRegistryKey(), new ResourceLocation(tagId));
                 return new FluidIngredient(tag);
             }
             if (fluid.isEmpty()) {
@@ -166,7 +165,7 @@ public class FluidIngredient extends Ingredient {
         public FluidIngredient parse(@Nonnull JsonObject json) {
             if (json.has("tag")) {
                 ResourceLocation tagId = new ResourceLocation(json.get("tag").getAsString());
-                TagKey<Fluid> tag = TagKey.create(Registry.FLUID_REGISTRY, tagId);
+                TagKey<Fluid> tag = TagKey.create(ForgeRegistries.FLUIDS.getRegistryKey(), tagId);
                 return new FluidIngredient(tag);
             } else {
                 ResourceLocation fluid = new ResourceLocation(json.get("fluid").getAsString());

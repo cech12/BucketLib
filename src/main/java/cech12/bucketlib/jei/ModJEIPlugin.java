@@ -1,5 +1,6 @@
 package cech12.bucketlib.jei;
 
+/*
 import cech12.bucketlib.BucketLib;
 import cech12.bucketlib.api.BucketLibApi;
 import cech12.bucketlib.api.BucketLibTags;
@@ -75,3 +76,4 @@ public class ModJEIPlugin implements IModPlugin {
     }
 
 }
+ */
