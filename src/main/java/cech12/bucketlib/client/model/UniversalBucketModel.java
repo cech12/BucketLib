@@ -95,7 +95,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
     }
 
     @Override
-    public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
+    public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation) {
         Material particleLocation = owner.hasMaterial("particle") ? owner.getMaterial("particle") : null;
 
         Material baseLocation = null;
@@ -138,9 +138,9 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
 
         // if the fluid is lighter than air, will manipulate the initial state to be rotated 180deg to turn it upside down
         if (fluid != Fluids.EMPTY && fluid.getFluidType().isLighterThanAir()) {
-            modelTransform = new SimpleModelState(
-                    modelTransform.getRotation().blockCornerToCenter().compose(
-                            new Transformation(null, new Quaternionf(0, 0, 1, 0), null, null)).blockCenterToCorner());
+            modelState = new SimpleModelState(
+                    modelState.getRotation().compose(
+                            new Transformation(null, new Quaternionf(0, 0, 1, 0), null, null)));
         }
 
         // We need to disable GUI 3D and block lighting for this to render properly
@@ -152,13 +152,13 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         if (baseSprite != null) {
             // build base (insidest)
             var unbaked = UnbakedGeometryHelper.createUnbakedItemElements(0, baseSprite.contents());
-            var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> baseSprite, modelTransform, modelLocation);
+            var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> baseSprite, modelState, modelLocation);
             modelBuilder.addQuads(normalRenderTypes, quads);
         }
 
         if (otherContentSprite != null) {
             //layer 2 to avoid coloring the entity layer
-            var transformedState = new SimpleModelState(modelTransform.getRotation().compose(DEPTH_OFFSET_TRANSFORM), modelTransform.isUvLocked());
+            var transformedState = new SimpleModelState(modelState.getRotation().compose(DEPTH_OFFSET_TRANSFORM), modelState.isUvLocked());
             var unbaked = UnbakedGeometryHelper.createUnbakedItemElements(2, otherContentSprite.contents());
             var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> otherContentSprite, transformedState, modelLocation);
             modelBuilder.addQuads(normalRenderTypes, quads);
@@ -166,7 +166,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
             TextureAtlasSprite templateSprite = spriteGetter.apply(fluidMaskLocation);
             if (templateSprite != null) {
                 // build liquid layer (inside)
-                var transformedState = new SimpleModelState(modelTransform.getRotation().compose(DEPTH_OFFSET_TRANSFORM), modelTransform.isUvLocked());
+                var transformedState = new SimpleModelState(modelState.getRotation().compose(DEPTH_OFFSET_TRANSFORM), modelState.isUvLocked());
                 var unbaked = UnbakedGeometryHelper.createUnbakedItemMaskElements(1, templateSprite.contents()); // Use template as mask
                 var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> fluidSprite, transformedState, modelLocation); // Bake with fluid texture
 
