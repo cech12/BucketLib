@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.19-1.0.3.3] - 2023-01-09
+### Fixed
+- flipped buckets were not rendered at correct spot (thanks to benbenlaw for the report)
+
 ## [1.19-1.0.3.2] - 2022-08-30
 ### Fixed
 - fluid handler of milk bucket didn't work with milk fluid of Forge #22 (thanks to TimeheroTH for the report)
