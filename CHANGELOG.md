@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.19.3-1.1.1.0] - 2023-01-17
+### Changed
+- re-add JEI support
+
 ## [1.19.3-1.1.0.1] - 2023-01-09
 ### Fixed
 - flipped buckets were not rendered at correct spot (thanks to benbenlaw for the report)

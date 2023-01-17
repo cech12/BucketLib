@@ -27,6 +27,6 @@ license="The MIT License (MIT)"
 [[dependencies.bucketlib]]
    modId="jei"
    mandatory=false
-   versionRange="[11.0.0.211,)"
+   versionRange="[12.0.2.2,)"
    ordering="NONE"
    side="BOTH"
