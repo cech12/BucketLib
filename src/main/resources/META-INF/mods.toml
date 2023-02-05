@@ -28,5 +28,6 @@ license="The MIT License (MIT)"
    modId="jei"
    mandatory=false
    versionRange="[11.9999,)"
+   referralUrl="https://github.com/mezz/JustEnoughItems"
    ordering="NONE"
    side="BOTH"
