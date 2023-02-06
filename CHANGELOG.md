@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.19-1.0.4.0] - 2023-02-06
+### Added
+- Gwibling texture of The Undergarden mod
+- Snail texture of Naturalist mod #24 (temporary until Naturalist added it by themselves)
+
+### Fixed
+- fix bucket rendering when bucket entity texture of other mod is missing #24
+
 ## [1.19-1.0.3.3] - 2023-01-09
 ### Fixed
 - flipped buckets were not rendered at correct spot (thanks to benbenlaw for the report)

@@ -27,6 +27,8 @@ public class ClientEvents {
         if (event.getAtlas().location().equals(InventoryMenu.BLOCK_ATLAS)) {
             //register texture of milk bucket
             event.addSprite(UniversalBucketModel.getContentTexture(BucketLibUtil.MILK_LOCATION));
+            //register texture of missing bucket content
+            event.addSprite(UniversalBucketModel.getContentTexture(UniversalBucketModel.MISSING_LOWER_CONTENT));
             //register block buckets
             for (RegistryUtil.BucketBlock bucketBlock : RegistryUtil.getBucketBlocks()) {
                 event.addSprite(UniversalBucketModel.getContentTexture(ForgeRegistries.BLOCKS.getKey(bucketBlock.block())));

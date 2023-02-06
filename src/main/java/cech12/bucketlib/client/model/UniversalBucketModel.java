@@ -13,6 +13,7 @@ import com.mojang.math.Transformation;
 import com.mojang.math.Vector3f;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
@@ -53,11 +54,15 @@ import java.util.function.Function;
  */
 public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketModel> {
 
+    public static final ResourceLocation MISSING_LOWER_CONTENT = new ResourceLocation(BucketLibApi.MOD_ID, "missing_lower_content");
+
     private static final Map<ResourceLocation, ResourceLocation> TEXTURE_MAP = Maps.newHashMap();
     // Depth offsets to prevent Z-fighting
     private static final Transformation DEPTH_OFFSET_TRANSFORM = new Transformation(Vector3f.ZERO, Quaternion.ONE, new Vector3f(1, 1, 1.002f), Quaternion.ONE);
     // Transformer to set quads to max brightness
     private static final IQuadTransformer MAX_LIGHTMAP_TRANSFORMER = IQuadTransformer.applyingLightmap(0x00F000F0);
+
+    public static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(MISSING_LOWER_CONTENT));
 
     @Nonnull
     private final Fluid fluid;
@@ -133,7 +138,14 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         }
 
         TextureAtlasSprite baseSprite = baseLocation != null ? spriteGetter.apply(baseLocation) : null;
-        TextureAtlasSprite otherContentSprite = otherContentLocation != null ? spriteGetter.apply(otherContentLocation) : null;
+        TextureAtlasSprite otherContentSprite = null;
+        if (otherContentLocation != null) {
+            otherContentSprite = spriteGetter.apply(otherContentLocation);
+            //if content texture is missing - fallback to pink content texture
+            if (MissingTextureAtlasSprite.getLocation().equals(otherContentSprite.getName())) {
+                otherContentSprite = spriteGetter.apply(MISSING_LOWER_CONTENT_MATERIAL);
+            }
+        }
         TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? spriteGetter.apply(ForgeHooksClient.getBlockMaterial(IClientFluidTypeExtensions.of(fluid).getStillTexture())) : null;
         TextureAtlasSprite particleSprite = particleLocation != null ? spriteGetter.apply(particleLocation) : null;
         if (particleSprite == null) particleSprite = baseSprite;
@@ -164,7 +176,8 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
             //layer 2 to avoid coloring the entity layer
             var transformedState = new SimpleModelState(modelState.getRotation().compose(DEPTH_OFFSET_TRANSFORM), modelState.isUvLocked());
             var unbaked = UnbakedGeometryHelper.createUnbakedItemElements(2, otherContentSprite);
-            var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> otherContentSprite, transformedState, modelLocation);
+            TextureAtlasSprite finalOtherContentSprite = otherContentSprite;
+            var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> finalOtherContentSprite, transformedState, modelLocation);
             modelBuilder.addQuads(normalRenderTypes, quads);
         } else if (fluidMaskLocation != null && fluidSprite != null) {
             TextureAtlasSprite templateSprite = spriteGetter.apply(fluidMaskLocation);
