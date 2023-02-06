@@ -15,6 +15,7 @@ import com.mojang.math.Transformation;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
@@ -56,11 +57,15 @@ import java.util.function.Function;
  */
 public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel> {
 
+    public static final ResourceLocation MISSING_LOWER_CONTENT = new ResourceLocation(BucketLibApi.MOD_ID, "missing_lower_content");
+
     private static final Map<ResourceLocation, ResourceLocation> TEXTURE_MAP = Maps.newHashMap();
 
     // minimal Z offset to prevent depth-fighting
     private static final float NORTH_Z_FLUID = 7.498f / 16f;
     private static final float SOUTH_Z_FLUID = 8.502f / 16f;
+
+    public static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(MISSING_LOWER_CONTENT));
 
     @Nonnull
     private final Fluid fluid;
@@ -135,8 +140,14 @@ public class UniversalBucketModel implements IModelGeometry<UniversalBucketModel
             }
         }
 
-        TextureAtlasSprite otherContentSprite = otherContentLocation != null ? spriteGetter.apply(otherContentLocation) : null;
-
+        TextureAtlasSprite otherContentSprite = null;
+        if (otherContentLocation != null) {
+            otherContentSprite = spriteGetter.apply(otherContentLocation);
+            //if content texture is missing - fallback to pink content texture
+            if (MissingTextureAtlasSprite.getLocation().equals(otherContentSprite.getName())) {
+                otherContentSprite = spriteGetter.apply(MISSING_LOWER_CONTENT_MATERIAL);
+            }
+        }
         ModelState transformsFromModel = owner.getCombinedTransform();
 
         TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? spriteGetter.apply(ForgeHooksClient.getBlockMaterial(fluid.getAttributes().getStillTexture())) : null;

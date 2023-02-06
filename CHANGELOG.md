@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.18.2-0.5.4.0] - 2023-02-06
+### Added
+- Gwibling texture of The Undergarden mod
+- Snail texture of Naturalist mod #24 (temporary until Naturalist added it by themselves)
+
+### Fixed
+- fix bucket rendering when bucket entity texture of other mod is missing #24
+
 ## [1.18.2-0.5.3.9] - 2022-08-30
 ### Fixed
 - fluid handler of milk bucket didn't work with milk fluid of Forge #22 (thanks to TimeheroTH for the report)
