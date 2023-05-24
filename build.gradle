@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '6.0.+', changing: true
     }
 }
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
@@ -44,7 +44,7 @@ minecraft {
             property 'forge.enabledGameTestNamespaces', mod_id
 
             mods {
-                bucketlib {
+                "${mod_id}" {
                     source sourceSets.main
                     source sourceSets.test
                 }
@@ -59,7 +59,7 @@ minecraft {
             property 'forge.enabledGameTestNamespaces', mod_id
 
             mods {
-                bucketlib {
+                "${mod_id}" {
                     source sourceSets.main
                     source sourceSets.test
                 }
@@ -78,10 +78,8 @@ minecraft {
 
             property 'bucketlibtest.milkEnabled', project.test_milk_enabled
 
-            forceExit false
-
             mods {
-                bucketlib {
+                "${mod_id}" {
                     source sourceSets.main
                     source sourceSets.test
                 }
@@ -96,7 +94,7 @@ minecraft {
             args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
-                bucketlib {
+                "${mod_id}" {
                     source sourceSets.main
                 }
             }
