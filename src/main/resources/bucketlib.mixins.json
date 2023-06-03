@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "cech12.bucketlib.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "bucketlib.refmap.json",
+  "mixins": [
+    "AxolotlAiMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

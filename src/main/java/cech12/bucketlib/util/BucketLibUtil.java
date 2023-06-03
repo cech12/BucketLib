@@ -14,6 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MobBucketItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
@@ -27,6 +28,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -278,6 +280,15 @@ public class BucketLibUtil {
             return removeContent(itemStack);
         }
         return itemStack.copy();
+    }
+
+    public static EntityType<?> getEntityTypeOfMobBucketItem(MobBucketItem mobBucketItem) {
+        try {
+            Method getFishType = mobBucketItem.getClass().getDeclaredMethod("getFishType");
+            getFishType.setAccessible(true);
+            return (EntityType<?>) getFishType.invoke(mobBucketItem);
+        } catch (ReflectiveOperationException ignored) {}
+        return null;
     }
 
 }

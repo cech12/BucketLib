@@ -21,11 +21,14 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Bucketable;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.entity.animal.axolotl.AxolotlAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -35,6 +38,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MilkBucketItem;
+import net.minecraft.world.item.MobBucketItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -329,7 +333,32 @@ public class UniversalBucketItem extends Item {
         if (this.canMilkEntities() && BucketLibUtil.isEmpty(itemStack)) {
             return WorldInteractionUtil.tryMilkLivingEntity(itemStack, entity, player, interactionHand);
         }
-        //TODO feed axolotl?
+        //feed axolotl
+        if (entity instanceof Axolotl axolotl && BucketLibUtil.containsEntityType(itemStack)
+                && Arrays.stream(AxolotlAi.getTemptations().getItems()).anyMatch(
+                        stack -> stack.getItem() instanceof MobBucketItem mobBucketItem
+                                && BucketLibUtil.getFluid(itemStack) == mobBucketItem.getFluid()
+                                && BucketLibUtil.getEntityType(itemStack) == BucketLibUtil.getEntityTypeOfMobBucketItem(mobBucketItem)
+        )) {
+            int age = axolotl.getAge();
+            if (!axolotl.level.isClientSide && age == 0 && axolotl.canFallInLove()) {
+                if (!player.isCreative()) {
+                    player.setItemInHand(interactionHand, BucketLibUtil.removeEntityType(itemStack, BucketLibUtil.getFluid(itemStack) == Fluids.EMPTY));
+                }
+                axolotl.setInLove(player);
+                return InteractionResult.SUCCESS;
+            }
+            if (axolotl.isBaby()) {
+                if (!player.isCreative()) {
+                    player.setItemInHand(interactionHand, BucketLibUtil.removeEntityType(itemStack, BucketLibUtil.getFluid(itemStack) == Fluids.EMPTY));
+                }
+                axolotl.ageUp(AgeableMob.getSpeedUpSecondsWhenFeeding(-age), true);
+                return InteractionResult.sidedSuccess(axolotl.level.isClientSide);
+            }
+            if (axolotl.level.isClientSide) {
+                return InteractionResult.CONSUME;
+            }
+        }
         return super.interactLivingEntity(itemStack, player, entity, interactionHand);
     }
 

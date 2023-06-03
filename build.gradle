@@ -1,10 +1,12 @@
 buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '6.0.+', changing: true
+        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
     }
 }
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
@@ -13,6 +15,7 @@ plugins {
     id 'maven-publish'
 }
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.spongepowered.mixin'
 
 version = "${minecraft_version}-${mod_version}"
 group = "cech12.${mod_id}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -43,6 +46,12 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', mod_id
 
+            // Export mixin-changed classes
+            property 'mixin.debug.export', 'true'
+
+            // Add mixin config to runtime
+            args '-mixin.config=' + project.getProperty('mod_id') + '.mixins.json'
+
             mods {
                 "${mod_id}" {
                     source sourceSets.main
@@ -57,6 +66,12 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', mod_id
+
+            // Export mixin-changed classes
+            property 'mixin.debug.export', 'true'
+
+            // Add mixin config to runtime
+            args '-mixin.config=' + project.getProperty('mod_id') + '.mixins.json'
 
             mods {
                 "${mod_id}" {
@@ -78,6 +93,12 @@ minecraft {
 
             property 'bucketlibtest.milkEnabled', project.test_milk_enabled
 
+            // Export mixin-changed classes
+            property 'mixin.debug.export', 'true'
+
+            // Add mixin config to runtime
+            args '-mixin.config=' + project.getProperty('mod_id') + '.mixins.json'
+
             mods {
                 "${mod_id}" {
                     source sourceSets.main
@@ -93,6 +114,12 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
             args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
+            // Export mixin-changed classes
+            property 'mixin.debug.export', 'true'
+
+            // Add mixin config to runtime
+            args '-mixin.config=' + project.getProperty('mod_id') + '.mixins.json'
+
             mods {
                 "${mod_id}" {
                     source sourceSets.main
@@ -103,6 +130,10 @@ minecraft {
 }
 
 repositories {
+    maven {
+        //for mixin
+        url = 'https://repo.spongepowered.org/maven'
+    }
     maven {
         // location of the maven that hosts JEI files
         name = "Progwml6 maven"
@@ -115,11 +146,18 @@ repositories {
     }
 }
 
+mixin {
+    add sourceSets.main, "${mod_id}.refmap.json"
+}
+
 dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
+
+    // Mixin annotation processor - generates the refmap
+    annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
 
     // compile against the JEI API but do not include it at runtime
     compileOnly fg.deobf("mezz.jei:jei-${project.minecraft_version}-common-api:${project.jei_version}")
@@ -138,7 +176,8 @@ jar {
                 "Implementation-Title": project.name,
                 "Implementation-Version": "${version}",
                 "Implementation-Vendor" :"Cech12",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "MixinConfigs": "${mod_id}.mixins.json"
         ])
     }
 }
