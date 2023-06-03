@@ -64,6 +64,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -261,14 +262,17 @@ public class UniversalBucketItem extends Item {
                 if (BucketLibUtil.containsFluid(itemstack)) {
                     //place fluid interaction
                     FluidStack fluidStack = FluidUtil.getFluidHandler(itemstack).map(fluidHandler -> fluidHandler.getFluidInTank(0)).orElse(FluidStack.EMPTY);
-                    //remove entity to be able to use tryPlaceFluid method
-                    FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, relativeBlockPos, BucketLibUtil.removeEntityType(itemstack, false), fluidStack);
-                    if (fluidActionResult.isSuccess()) {
-                        if (BucketLibUtil.containsEntityType(itemstack)) {
-                            //place entity if exists
-                            spawnEntityFromBucket(player, level, itemstack, relativeBlockPos, false);
+                    //try to place fluid at hit block and then at the relative block
+                    for (BlockPos pos : Arrays.asList(hitBlockPos, relativeBlockPos)) {
+                        //remove entity to be able to use tryPlaceFluid method
+                        FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, pos, BucketLibUtil.removeEntityType(itemstack, false), fluidStack);
+                        if (fluidActionResult.isSuccess()) {
+                            if (BucketLibUtil.containsEntityType(itemstack)) {
+                                //place entity if exists
+                                spawnEntityFromBucket(player, level, itemstack, pos, false);
+                            }
+                            return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, fluidActionResult.getResult(), interactionHand), level.isClientSide());
                         }
-                        return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, fluidActionResult.getResult(), interactionHand), level.isClientSide());
                     }
                 } else if (BucketLibUtil.containsEntityType(itemstack)) {
                     //place entity interaction
