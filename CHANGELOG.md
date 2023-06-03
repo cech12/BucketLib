@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.19-1.0.5.0] - 2023-06-03
+### Fixed
+- fix waterlogging blocks
+
 ## [1.19-1.0.4.1] - 2023-02-19
 ### Added
 - recipe for dough of Farmer's Delight (thanks to VivaGabe for the hint)
