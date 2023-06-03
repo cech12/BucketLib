@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraftforge.common.util.FakePlayer;
 import org.jetbrains.annotations.NotNull;
 
@@ -82,6 +83,12 @@ public class BucketLibTestHelper {
         player.setItemInHand(InteractionHand.MAIN_HAND, stack);
         InteractionResult interactionResult = player.interactOn(entity, InteractionHand.MAIN_HAND);
         return new PlayerInteractionResult(player, interactionResult, player.getItemInHand(InteractionHand.MAIN_HAND));
+    }
+
+    public static void addItemStackToDispenser(GameTestHelper helper, ItemStack stack, BlockPos pos) {
+        DispenserBlockEntity dispenserBlockEntity = (DispenserBlockEntity) helper.getBlockEntity(pos);
+        dispenserBlockEntity.addItem(stack);
+        dispenserBlockEntity.setChanged();
     }
 
 }
