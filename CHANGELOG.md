@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20-2.0.0.0] - 2023-06-14
+### Changed
+- update mod to Forge 1.20-46.0.12 #25
+- update JEI support to version 14.0.0.11 #25
+
 ## [1.19.3-1.2.0.0] - 2023-06-03
 ### Added
 - feeding Axolotls with buckets of tropical fish (or other mob buckets listed in "minecraft:axolotl_tempt_items" item tag) is possible now

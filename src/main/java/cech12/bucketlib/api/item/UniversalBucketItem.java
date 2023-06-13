@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
@@ -20,7 +21,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -200,7 +200,7 @@ public class UniversalBucketItem extends Item {
                 entity.setTicksFrozen(Math.min(entity.getTicksRequiredToFreeze(), ticks));
                 //damaging here because, the vanilla mechanic is reducing the freeze ticks below fully freezing
                 if (BucketLibUtil.notCreative(entity) && entity.tickCount % 40 == 0 && entity.isFullyFrozen()) {
-                    entity.hurt(DamageSource.FREEZE, entity.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
+                    entity.hurt(level.damageSources().freeze(), entity.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
                     BucketLibUtil.damageByOne(itemStack);
                 }
             }
@@ -341,7 +341,7 @@ public class UniversalBucketItem extends Item {
                                 && BucketLibUtil.getEntityType(itemStack) == BucketLibUtil.getEntityTypeOfMobBucketItem(mobBucketItem)
         )) {
             int age = axolotl.getAge();
-            if (!axolotl.level.isClientSide && age == 0 && axolotl.canFallInLove()) {
+            if (!axolotl.level().isClientSide && age == 0 && axolotl.canFallInLove()) {
                 if (!player.isCreative()) {
                     player.setItemInHand(interactionHand, BucketLibUtil.removeEntityType(itemStack, BucketLibUtil.getFluid(itemStack) == Fluids.EMPTY));
                 }
@@ -353,9 +353,9 @@ public class UniversalBucketItem extends Item {
                     player.setItemInHand(interactionHand, BucketLibUtil.removeEntityType(itemStack, BucketLibUtil.getFluid(itemStack) == Fluids.EMPTY));
                 }
                 axolotl.ageUp(AgeableMob.getSpeedUpSecondsWhenFeeding(-age), true);
-                return InteractionResult.sidedSuccess(axolotl.level.isClientSide);
+                return InteractionResult.sidedSuccess(axolotl.level().isClientSide);
             }
-            if (axolotl.level.isClientSide) {
+            if (axolotl.level().isClientSide) {
                 return InteractionResult.CONSUME;
             }
         }
@@ -372,7 +372,7 @@ public class UniversalBucketItem extends Item {
             entity.playSound(entity.getPickupSound(), 1.0F, 1.0F);
             ItemStack filledItemStack = BucketLibUtil.addEntityType(itemStack, entity.getType());
             entity.saveToBucketTag(filledItemStack);
-            Level level = entity.level;
+            Level level = entity.level();
             ItemStack handItemStack = ItemUtils.createFilledResult(itemStack, player, filledItemStack, false);
             player.setItemInHand(interactionHand, handItemStack);
             if (!level.isClientSide) {
@@ -493,7 +493,7 @@ public class UniversalBucketItem extends Item {
         return defaultList != null && defaultList.contains(element);
     }
 
-    public CreativeModeTab getCreativeTab() {
+    public ResourceKey<CreativeModeTab> getCreativeTab() {
         return this.properties.tab;
     }
 
@@ -591,7 +591,7 @@ public class UniversalBucketItem extends Item {
 
     public static class Properties {
 
-        CreativeModeTab tab = CreativeModeTabs.TOOLS_AND_UTILITIES;
+        ResourceKey<CreativeModeTab> tab = CreativeModeTabs.TOOLS_AND_UTILITIES;
         int maxStackSize = 16;
 
         int durability = 0;
@@ -647,7 +647,7 @@ public class UniversalBucketItem extends Item {
         List<Block> allowedBlocks = null;
         TagKey<Block> allowedBlocksTag = null;
 
-        public Properties tab(CreativeModeTab tab) {
+        public Properties tab(ResourceKey<CreativeModeTab> tab) {
             this.tab = tab;
             return this;
         }

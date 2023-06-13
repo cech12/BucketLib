@@ -23,7 +23,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fml.DistExecutor;
@@ -126,9 +126,9 @@ public class BucketLib {
         }, bucket));
     }
 
-    private void addItemsToTabs(CreativeModeTabEvent.BuildContents event) {
+    private void addItemsToTabs(BuildCreativeModeTabContentsEvent event) {
         buckets.forEach(bucket -> {
-            if (event.getTab() == bucket.getCreativeTab()) {
+            if (event.getTabKey() == bucket.getCreativeTab()) {
                 ItemStack emptyBucket = new ItemStack(bucket);
                 //add empty bucket
                 event.accept(emptyBucket);

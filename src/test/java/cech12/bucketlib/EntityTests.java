@@ -128,7 +128,7 @@ public class EntityTests {
                         Player player = BucketLibTestHelper.createPlayer(test, isCreative);
                         player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 2000, 1, false, false, true));
                         ItemStack bucket = BucketLibUtil.addMilk(new ItemStack(BucketLibTestMod.TEST_BUCKET.get()));
-                        ItemStack result = bucket.finishUsingItem(player.getLevel(), player);
+                        ItemStack result = bucket.finishUsingItem(player.level(), player);
                         if (BucketLibUtil.containsMilk(result) != isCreative) {
                             test.fail("The bucket in main hand does " + (isCreative ? "" : "not ") + "contain milk after " + (isCreative ? "creative" : "survival") + " using a milk bucket");
                         }
