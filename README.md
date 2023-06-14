@@ -44,4 +44,17 @@ dependencies {
 
 Replace `${project.bucketlib_version}` with the version of BucketLib that you want to use. The actual versions can be found [here](https://jitpack.io/api/builds/com.github.cech12/BucketLib) or on the Github Releases page.
 
+### Since BucketLib 1.19.3-1.2.0.0
+
+BucketLib 1.19.3-1.2.0.0 added mixins and developers will need to make sure to tweak their run configurations in order to launch the game in their development environment if using this version or newer as a dependency.
+
+Add both of these lines to both the `client {}` and `server {}` run configuration blocks in the `build.gradle`. These can be placed anywhere within each run configuration, the order does not matter.
+
+```groovy
+property 'mixin.env.remapRefMap', 'true'
+property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+```
+
+Don't forget to re-generate your IDE runs. (`genIntellijRuns`, `genEclipseRuns`, or `genVSCodeRuns`)
+
 For detailed information please see the [Developer Guide](https://github.com/cech12/BucketLib/wiki/Developer-Guide).
