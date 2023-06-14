@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.1-2.1.0.0] - 2023-06-14
+### Changed
+- update mod to Forge 1.20.1-47.0.1
+- update JEI support to version 15.0.0.12
+
+### Fixed
+- placing axolotls in 1.20.1 crashed the game
+
 ## [1.20-2.0.0.0] - 2023-06-14
 ### Changed
 - update mod to Forge 1.20-46.0.12 #25
