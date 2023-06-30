@@ -1,33 +1,31 @@
 modLoader="javafml"
-loaderVersion="[47,)"
-issueTrackerURL="https://github.com/cech12/BucketLib/issues"
-license="The MIT License (MIT)"
+loaderVersion="${loader_version_range}"
+issueTrackerURL="${mod_issue_tracker}"
+license="${mod_license}"
 [[mods]]
-    modId="bucketlib"
-    version="${file.jarVersion}"
-    displayName="BucketLib"
-    displayURL="https://github.com/cech12/BucketLib"
+    modId="${mod_id}"
+    version="${minecraft_version}-${mod_version}"
+    displayName="${mod_name}"
+    displayURL="${mod_url}"
     logoFile="logo.png"
-    authors="Cech12"
-    description='''
-    A library mod for custom buckets.
-    '''
-[[dependencies.bucketlib]]
+    authors="${mod_authors}"
+    description='''${mod_description}'''
+[[dependencies.${mod_id}]]
     modId="forge"
     mandatory=true
-    versionRange="[47.0.1,)"
+    versionRange="${forge_version_range}"
     ordering="NONE"
     side="BOTH"
-[[dependencies.bucketlib]]
+[[dependencies.${mod_id}]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.20.1,)"
+    versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
-[[dependencies.bucketlib]]
+[[dependencies.${mod_id}]]
    modId="jei"
    mandatory=false
-   versionRange="[15.0.0.12,)"
+   versionRange="${jei_version_range}"
    referralUrl="https://github.com/mezz/JustEnoughItems"
    ordering="NONE"
    side="BOTH"
