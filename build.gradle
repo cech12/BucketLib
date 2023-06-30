@@ -79,7 +79,7 @@ minecraft {
 
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', mod_id
-            property 'bucketlibtest.milkEnabled', project.test_milk_enabled
+            property 'bucketlibtest.milkEnabled', test_milk_enabled
         }
 
         data {
@@ -135,7 +135,7 @@ dependencies {
 
 tasks.register('apiJar', Jar) {
     archiveClassifier.set('api')
-    include 'cech12/bucketlib/api/**/*'
+    include mod_group_id.replace('.', '/') + '/api/**/*'
     from sourceSets.main.allSource
     from sourceSets.main.output
 }
