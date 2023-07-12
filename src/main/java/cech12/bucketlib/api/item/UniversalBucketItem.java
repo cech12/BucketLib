@@ -20,7 +20,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -200,7 +199,7 @@ public class UniversalBucketItem extends Item {
                 entity.setTicksFrozen(Math.min(entity.getTicksRequiredToFreeze(), ticks));
                 //damaging here because, the vanilla mechanic is reducing the freeze ticks below fully freezing
                 if (BucketLibUtil.notCreative(entity) && entity.tickCount % 40 == 0 && entity.isFullyFrozen()) {
-                    entity.hurt(DamageSource.FREEZE, entity.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
+                    entity.hurt(level.damageSources().freeze(), entity.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
                     BucketLibUtil.damageByOne(itemStack);
                 }
             }

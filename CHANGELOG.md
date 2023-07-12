@@ -3,7 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
-## [1.19.3-1.2.1.0] - 2023-??-??
+## [1.19.4-1.3.0.0] - 2023-07-12
+### Changed
+- update mod to Forge 1.19.4-45.1.4 to fix interaction with already waterlogged blocks
+- update JEI to 1.19.4-13.0.0.1
+
 ### Removed
 - Snail texture of Naturalist mod, because the mod authors added it by themselves
 

@@ -5,6 +5,7 @@ import cech12.bucketlib.util.ColorUtil;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
@@ -56,6 +57,7 @@ public class BucketDyeingRecipe extends CustomRecipe {
     /**
      * Used to check if a recipe matches current crafting inventory
      */
+    @Override
     public boolean matches(@Nonnull CraftingContainer inv, @Nonnull Level worldIn) {
         Pair<ItemStack, List<DyeItem>> bucketAndDyes = getBucketAndDyes(inv);
         return bucketAndDyes != null;
@@ -64,8 +66,9 @@ public class BucketDyeingRecipe extends CustomRecipe {
     /**
      * Returns an Item that is the result of this recipe
      */
+    @Override
     @Nonnull
-    public ItemStack assemble(@Nonnull CraftingContainer inv) {
+    public ItemStack assemble(@Nonnull CraftingContainer inv, @Nonnull RegistryAccess registryAccess) {
         Pair<ItemStack, List<DyeItem>> bucketAndDyes = getBucketAndDyes(inv);
         if (bucketAndDyes != null) {
             return ColorUtil.dyeItem(bucketAndDyes.getFirst(), bucketAndDyes.getSecond());
@@ -73,8 +76,8 @@ public class BucketDyeingRecipe extends CustomRecipe {
         return ItemStack.EMPTY;
     }
 
-    @Nonnull
     @Override
+    @Nonnull
     public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
         //override it to avoid remaining container items
         return NonNullList.withSize(inv.getContainerSize(), ItemStack.EMPTY);
@@ -83,6 +86,7 @@ public class BucketDyeingRecipe extends CustomRecipe {
     /**
      * Used to determine if this recipe can fit in a grid of the given width/height
      */
+    @Override
     public boolean canCraftInDimensions(int width, int height) {
         return width * height >= 2;
     }
