@@ -48,7 +48,7 @@ Replace `${project.bucketlib_version}` with the version of BucketLib that you wa
 
 BucketLib 1.19.3-1.2.0.0 added mixins and developers will need to make sure to tweak their run configurations in order to launch the game in their development environment if using this version or newer as a dependency.
 
-Add both of these lines to both the `client {}` and `server {}` run configuration blocks in the `build.gradle`. These can be placed anywhere within each run configuration, the order does not matter.
+Add both of these lines to the `configureEach {}` run configuration block in the `build.gradle` (or to both the `client {}` and `server {}`). These can be placed anywhere within the run configuration, the order does not matter.
 
 ```groovy
 property 'mixin.env.remapRefMap', 'true'
