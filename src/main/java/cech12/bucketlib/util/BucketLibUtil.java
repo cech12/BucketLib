@@ -49,7 +49,14 @@ public class BucketLibUtil {
     }
 
     public static ItemStack createEmptyResult(ItemStack initialStack, Player player, ItemStack resultStack, InteractionHand hand) {
+        return createEmptyResult(initialStack, player, resultStack, hand, false);
+    }
+
+    public static ItemStack createEmptyResult(ItemStack initialStack, Player player, ItemStack resultStack, InteractionHand hand, boolean addAdditionalBucketOnInstaBuild) {
         if (!BucketLibUtil.notCreative(player)) {
+            if (addAdditionalBucketOnInstaBuild && !player.getInventory().contains(resultStack)) {
+                player.getInventory().add(resultStack);
+            }
             return initialStack;
         }
         if (resultStack.isEmpty()) {

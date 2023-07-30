@@ -32,8 +32,11 @@ public class WorldInteractionUtil {
             return InteractionResult.PASS;
         }
         player.setItemInHand(interactionHand, new ItemStack(Items.BUCKET));
+        //deactivate instabuild for the fake interaction to avoid side effects like adding additional filled vanilla buckets into inventory
+        boolean previousInstabuildValue = player.getAbilities().instabuild;
+        player.getAbilities().instabuild = false;
         InteractionResult result = player.interactOn(entity, interactionHand);
-        //TODO bug: milking entity in creative mode adds a vanilla milk bucket to inventory
+        player.getAbilities().instabuild = previousInstabuildValue;
         if (result.consumesAction()) {
             itemStack = ItemUtils.createFilledResult(itemStack.copy(), player, BucketLibUtil.addMilk(ItemHandlerHelper.copyStackWithSize(itemStack, 1)));
         }
@@ -55,10 +58,13 @@ public class WorldInteractionUtil {
                     || cauldronBlock == Blocks.POWDER_SNOW_CAULDRON && bucketItem.canHoldBlock(Blocks.POWDER_SNOW)) {
                 //fake vanilla bucket using on cauldron
                 player.setItemInHand(interactionHand, new ItemStack(Items.BUCKET));
+                //deactivate instabuild for the fake interaction to avoid side effects like adding additional filled vanilla buckets into inventory
+                boolean previousInstabuildValue = player.getAbilities().instabuild;
+                player.getAbilities().instabuild = false;
                 InteractionResult interactionResult = hitBlockState.use(level, player, interactionHand, blockHitResult);
+                player.getAbilities().instabuild = previousInstabuildValue;
                 ItemStack resultItemStack = player.getItemInHand(interactionHand);
                 player.setItemInHand(interactionHand, itemstack);
-                //TODO bug: pickup something from cauldron in creative mode adds a vanilla milk bucket to inventory
                 if (interactionResult.consumesAction()) {
                     if (resultItemStack.getItem() == Items.POWDER_SNOW_BUCKET) {
                         return new InteractionResultHolder<>(interactionResult, ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addBlock(ItemHandlerHelper.copyStackWithSize(itemstack, 1), Blocks.POWDER_SNOW)));
@@ -86,17 +92,25 @@ public class WorldInteractionUtil {
             Block bucketBlock = BucketLibUtil.getBlock(itemstack);
             if (bucketFluid == Fluids.LAVA || bucketFluid == Fluids.WATER) {
                 player.setItemInHand(interactionHand, new ItemStack(bucketFluid.getBucket()));
+                //deactivate instabuild for the fake interaction to avoid side effects like adding additional empty vanilla buckets into inventory
+                boolean previousInstabuildValue = player.getAbilities().instabuild;
+                player.getAbilities().instabuild = false;
                 InteractionResult interactionResult = hitBlockState.use(level, player, interactionHand, blockHitResult);
+                player.getAbilities().instabuild = previousInstabuildValue;
                 player.setItemInHand(interactionHand, itemstack);
                 if (interactionResult.consumesAction()) {
-                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeFluid(itemstack), interactionHand));
+                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeFluid(itemstack), interactionHand, true));
                 }
             } else if (bucketBlock == Blocks.POWDER_SNOW) {
                 player.setItemInHand(interactionHand, new ItemStack(Items.POWDER_SNOW_BUCKET));
+                //deactivate instabuild for the fake interaction to avoid side effects like adding additional empty vanilla buckets into inventory
+                boolean previousInstabuildValue = player.getAbilities().instabuild;
+                player.getAbilities().instabuild = false;
                 InteractionResult interactionResult = hitBlockState.use(level, player, interactionHand, blockHitResult);
+                player.getAbilities().instabuild = previousInstabuildValue;
                 player.setItemInHand(interactionHand, itemstack);
                 if (interactionResult.consumesAction()) {
-                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack), interactionHand));
+                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack), interactionHand, true));
                 }
             }
         }
