@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.1-2.2.0.2] - 2023-07-30
+### Fixed
+- Milk interaction and cauldron interaction in creative mode added a vanilla bucket to the inventory (thanks to Sinhika for the report) #28
+
 ## [1.20.1-2.2.0.1] - 2023-07-25
 ### Fixed
 - Version of mod was wrong (thanks to Sinhika for the report) #27
