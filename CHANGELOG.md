@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.1-2.3.0.0] - 2023-08-09
+### Changed
+- Changed Forge to NeoForge 1.20.1-47.1.54 (compatible with Forge 47.1.0)
+- Updated compat with JEI to 1.20.1-15.2.0.23
+
 ## [1.20.1-2.2.0.2] - 2023-07-30
 ### Fixed
 - Milk interaction and cauldron interaction in creative mode added a vanilla bucket to the inventory (thanks to Sinhika for the report) #28
