@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.19-1.0.6.1] - 2023-09-10
+### Fixed
+- textures of catfish and cosmic cod (Alex's Mobs) were not rendered correctly
+- cracked bucket texture was not used for stradpole (Alex's Mobs) bucket texture
+
 ## [1.19-1.0.6.0] - 2023-07-12
 ### Removed
 - Snail texture of Naturalist mod, because the mod added it by themselves

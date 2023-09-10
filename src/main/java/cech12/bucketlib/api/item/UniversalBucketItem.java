@@ -103,9 +103,8 @@ public class UniversalBucketItem extends Item {
     }
 
     public boolean isCracked(ItemStack stack) {
-        FluidStack fluidStack = FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY);
-        if (!fluidStack.isEmpty()) {
-            Fluid fluid = fluidStack.getFluid();
+        Fluid fluid = BucketLibUtil.getFluid(stack);
+        if (fluid != Fluids.EMPTY) {
             int fluidTemperature = fluid.getFluidType().getTemperature();
             Integer upperCrackingTemperature = getUpperBreakTemperature();
             Integer lowerCrackingTemperature = getLowerBreakTemperature();
