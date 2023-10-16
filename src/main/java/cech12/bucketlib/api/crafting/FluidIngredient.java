@@ -1,10 +1,8 @@
 package cech12.bucketlib.api.crafting;
 
 import cech12.bucketlib.BucketLib;
-import cech12.bucketlib.api.BucketLibApi;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -13,7 +11,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
+import net.minecraftforge.common.crafting.ingredients.AbstractIngredient;
+import net.minecraftforge.common.crafting.ingredients.IIngredientSerializer;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
@@ -29,7 +28,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class FluidIngredient extends Ingredient {
+public class FluidIngredient extends AbstractIngredient {
 
     protected final Fluid fluid;
     protected final TagKey<Fluid> tag;
@@ -41,12 +40,16 @@ public class FluidIngredient extends Ingredient {
         this.tag = tag;
     }
 
+    public FluidIngredient(Optional<ResourceLocation> fluidOptional, Optional<TagKey<Fluid>> tagOptional) {
+        this(fluidOptional.map(ForgeRegistries.FLUIDS::getValue).orElse(null), tagOptional.orElse(null));
+    }
+
     public FluidIngredient(Fluid fluid) {
         this(fluid, null);
     }
 
     public FluidIngredient(TagKey<Fluid> tag) {
-        this(null, tag);
+        this((Fluid)null, tag);
     }
 
     private boolean isFluidCorrect(Fluid fluid) {
@@ -122,32 +125,26 @@ public class FluidIngredient extends Ingredient {
 
     @Override
     @Nonnull
-    public IIngredientSerializer<? extends Ingredient> getSerializer() {
-        return Serializer.INSTANCE;
+    public IIngredientSerializer<? extends Ingredient> serializer() {
+        return SERIALIZER;
     }
 
-    @Nonnull
-    public JsonElement toJson() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", Serializer.NAME.toString());
-        if (this.fluid != null) {
-            jsonObject.addProperty("fluid", Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(this.fluid)).toString());
-        }
-        if (this.tag != null) {
-            jsonObject.addProperty("tag", this.tag.location().toString());
-        }
-        return jsonObject;
-    }
+    public static final Codec<FluidIngredient> CODEC = RecordCodecBuilder.create(builder ->
+            builder.group(
+                    ResourceLocation.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.ofNullable(ForgeRegistries.FLUIDS.getKey(i.fluid))),
+                    TagKey.codec(ForgeRegistries.FLUIDS.getRegistryKey()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
+            ).apply(builder, FluidIngredient::new)
+    );
 
-    public static final class Serializer implements IIngredientSerializer<FluidIngredient> {
-        public static final Serializer INSTANCE = new Serializer();
-        public static final ResourceLocation NAME = new ResourceLocation(BucketLibApi.MOD_ID, "fluid");
+    public static final IIngredientSerializer<FluidIngredient> SERIALIZER = new IIngredientSerializer<>() {
 
-        private Serializer() {}
-
-        @Nonnull
         @Override
-        public FluidIngredient parse(@Nonnull FriendlyByteBuf buffer) {
+        public Codec<? extends FluidIngredient> codec() {
+            return CODEC;
+        }
+
+        @Override
+        public FluidIngredient read(FriendlyByteBuf buffer) {
             String fluid = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
@@ -160,26 +157,10 @@ public class FluidIngredient extends Ingredient {
             return new FluidIngredient(ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluid)));
         }
 
-        @Nonnull
-        @Override
-        public FluidIngredient parse(@Nonnull JsonObject json) {
-            if (json.has("tag")) {
-                ResourceLocation tagId = new ResourceLocation(json.get("tag").getAsString());
-                TagKey<Fluid> tag = TagKey.create(ForgeRegistries.FLUIDS.getRegistryKey(), tagId);
-                return new FluidIngredient(tag);
-            } else {
-                ResourceLocation fluid = new ResourceLocation(json.get("fluid").getAsString());
-                if (!ForgeRegistries.FLUIDS.containsKey(fluid)) {
-                    throw new JsonSyntaxException("Unknown fluid: " + fluid);
-                }
-                return new FluidIngredient(ForgeRegistries.FLUIDS.getValue(fluid));
-            }
-        }
-
         @Override
         public void write(@Nonnull FriendlyByteBuf buffer, @Nonnull FluidIngredient ingredient) {
             buffer.writeUtf(ingredient.fluid != null ? Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(ingredient.fluid)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }
-    }
+    };
 }

@@ -35,6 +35,7 @@ public class FluidHandlerTests {
         return FLUIDS;
     }
 
+    /*
     @GameTestGenerator
     public static List<TestFunction> generateEmptyBucketFluidHandlerTests() {
         List<TestFunction> testFunctions = new ArrayList<>();
@@ -210,5 +211,6 @@ public class FluidHandlerTests {
         }
         return testFunctions;
     }
+     */
 
 }

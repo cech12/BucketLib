@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -12,7 +13,6 @@ import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
-import net.minecraftforge.common.util.FakePlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -25,7 +25,9 @@ public class BucketLibTestHelper {
     }
 
     private static ServerPlayer makeMockCreativePlayer(GameTestHelper helper) {
-        return new FakePlayer(helper.getLevel(), new GameProfile(UUID.randomUUID(), "test-mock-creative-player")) {
+        var level = helper.getLevel();
+        var cookie = CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "test-mock-creative-player"));
+        return new ServerPlayer(level.getServer(), level, cookie.gameProfile(), cookie.clientInformation()) {
             public boolean isSpectator() {
                 return false;
             }
@@ -45,7 +47,9 @@ public class BucketLibTestHelper {
     }
 
     private static ServerPlayer makeMockSurvivalPlayer(GameTestHelper helper) {
-        return new FakePlayer(helper.getLevel(), new GameProfile(UUID.randomUUID(), "test-mock-survival-player")) {
+        var level = helper.getLevel();
+        var cookie = CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "test-mock-survival-player"));
+        return new ServerPlayer(level.getServer(), level, cookie.gameProfile(), cookie.clientInformation()) {
             public boolean isSpectator() {
                 return false;
             }

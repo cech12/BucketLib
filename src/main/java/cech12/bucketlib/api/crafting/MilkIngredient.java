@@ -1,22 +1,23 @@
 package cech12.bucketlib.api.crafting;
 
 import cech12.bucketlib.BucketLib;
-import cech12.bucketlib.api.BucketLibApi;
 import cech12.bucketlib.util.BucketLibUtil;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Decoder;
+import com.mojang.serialization.Encoder;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
+import net.minecraftforge.common.crafting.ingredients.AbstractIngredient;
+import net.minecraftforge.common.crafting.ingredients.IIngredientSerializer;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
-public class MilkIngredient extends Ingredient {
+public class MilkIngredient extends AbstractIngredient {
 
     private ItemStack[] matchingStacks;
 
@@ -61,44 +62,33 @@ public class MilkIngredient extends Ingredient {
         return false;
     }
 
+
     @Override
     protected void invalidate() {
         this.matchingStacks = null;
     }
 
     @Override
-    @Nonnull
-    public IIngredientSerializer<? extends Ingredient> getSerializer() {
-        return Serializer.INSTANCE;
+    public IIngredientSerializer<? extends Ingredient> serializer() {
+        return SERIALIZER;
     }
 
-    @Nonnull
-    public JsonElement toJson() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", Serializer.NAME.toString());
-        return jsonObject;
-    }
+    public static final Codec<MilkIngredient> CODEC = MapCodec.of(Encoder.empty(), Decoder.unit(new MilkIngredient())).codec();
 
-    public static final class Serializer implements IIngredientSerializer<MilkIngredient> {
-        public static final Serializer INSTANCE = new Serializer();
-        public static final ResourceLocation NAME = new ResourceLocation(BucketLibApi.MOD_ID, "milk");
+    public static final IIngredientSerializer<MilkIngredient> SERIALIZER = new IIngredientSerializer<>() {
 
-        private Serializer() {}
-
-        @Nonnull
         @Override
-        public MilkIngredient parse(@Nonnull FriendlyByteBuf buffer) {
-            return new MilkIngredient();
+        public Codec<? extends MilkIngredient> codec() {
+            return CODEC;
         }
 
-        @Nonnull
         @Override
-        public MilkIngredient parse(@Nonnull JsonObject json) {
+        public MilkIngredient read(FriendlyByteBuf buffer) {
             return new MilkIngredient();
         }
 
         @Override
         public void write(@Nonnull FriendlyByteBuf buffer, @Nonnull MilkIngredient ingredient) {
         }
-    }
+    };
 }

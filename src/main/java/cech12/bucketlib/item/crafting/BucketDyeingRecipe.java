@@ -23,8 +23,8 @@ import java.util.List;
 
 public class BucketDyeingRecipe extends CustomRecipe {
 
-    public BucketDyeingRecipe(ResourceLocation id, CraftingBookCategory category) {
-        super(id, category);
+    public BucketDyeingRecipe(CraftingBookCategory category) {
+        super(category);
     }
 
     @Nullable

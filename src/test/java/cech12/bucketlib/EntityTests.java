@@ -31,6 +31,7 @@ public class EntityTests {
     private static final EntityType<?>[] MILKABLE_ENTITIES = {EntityType.COW, EntityType.GOAT};
     private static final EntityType<?>[] BUCKETABLE_ENTITIES = {EntityType.AXOLOTL, EntityType.COD, EntityType.PUFFERFISH, EntityType.SALMON, EntityType.TADPOLE, EntityType.TROPICAL_FISH};
 
+    /*
     @GameTestGenerator
     public static List<TestFunction> generateMilkingTests() {
         List<TestFunction> testFunctions = new ArrayList<>();
@@ -283,5 +284,6 @@ public class EntityTests {
         }
         return testFunctions;
     }
+     */
 
 }

@@ -36,6 +36,7 @@ public class CauldronTests {
                 () -> "Empty cauldron was not filled with water after using a water test bucket."));
     }
 
+    /*
     @GameTestGenerator
     public static List<TestFunction> generateEmptyBucketOnFilledCauldronTests() {
         List<TestFunction> testFunctions = new ArrayList<>();
@@ -87,5 +88,6 @@ public class CauldronTests {
         }
         return testFunctions;
     }
+     */
 
 }

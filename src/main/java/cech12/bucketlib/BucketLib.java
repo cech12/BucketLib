@@ -22,7 +22,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.ingredients.IIngredientSerializer;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.FluidUtil;
@@ -49,7 +49,13 @@ import java.util.List;
 public class BucketLib {
 
     public static DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, BucketLibApi.MOD_ID);
-    public static RegistryObject<RecipeSerializer<?>> BUCKET_DYEING_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("bucket_dyeing", () -> BucketDyeingRecipe.Serializer.INSTANCE);
+    public static DeferredRegister<IIngredientSerializer<?>> INGREDIENT_SERIALIZERS = DeferredRegister.create(ForgeRegistries.Keys.INGREDIENT_SERIALIZERS, BucketLibApi.MOD_ID);
+
+    static {
+        RECIPE_SERIALIZERS.register("bucket_dyeing", () -> BucketDyeingRecipe.Serializer.INSTANCE);
+        INGREDIENT_SERIALIZERS.register("fluid", () -> FluidIngredient.SERIALIZER);
+        INGREDIENT_SERIALIZERS.register("milk", () -> MilkIngredient.SERIALIZER);
+    }
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -68,8 +74,7 @@ public class BucketLib {
         //dye recipe serializer
         RECIPE_SERIALIZERS.register(eventBus);
         //ingredient serializer
-        CraftingHelper.register(FluidIngredient.Serializer.NAME, FluidIngredient.Serializer.INSTANCE);
-        CraftingHelper.register(MilkIngredient.Serializer.NAME, MilkIngredient.Serializer.INSTANCE);
+        INGREDIENT_SERIALIZERS.register(eventBus);
     }
 
     public static List<UniversalBucketItem> getRegisteredBuckets() {

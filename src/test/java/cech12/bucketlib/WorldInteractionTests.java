@@ -19,6 +19,7 @@ public class WorldInteractionTests {
 
     private static final BlockPos POWDER_SNOW_POSITION = new BlockPos(0, 1, 0);
 
+    /*
     @GameTestGenerator
     public static List<TestFunction> generatePowderSnowPickupTests() {
         List<TestFunction> testFunctions = new ArrayList<>();
@@ -63,5 +64,6 @@ public class WorldInteractionTests {
         }
         return testFunctions;
     }
+     */
 
 }

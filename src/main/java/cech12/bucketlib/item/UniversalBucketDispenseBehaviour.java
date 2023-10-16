@@ -4,7 +4,7 @@ import cech12.bucketlib.api.item.UniversalBucketItem;
 import cech12.bucketlib.util.BucketLibUtil;
 import cech12.bucketlib.util.RegistryUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.DispensibleContainerItem;
@@ -12,7 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fluids.DispenseFluidContainer;
 
@@ -46,8 +45,8 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
     }
 
     private ItemStack fillBucket(@Nonnull BlockSource source, @Nonnull ItemStack stack) {
-        ServerLevel level = source.getLevel();
-        BlockPos pickupPosition = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
+        ServerLevel level = source.level();
+        BlockPos pickupPosition = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
         BlockState blockState = level.getBlockState(pickupPosition);
         RegistryUtil.BucketBlock bucketBlock = RegistryUtil.getBucketBlock(blockState.getBlock());
         if (bucketBlock != null) {
@@ -56,7 +55,7 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
                     && universalBucketItem.canHoldBlock(bucketBlock.block())
                     && bucketBlock.block() instanceof BucketPickup bucketPickup
             ) {
-                ItemStack vanillaStack = bucketPickup.pickupBlock(level, pickupPosition, blockState);
+                ItemStack vanillaStack = bucketPickup.pickupBlock(null, level, pickupPosition, blockState);
                 if (!vanillaStack.isEmpty()) {
                     if (stack.getCount() == 1) {
                         return BucketLibUtil.addBlock(stack, bucketBlock.block());
@@ -67,7 +66,7 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
                     if (stack.getCount() == 1) {
                         return resultStack;
                     }
-                    if (((DispenserBlockEntity)source.getEntity()).addItem(resultStack) < 0) {
+                    if ((source.blockEntity()).addItem(resultStack) < 0) {
                         this.dispenseBehavior.dispense(source, resultStack);
                     }
                     ItemStack stackCopy = stack.copy();
@@ -81,13 +80,13 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
     }
 
     private ItemStack emptyBucket(@Nonnull BlockSource source, @Nonnull ItemStack stack) {
-        ServerLevel level = source.getLevel();
-        BlockPos placePosition = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
+        ServerLevel level = source.level();
+        BlockPos placePosition = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
         if (BucketLibUtil.containsBlock(stack)) {
             //place block
             Block placeBlock = BucketLibUtil.getBlock(stack);
             if (placeBlock != null && placeBlock.asItem() instanceof DispensibleContainerItem dispensibleContainerItem) {
-                if (dispensibleContainerItem.emptyContents(null, level, placePosition, null)) {
+                if (dispensibleContainerItem.emptyContents(null, level, placePosition, null, stack)) {
                     return BucketLibUtil.removeBlock(stack);
                 }
             }
@@ -102,7 +101,7 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
             }
             if (!BucketLibUtil.containsFluid(resultStack) && stack.getItem() instanceof UniversalBucketItem bucketItem) {
                 //if fluid placement was successful or not needed, spawn entity
-                return bucketItem.spawnEntityFromBucket(null, source.getLevel(), resultStack, placePosition, !fluidPlaced);
+                return bucketItem.spawnEntityFromBucket(null, source.level(), resultStack, placePosition, !fluidPlaced);
             }
             return resultStack;
         }
