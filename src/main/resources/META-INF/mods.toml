@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[41,)"
+loaderVersion="[43,)"
 issueTrackerURL="https://github.com/cech12/BucketLib/issues"
 license="The MIT License (MIT)"
 [[mods]]
@@ -15,18 +15,18 @@ license="The MIT License (MIT)"
 [[dependencies.bucketlib]]
     modId="forge"
     mandatory=true
-    versionRange="[41.0.105,)"
+    versionRange="[43.1.38,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.bucketlib]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19,1.20)"
+    versionRange="[1.19.2,1.20)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.bucketlib]]
    modId="jei"
    mandatory=false
-   versionRange="[11.0.0.211,)"
+   versionRange="[11.4.0.287,)"
    ordering="NONE"
    side="BOTH"

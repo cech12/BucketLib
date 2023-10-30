@@ -57,8 +57,6 @@ jobs:
       java-version: 17
       curseforge-id: 560156
       game-versions: |
-        1.19
-        1.19.1
         1.19.2
       release-type: release
     secrets:
@@ -73,8 +71,6 @@ jobs:
       java-version: 17
       modrinth-id: DItE655o
       game-versions: |
-        1.19
-        1.19.1
         1.19.2
       release-type: release
     secrets:
