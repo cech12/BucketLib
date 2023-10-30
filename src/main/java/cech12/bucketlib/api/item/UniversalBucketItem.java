@@ -94,7 +94,7 @@ public class UniversalBucketItem extends Item {
             argument = (block != null) ? block.getName() : Component.literal("?");
         } else if (BucketLibUtil.containsMilk(stack)) {
             descriptionId += ".filled";
-            argument = Component.translatable("fluid.minecraft.milk");
+            argument = Component.translatable("fluid_type.minecraft.milk");
         } else {
             //is empty
             return Component.translatable(descriptionId);

@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.19.2-1.0.7.0] - 2023-10-30
+### Changed
+- Update mod to Forge 1.19.2-43.1.38
+- Update JEI to 1.19.2-11.4.0.287
+
+### Fixed
+- Milk string was not translated correctly https://github.com/cech12/CeramicBucket/issues/74
+- Spinefish texture of Aquamirea mod was not rendered correctly
+
 ## [1.19-1.0.6.1] - 2023-09-10
 ### Fixed
 - textures of catfish and cosmic cod (Alex's Mobs) were not rendered correctly
