@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [1.20.2-2.4.0.3] - 2023-11-04
 ### Fixed
 - MobBucketItems with non-bucketable entities were added to creative menu (found in Naturalist mod 4.0)
+- milk bucket effect curing was triggered before advancement trigger (see https://github.com/neoforged/NeoForge/pull/170)
 
 ## [1.20.2-2.4.0.2] - 2023-10-30
 ### Fixed

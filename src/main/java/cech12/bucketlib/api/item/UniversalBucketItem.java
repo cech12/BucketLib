@@ -386,12 +386,12 @@ public class UniversalBucketItem extends Item {
     @Override
     @Nonnull
     public ItemStack finishUsingItem(@Nonnull ItemStack itemStack, @Nonnull Level level, @Nonnull LivingEntity player) {
-        if (!level.isClientSide) {
-            player.curePotionEffects(new ItemStack(Items.MILK_BUCKET));
-        }
         if (player instanceof ServerPlayer serverPlayer) {
             CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, new ItemStack(Items.MILK_BUCKET));
             serverPlayer.awardStat(Stats.ITEM_USED.get(Items.MILK_BUCKET));
+        }
+        if (!level.isClientSide) {
+            player.curePotionEffects(new ItemStack(Items.MILK_BUCKET));
         }
         if (BucketLibUtil.notCreative(player)) {
             return BucketLibUtil.removeMilk(itemStack);
