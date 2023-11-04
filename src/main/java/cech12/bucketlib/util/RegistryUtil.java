@@ -1,6 +1,8 @@
 package cech12.bucketlib.util;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.MobBucketItem;
 import net.minecraft.world.item.SolidBucketItem;
@@ -32,7 +34,7 @@ public class RegistryUtil {
                     Method method = MobBucketItem.class.getDeclaredMethod("getFishType");
                     method.setAccessible(true);
                     EntityType<?> entityType = (EntityType<?>) method.invoke(bucket);
-                    if (entityType != null) {
+                    if (entityType != null && Minecraft.getInstance().level != null && entityType.create(Minecraft.getInstance().level) instanceof Bucketable) {
                         bucketEntities.add(new BucketEntity(entityType, bucket.getFluid(), bucket));
                     }
                 } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {}

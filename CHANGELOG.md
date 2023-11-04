@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.1-2.3.0.3] - 2023-11-04
+### Fixed
+- MobBucketItems with non-bucketable entities were added to creative menu (found in Naturalist mod 4.0)
+
 ## [1.20.1-2.3.0.2] - 2023-10-30
 ### Fixed
 - Milk string was not translated correctly https://github.com/cech12/CeramicBucket/issues/74
