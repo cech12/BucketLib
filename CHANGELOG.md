@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.1-2.3.0.5] - 2023-11-05
+### Fixed
+- MobBucketItems were not loaded correctly in version 1.20.1-2.3.0.4
+
 ## [1.20.1-2.3.0.4] - 2023-11-04
 ### Fixed
 - dedicated servers could not start with version 1.20.1-2.3.0.3
