@@ -1,6 +1,5 @@
 package cech12.bucketlib.util;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.item.Item;
@@ -9,6 +8,8 @@ import net.minecraft.world.item.SolidBucketItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.common.util.LogicalSidedProvider;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
@@ -55,13 +56,7 @@ public class RegistryUtil {
         if (ServerLifecycleHooks.getCurrentServer() != null) {
             return ServerLifecycleHooks.getCurrentServer().overworld();
         }
-        try {
-            Class.forName("net.minecraft.client.Minecraft");
-            return Minecraft.getInstance().level;
-        } catch (ClassNotFoundException ex) {
-            LOGGER.error("Failed to load Minecraft instance.", ex);
-        }
-        return null;
+        return LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT).orElse(null);
     }
 
     public static List<BucketBlock> getBucketBlocks() {
