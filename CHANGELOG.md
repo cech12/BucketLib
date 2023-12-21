@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.2-3.0.0.0] - 2023-12-21
+### Changed
+- Move to Multiloader mod template to support Forge and Neoforge
+- Update to Minecraft 1.20.2 (Forge 48.1.0)
+- all classes were moved from cech12.bucketlib to de.cech12.bucketlib package
+- changed the property methods with forge config objects to suppliers 
+
+### Removed
+- removed deprecated property methods: blockedFluids, blockedEntities, blockedBlocks (please use the deniedX methods instead)
+
 ## [1.20.2-2.4.0.4] - 2023-11-05
 ### Fixed
 - dedicated servers could not start with version 1.20.2-2.4.0.3
