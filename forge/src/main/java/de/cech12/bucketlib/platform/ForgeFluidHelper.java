@@ -1,17 +1,15 @@
 package de.cech12.bucketlib.platform;
 
 import de.cech12.bucketlib.platform.services.IFluidHelper;
-import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.ForgeMod;
@@ -91,5 +89,9 @@ public class ForgeFluidHelper implements IFluidHelper {
         return new Tuple<>(fluidActionResult.isSuccess(), fluidActionResult.getResult());
     }
 
+    @Override
+    public void curePotionEffects(LivingEntity entity, ItemStack curativeItem) {
+        entity.curePotionEffects(curativeItem);
+    }
 
 }

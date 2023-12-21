@@ -363,7 +363,7 @@ public class UniversalBucketItem extends Item {
             serverPlayer.awardStat(Stats.ITEM_USED.get(Items.MILK_BUCKET));
         }
         if (!level.isClientSide) {
-            //TODO player.curePotionEffects(new ItemStack(Items.MILK_BUCKET));
+            Services.FLUID.curePotionEffects(player, new ItemStack(Items.MILK_BUCKET));
         }
         if (BucketLibUtil.notCreative(player)) {
             return BucketLibUtil.removeMilk(itemStack);

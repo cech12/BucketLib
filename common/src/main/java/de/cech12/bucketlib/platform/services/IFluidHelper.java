@@ -6,6 +6,7 @@ import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -35,5 +36,7 @@ public interface IFluidHelper {
     Tuple<Boolean, ItemStack> tryPickUpFluid(ItemStack stack, Player player, Level level, InteractionHand interactionHand, BlockPos pos, Direction direction);
 
     Tuple<Boolean, ItemStack> tryPlaceFluid(ItemStack stack, Player player, Level level, InteractionHand interactionHand, BlockPos pos);
+
+    void curePotionEffects(LivingEntity entity, ItemStack curativeItem);
 
 }
