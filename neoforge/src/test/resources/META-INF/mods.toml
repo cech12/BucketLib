@@ -1,0 +1,11 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="The MIT License (MIT)"
+[[mods]]
+    modId="bucketlib"
+[[mods]]
+    modId="bucketlibtest"
+[[mixins]]
+config = "bucketlib.mixins.json"
+[[mixins]]
+config = "bucketlib.neoforge.mixins.json"

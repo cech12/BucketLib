@@ -112,7 +112,7 @@ public class UniversalBucketItem extends Item {
         if (bucket instanceof MilkBucketItem && fluid != Services.FLUID.getMilkFluid()) {
             return false;
         }
-        if (!(bucket instanceof MilkBucketItem) && (!(bucket instanceof BucketItem) || BucketLibUtil.getFluidOfBucketItem((BucketItem) bucket) != fluid)) {
+        if (!(bucket instanceof MilkBucketItem) && (!(bucket instanceof BucketItem) || Services.BUCKET.getFluidOfBucketItem((BucketItem) bucket) != fluid)) {
             return false;
         }
         if (this.properties.allowedFluidsTag != null || this.properties.allowedFluids != null) {
@@ -308,8 +308,8 @@ public class UniversalBucketItem extends Item {
         if (entity instanceof Axolotl axolotl && BucketLibUtil.containsEntityType(itemStack)
                 && Arrays.stream(AxolotlAi.getTemptations().getItems()).anyMatch(
                         stack -> stack.getItem() instanceof MobBucketItem mobBucketItem
-                                && BucketLibUtil.getFluid(itemStack) == BucketLibUtil.getFluidOfBucketItem(mobBucketItem)
-                                && BucketLibUtil.getEntityType(itemStack) == BucketLibUtil.getEntityTypeOfMobBucketItem(mobBucketItem)
+                                && BucketLibUtil.getFluid(itemStack) == Services.BUCKET.getFluidOfBucketItem(mobBucketItem)
+                                && BucketLibUtil.getEntityType(itemStack) == Services.BUCKET.getEntityTypeOfMobBucketItem(mobBucketItem)
         )) {
             int age = axolotl.getAge();
             if (!axolotl.level().isClientSide && age == 0 && axolotl.canFallInLove()) {
@@ -336,7 +336,7 @@ public class UniversalBucketItem extends Item {
     private <T extends LivingEntity & Bucketable> InteractionResult pickupEntityWithBucket(Player player, InteractionHand interactionHand, T entity) {
         ItemStack itemStack = player.getItemInHand(interactionHand).copy(); //copy to avoid changing the real item stack
         Fluid containedFluid = Services.FLUID.getContainedFluid(itemStack);
-        Fluid entityBucketFluid = BucketLibUtil.getFluidOfBucketItem((BucketItem) entity.getBucketItemStack().getItem());
+        Fluid entityBucketFluid = Services.BUCKET.getFluidOfBucketItem((BucketItem) entity.getBucketItemStack().getItem());
         if (itemStack.getItem() instanceof UniversalBucketItem
                 && entity.isAlive()
                 && entityBucketFluid == containedFluid) {

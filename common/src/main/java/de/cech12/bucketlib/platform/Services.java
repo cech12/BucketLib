@@ -1,7 +1,7 @@
 package de.cech12.bucketlib.platform;
 
 import de.cech12.bucketlib.CommonLoader;
-import de.cech12.bucketlib.api.BucketLib;
+import de.cech12.bucketlib.platform.services.IBucketHelper;
 import de.cech12.bucketlib.platform.services.IConfigHelper;
 import de.cech12.bucketlib.platform.services.IFluidHelper;
 import de.cech12.bucketlib.platform.services.IPlatformHelper;
@@ -16,6 +16,8 @@ import java.util.ServiceLoader;
  */
 public class Services {
 
+    /** bucket helper instance */
+    public static final IBucketHelper BUCKET = load(IBucketHelper.class);
     /** Config helper instance */
     public static final IConfigHelper CONFIG = load(IConfigHelper.class);
     /** Fluid helper instance */

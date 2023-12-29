@@ -30,8 +30,8 @@ public class AxolotlAiMixin {
             for (ItemStack stack : cir.getReturnValue().getItems()) {
                 temptationStacks.add(stack);
                 if (stack.getItem() instanceof MobBucketItem mobBucketItem) {
-                    Fluid fluid = BucketLibUtil.getFluidOfBucketItem(mobBucketItem);
-                    EntityType<?> entityType = BucketLibUtil.getEntityTypeOfMobBucketItem(mobBucketItem);
+                    Fluid fluid = Services.BUCKET.getFluidOfBucketItem(mobBucketItem);
+                    EntityType<?> entityType = Services.BUCKET.getEntityTypeOfMobBucketItem(mobBucketItem);
                     for (UniversalBucketItem bucketItem : Services.REGISTRY.getRegisteredBuckets()) {
                         if (bucketItem.canHoldFluid(fluid) && bucketItem.canHoldEntity(entityType)) {
                             ItemStack bucket = new ItemStack(bucketItem);

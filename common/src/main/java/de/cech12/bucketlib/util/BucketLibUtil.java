@@ -283,26 +283,4 @@ public class BucketLibUtil {
         return itemStack.copy();
     }
 
-    public static Fluid getFluidOfBucketItem(BucketItem bucket) {
-        try {
-            Field fluidField = BucketItem.class.getDeclaredField("content");
-            fluidField.setAccessible(true);
-            return (Fluid) fluidField.get(bucket);
-        } catch (IllegalAccessException | NoSuchFieldException ex) {
-            CommonLoader.LOG.error("Could not get entity type of MobBucketItem.", ex);
-        }
-        return Fluids.EMPTY;
-    }
-
-    public static EntityType<?> getEntityTypeOfMobBucketItem(MobBucketItem mobBucketItem) {
-        try {
-            Field entityTypeField = MobBucketItem.class.getDeclaredField("type");
-            entityTypeField.setAccessible(true);
-            return  (EntityType<?>) entityTypeField.get(mobBucketItem);
-        } catch (IllegalAccessException | NoSuchFieldException ex) {
-            CommonLoader.LOG.error("Could not get entity type of MobBucketItem.", ex);
-        }
-        return null;
-    }
-
 }

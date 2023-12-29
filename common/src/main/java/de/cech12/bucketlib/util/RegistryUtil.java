@@ -29,9 +29,9 @@ public class RegistryUtil {
                 bucketBlocks.add(new BucketBlock(bucket.getBlock(), bucket));
             }
             if (item instanceof MobBucketItem bucket) {
-                EntityType<?> entityType = BucketLibUtil.getEntityTypeOfMobBucketItem(bucket);
+                EntityType<?> entityType = Services.BUCKET.getEntityTypeOfMobBucketItem(bucket);
                 if (entityType != null && level != null && entityType.create(level) instanceof Bucketable) {
-                    bucketEntities.add(new BucketEntity(entityType, BucketLibUtil.getFluidOfBucketItem(bucket), bucket));
+                    bucketEntities.add(new BucketEntity(entityType, Services.BUCKET.getFluidOfBucketItem(bucket), bucket));
                 }
             }
         }
