@@ -50,6 +50,7 @@ tasks.withType(JavaCompile).matching(notNeoTask).configureEach {
 }
 
 tasks.withType(Javadoc).matching(notNeoTask).configureEach {
+    options.tags = [ "reason" ]
     source(project(":common").sourceSets.main.allJava)
 }
 
