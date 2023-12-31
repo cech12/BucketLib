@@ -52,7 +52,7 @@ public class NeoforgeFluidHelper implements IFluidHelper {
 
     @Override
     public Fluid getContainedFluid(ItemStack stack) {
-        return FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY).getFluid();
+        return FluidUtil.getFluidHandler(stack).map(fluidHandler -> fluidHandler.getFluidInTank(0)).orElse(FluidStack.EMPTY).getFluid();
     }
 
     @Override

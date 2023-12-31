@@ -55,6 +55,7 @@ jobs:
     with:
       java-version: 17
       subproject: forge
+      title-prefix: forge-
       curseforge-id: 560156
       game-versions: |
         1.20.2
@@ -72,6 +73,7 @@ jobs:
     with:
       java-version: 17
       subproject: forge
+      title-prefix: forge-
       modrinth-id: DItE655o
       game-versions: |
         1.20.2
@@ -89,6 +91,7 @@ jobs:
     with:
       java-version: 17
       subproject: neoforge
+      title-prefix: neoforge-
       curseforge-id: 560156
       game-versions: |
         1.20.2
@@ -106,6 +109,7 @@ jobs:
     with:
       java-version: 17
       subproject: neoforge
+      title-prefix: neoforge-
       modrinth-id: DItE655o
       game-versions: |
         1.20.2
