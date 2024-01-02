@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.2-3.0.0.1] - 2024-01-02
+### Changed
+- fixed building api jar
+
 ## [1.20.2-3.0.0.0] - 2023-12-31
 ### Changed
 - Move to Multiloader mod template to support Forge and Neoforge

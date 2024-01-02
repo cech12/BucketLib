@@ -58,8 +58,16 @@ tasks.named("sourcesJar", Jar) {
     from(project(":common").sourceSets.main.allSource)
 }
 
+tasks.named("apiJar", Jar) {
+    from(project(":common").sourceSets.main.allSource)
+}
+
 tasks.withType(ProcessResources).matching(notNeoTask).configureEach {
     from project(":common").sourceSets.main.resources
+}
+
+artifacts {
+    archives apiJar
 }
 
 publishing {
