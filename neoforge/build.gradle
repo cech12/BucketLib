@@ -1,6 +1,5 @@
 plugins {
     id 'idea'
-    id 'maven-publish'
     id 'net.neoforged.gradle.userdev' version '7.0.41'
     id 'java-library'
 }
@@ -68,31 +67,4 @@ tasks.withType(ProcessResources).matching(notNeoTask).configureEach {
 
 artifacts {
     archives apiJar
-}
-
-publishing {
-    publications {
-        register('mavenJava', MavenPublication) {
-            artifact jar
-            artifact apiJar
-            artifact javadocJar
-            artifact sourcesJar
-
-            groupId = project.group
-            artifactId project.archivesBaseName
-            version project.version
-
-            // Filter any dependencies from appearing in the pom.xml
-            pom.withXml {
-                asNode().dependencies.dependency.each { dep ->
-                    assert dep.parent().remove(dep)
-                }
-            }
-        }
-    }
-    repositories {
-        maven {
-            url "file://" + System.getenv("local_maven")
-        }
-    }
 }

@@ -1,6 +1,5 @@
 plugins {
     id 'idea'
-    id 'maven-publish'
     id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
     id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
 }
@@ -93,30 +92,3 @@ artifacts {
 }
 
 jar.finalizedBy('reobfJar')
-
-publishing {
-    publications {
-        register('mavenJava', MavenPublication) {
-            artifact jar
-            artifact apiJar
-            artifact javadocJar
-            artifact sourcesJar
-
-            groupId = project.group
-            artifactId project.archivesBaseName
-            version project.version
-
-            // Filter any dependencies from appearing in the pom.xml
-            pom.withXml {
-                asNode().dependencies.dependency.each { dep ->
-                    assert dep.parent().remove(dep)
-                }
-            }
-        }
-    }
-    repositories {
-        maven {
-            url "file://" + System.getenv("local_maven")
-        }
-    }
-}
