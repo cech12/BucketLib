@@ -7,6 +7,8 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
 
+    version "$project.minecraft_version-$project.mod_version"
+
     java.toolchain.languageVersion = JavaLanguageVersion.of(17)
     java.withSourcesJar()
     java.withJavadocJar()
@@ -99,7 +101,7 @@ subprojects {
             maven(MavenPublication) {
                 groupId project.group
                 artifactId project.name
-                version "$project.minecraft_version-$project.version"
+                version "$project.minecraft_version-$project.mod_version"
                 from components.java
 
                 // Filter any dependencies from appearing in the pom.xml
