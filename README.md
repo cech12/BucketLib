@@ -33,21 +33,22 @@ Add the following to your `build.gradle` file:
 
 ```groovy
 repositories {
-    maven { url 'https://jitpack.io' }
+    maven {
+      name 'Jitpack'
+      url 'https://jitpack.io'
+    }
 }
 
 dependencies {
-    compileOnly fg.deobf("com.github.cech12:BucketLib:${project.bucketlib_version}:api")
-    runtimeOnly fg.deobf("com.github.cech12:BucketLib:${project.bucketlib_version}")
+    implementation fg.deobf("com.github.cech12:BucketLib:${loader}:${bucketlib_version}")
 }
 ```
 
-Replace `${project.bucketlib_version}` with the version of BucketLib that you want to use. The actual versions can be found [here](https://jitpack.io/api/builds/com.github.cech12/BucketLib) or on the Github Releases page.
+Replace `${loader}` with the loader (`forge` or `neoforge`) you want to use.
 
-### Since BucketLib 1.19.3-1.2.0.0
+Replace `${bucketlib_version}` with the version of BucketLib that you want to use. The actual versions can be found [here](https://jitpack.io/api/builds/com.github.cech12/BucketLib) or on the Github Releases page.
 
-BucketLib 1.19.3-1.2.0.0 added mixins and developers will need to make sure to tweak their run configurations in order to launch the game in their development environment if using this version or newer as a dependency.
-
+BucketLib adds mixins and developers need to make sure to tweak their run configurations in order to launch the game in their development environment.
 Add both of these lines to the `configureEach {}` run configuration block in the `build.gradle` (or to both the `client {}` and `server {}`). These can be placed anywhere within the run configuration, the order does not matter.
 
 ```groovy
@@ -56,5 +57,7 @@ property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg
 ```
 
 Don't forget to re-generate your IDE runs. (`genIntellijRuns`, `genEclipseRuns`, or `genVSCodeRuns`)
+
+Before BucketLib ***1.20.2-3.0.0.0*** the `build.gradle` file adjustments were different.
 
 For detailed information please see the [Developer Guide](https://github.com/cech12/BucketLib/wiki/Developer-Guide).
