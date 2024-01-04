@@ -34,12 +34,12 @@ public class NeoforgeRegistryHelper implements IRegistryHelper {
 
     @Override
     public Block getBlock(ResourceLocation location) {
-        return null;
+        return BuiltInRegistries.BLOCK.get(location);
     }
 
     @Override
     public ResourceLocation getBlockLocation(Block block) {
-        return null;
+        return BuiltInRegistries.BLOCK.getKey(block);
     }
 
     @Override

@@ -31,12 +31,12 @@ public class ForgeRegistryHelper implements IRegistryHelper {
 
     @Override
     public Block getBlock(ResourceLocation location) {
-        return null;
+        return ForgeRegistries.BLOCKS.getValue(location);
     }
 
     @Override
     public ResourceLocation getBlockLocation(Block block) {
-        return null;
+        return ForgeRegistries.BLOCKS.getKey(block);
     }
 
     @Override
