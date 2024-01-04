@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [1.20.2-3.0.0.5] - 2024-01-04
 ### Fixed
 - powder snow buckets were missing
+- entity buckets could not be emptied using a dispenser
 
 ## [1.20.2-3.0.0.4] - 2024-01-03
 ### Fixed
