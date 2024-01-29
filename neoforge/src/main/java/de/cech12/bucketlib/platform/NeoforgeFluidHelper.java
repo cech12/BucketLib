@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
+import net.neoforged.neoforge.common.EffectCures;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.fluids.*;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -91,7 +92,7 @@ public class NeoforgeFluidHelper implements IFluidHelper {
 
     @Override
     public void curePotionEffects(LivingEntity entity, ItemStack curativeItem) {
-        entity.curePotionEffects(curativeItem);
+        entity.removeEffectsCuredBy(EffectCures.MILK);
     }
 
 }

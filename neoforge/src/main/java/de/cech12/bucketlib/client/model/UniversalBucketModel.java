@@ -161,7 +161,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
 
         if (baseSprite != null) {
             // build base (insidest)
-            var unbaked = UnbakedGeometryHelper.createUnbakedItemElements(0, baseSprite.contents());
+            var unbaked = UnbakedGeometryHelper.createUnbakedItemElements(0, baseSprite);
             var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> baseSprite, modelState, modelLocation);
             modelBuilder.addQuads(normalRenderTypes, quads);
         }
@@ -169,7 +169,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         if (otherContentSprite != null) {
             //layer 2 to avoid coloring the entity layer
             var transformedState = new SimpleModelState(modelState.getRotation().compose(DEPTH_OFFSET_TRANSFORM), modelState.isUvLocked());
-            var unbaked = UnbakedGeometryHelper.createUnbakedItemElements(2, otherContentSprite.contents());
+            var unbaked = UnbakedGeometryHelper.createUnbakedItemElements(2, otherContentSprite);
             TextureAtlasSprite finalOtherContentSprite = otherContentSprite;
             var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> finalOtherContentSprite, transformedState, modelLocation);
             modelBuilder.addQuads(normalRenderTypes, quads);
@@ -178,7 +178,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
             if (templateSprite != null) {
                 // build liquid layer (inside)
                 var transformedState = new SimpleModelState(modelState.getRotation().compose(DEPTH_OFFSET_TRANSFORM), modelState.isUvLocked());
-                var unbaked = UnbakedGeometryHelper.createUnbakedItemMaskElements(1, templateSprite.contents()); // Use template as mask
+                var unbaked = UnbakedGeometryHelper.createUnbakedItemMaskElements(1, templateSprite); // Use template as mask
                 var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> fluidSprite, transformedState, modelLocation); // Bake with fluid texture
 
                 var unlit = fluid.getFluidType().getLightLevel() > 0;

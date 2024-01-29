@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.4-3.1.0.0] - 2024-01-29
+### Changed
+- Update to Minecraft 1.20.4 (Forge 49.0.22, Neoforge 20.4.138-beta)
+- Update JEI support to 17.3.0.43 (Forge & Neoforge)
+
 ## [1.20.2-3.0.0.5] - 2024-01-04
 ### Fixed
 - powder snow buckets were missing

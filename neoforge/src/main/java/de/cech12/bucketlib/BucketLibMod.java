@@ -7,6 +7,7 @@ import de.cech12.bucketlib.api.crafting.FluidIngredient;
 import de.cech12.bucketlib.api.crafting.MilkIngredient;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.item.UniversalBucketDispenseBehaviour;
+import de.cech12.bucketlib.item.UniversalBucketFluidHandler;
 import de.cech12.bucketlib.item.crafting.BucketDyeingRecipe;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.ColorUtil;
@@ -26,6 +27,8 @@ import net.neoforged.fml.DistExecutor;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.crafting.IngredientType;
@@ -61,6 +64,7 @@ public class BucketLibMod {
         CommonLoader.init();
 
         eventBus.addListener(this::commonSetup);
+        eventBus.addListener(this::registerCapabilities);
         eventBus.addListener(this::processIMC);
         eventBus.addListener(this::addItemsToTabs);
 
@@ -77,6 +81,12 @@ public class BucketLibMod {
     private void commonSetup(FMLCommonSetupEvent event) {
         //Ensure that the tags are initialized
         BucketLibTags.init();
+    }
+
+    private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        for (Item item : buckets) {
+            event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new UniversalBucketFluidHandler(stack), item);
+        }
     }
 
     private void processIMC(final InterModProcessEvent event) {
