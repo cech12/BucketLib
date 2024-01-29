@@ -28,20 +28,24 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.capabilities.ICapabilityProvider;
+import net.neoforged.neoforge.capabilities.ItemCapability;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Mod(BucketLib.MOD_ID)
@@ -64,7 +68,6 @@ public class BucketLibMod {
         CommonLoader.init();
 
         eventBus.addListener(this::commonSetup);
-        eventBus.addListener(this::registerCapabilities);
         eventBus.addListener(this::processIMC);
         eventBus.addListener(this::addItemsToTabs);
 
@@ -81,12 +84,6 @@ public class BucketLibMod {
     private void commonSetup(FMLCommonSetupEvent event) {
         //Ensure that the tags are initialized
         BucketLibTags.init();
-    }
-
-    private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        for (Item item : buckets) {
-            event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new UniversalBucketFluidHandler(stack), item);
-        }
     }
 
     private void processIMC(final InterModProcessEvent event) {
@@ -118,6 +115,15 @@ public class BucketLibMod {
 
     private void registerBucket(UniversalBucketItem bucket) {
         buckets.add(bucket);
+        //register item capability, because RegisterCapabilitiesEvent fires before InterModProcessEvent
+        try {
+            Field providersField = ItemCapability.class.getDeclaredField("providers");
+            providersField.setAccessible(true);
+            Map<Item, List<ICapabilityProvider<ItemStack, Void, IFluidHandlerItem>>> providers = (Map<Item, List<ICapabilityProvider<ItemStack, Void, IFluidHandlerItem>>>) providersField.get(Capabilities.FluidHandler.ITEM);
+            (providers.computeIfAbsent(bucket, (i) -> new ArrayList<>())).add((stack, ctx) -> new UniversalBucketFluidHandler(stack));
+        } catch (IllegalAccessException | NoSuchFieldException ex) {
+            LOGGER.error("Bucket could not be registered completely. The capability provider registration failed.", ex);
+        }
         //register dispense behaviour
         DispenserBlock.registerBehavior(bucket, UniversalBucketDispenseBehaviour.getInstance());
         //register color
