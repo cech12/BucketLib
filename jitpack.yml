@@ -8,8 +8,8 @@ before_install:
 #  - then rm -r ./.gradle/
 #  - else echo gradle cache was not cleared
 #  - fi
-  - sdk install java 17.0.7-tem
-  - sdk use java 17.0.7-tem
+  - sdk install java 17.0.10-tem
+  - sdk use java 17.0.10-tem
 install:
 #  - ./gradlew clean -Pgroup=$GROUP -Pversion=$VERSION -xtest assemble publishToMavenLocal --stacktrace --debug
   - ./gradlew assemble -Pgroup=$GROUP -Pversion=$VERSION publishToMavenLocal
