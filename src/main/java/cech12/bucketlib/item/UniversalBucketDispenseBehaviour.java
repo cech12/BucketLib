@@ -88,7 +88,7 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
             Block placeBlock = BucketLibUtil.getBlock(stack);
             if (placeBlock != null && placeBlock.asItem() instanceof DispensibleContainerItem dispensibleContainerItem) {
                 if (dispensibleContainerItem.emptyContents(null, level, placePosition, null)) {
-                    return BucketLibUtil.removeBlock(stack);
+                    return BucketLibUtil.removeBlock(stack, true);
                 }
             }
         } else if (BucketLibUtil.containsEntityType(stack)) {

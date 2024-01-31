@@ -66,7 +66,9 @@ public class EmptyIngredient extends Ingredient {
     public ItemStack[] getItems() {
         if (this.matchingStacks == null) {
             ArrayList<ItemStack> stacks = new ArrayList<>();
-            stacks.add(new ItemStack(Items.BUCKET));
+            if (this.item == null && this.tag == null) {
+                stacks.add(new ItemStack(Items.BUCKET));
+            }
             BucketLib.getRegisteredBuckets().forEach(universalBucketItem -> {
                 ItemStack universalBucketItemStack = new ItemStack(universalBucketItem);
                 if (this.item != null && universalBucketItem == this.item

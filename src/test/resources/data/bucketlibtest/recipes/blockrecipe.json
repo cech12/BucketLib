@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "type": "bucketlib:block",
+      "block": "minecraft:powder_snow"
+    }
+  ],
+  "result": {
+    "item": "minecraft:snowball"
+  }
+}

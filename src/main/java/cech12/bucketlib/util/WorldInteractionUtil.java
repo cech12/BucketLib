@@ -110,7 +110,7 @@ public class WorldInteractionUtil {
                 player.getAbilities().instabuild = previousInstabuildValue;
                 player.setItemInHand(interactionHand, itemstack);
                 if (interactionResult.consumesAction()) {
-                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack), interactionHand, true));
+                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack, true), interactionHand, true));
                 }
             }
         }

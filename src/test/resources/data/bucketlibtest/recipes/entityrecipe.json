@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "type": "bucketlib:entity",
+      "entity": "minecraft:salmon"
+    }
+  ],
+  "result": {
+    "item": "minecraft:raw_iron"
+  }
+}

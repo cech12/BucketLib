@@ -82,6 +82,15 @@ public class RegistryUtil {
         return bucketEntities;
     }
 
+    public static BucketEntity getBucketEntity(EntityType<?> entityType) {
+        for (BucketEntity bucketEntity : getBucketEntities()) {
+            if (bucketEntity.entityType() == entityType) {
+                return bucketEntity;
+            }
+        }
+        return null;
+    }
+
     public record BucketBlock(Block block, SolidBucketItem bucketItem) {}
 
     public record BucketEntity(EntityType<?> entityType, Fluid fluid, MobBucketItem bucketItem) {}

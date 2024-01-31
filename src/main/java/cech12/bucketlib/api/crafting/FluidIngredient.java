@@ -2,6 +2,7 @@ package cech12.bucketlib.api.crafting;
 
 import cech12.bucketlib.BucketLib;
 import cech12.bucketlib.api.BucketLibApi;
+import cech12.bucketlib.util.BucketLibUtil;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -76,30 +77,28 @@ public class FluidIngredient extends Ingredient {
     public ItemStack[] getItems() {
         if (this.matchingStacks == null) {
             ArrayList<ItemStack> stacks = new ArrayList<>();
-            BucketLib.getRegisteredBuckets().forEach(universalBucketItem -> {
-                ItemStack stack = new ItemStack(universalBucketItem);
-                List<Fluid> fluids = new ArrayList<>();
-                ITagManager<Fluid> fluidTags = ForgeRegistries.FLUIDS.tags();
-                if (this.tag != null && fluidTags != null) {
-                    fluidTags.getTag(this.tag).forEach(fluids::add);
-                } else if (this.fluid != null) {
-                    fluids.add(this.fluid);
+            List<Fluid> fluids = new ArrayList<>();
+            ITagManager<Fluid> fluidTags = ForgeRegistries.FLUIDS.tags();
+            if (this.tag != null && fluidTags != null) {
+                fluidTags.getTag(this.tag).forEach(fluids::add);
+            } else if (this.fluid != null) {
+                fluids.add(this.fluid);
+            }
+            //vanilla buckets
+            for (Fluid fluid : fluids) {
+                Item bucketItem = fluid.getBucket();
+                if (bucketItem instanceof BucketItem specificBucketItem && specificBucketItem.getFluid() == fluid) {
+                    stacks.add(new ItemStack(bucketItem));
                 }
-                for (Fluid fluid : fluids) {
-                    Item bucketItem = fluid.getBucket();
-                    if (!(bucketItem instanceof BucketItem) || ((BucketItem) bucketItem).getFluid() != fluid) {
-                        continue;
+            }
+            //bucket lib buckets
+            for (Fluid fluid : fluids) {
+                BucketLib.getRegisteredBuckets().forEach(universalBucketItem -> {
+                    if (universalBucketItem.canHoldFluid(fluid)) {
+                        stacks.add(BucketLibUtil.addFluid(new ItemStack(universalBucketItem), fluid));
                     }
-                    stacks.add(new ItemStack(fluid.getBucket()));
-                    FluidStack fluidStack = new FluidStack(fluid, FluidType.BUCKET_VOLUME);
-                    FluidUtil.getFluidHandler(stack).ifPresent(fluidHandler -> {
-                        int filledAmount = fluidHandler.fill(fluidStack, IFluidHandler.FluidAction.EXECUTE);
-                        if (filledAmount == FluidType.BUCKET_VOLUME) {
-                            stacks.add(fluidHandler.getContainer());
-                        }
-                    });
-                }
-            });
+                });
+            }
             this.matchingStacks = stacks.toArray(new ItemStack[0]);
         }
         return this.matchingStacks;
