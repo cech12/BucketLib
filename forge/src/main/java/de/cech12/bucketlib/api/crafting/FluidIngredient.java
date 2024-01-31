@@ -3,6 +3,7 @@ package de.cech12.bucketlib.api.crafting;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
+import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -79,30 +80,27 @@ public class FluidIngredient extends AbstractIngredient {
     public ItemStack[] getItems() {
         if (this.matchingStacks == null) {
             ArrayList<ItemStack> stacks = new ArrayList<>();
-            BucketLibMod.getRegisteredBuckets().forEach(universalBucketItem -> {
-                ItemStack stack = new ItemStack(universalBucketItem);
-                List<Fluid> fluids = new ArrayList<>();
-                ITagManager<Fluid> fluidTags = ForgeRegistries.FLUIDS.tags();
-                if (this.tag != null && fluidTags != null) {
-                    fluidTags.getTag(this.tag).forEach(fluids::add);
-                } else if (this.fluid != null) {
-                    fluids.add(this.fluid);
+            List<Fluid> fluids = new ArrayList<>();
+            ITagManager<Fluid> fluidTags = ForgeRegistries.FLUIDS.tags();
+            if (this.tag != null && fluidTags != null) {
+                fluidTags.getTag(this.tag).forEach(fluids::add);
+            } else if (this.fluid != null) {
+                fluids.add(this.fluid);
+            }
+            for (Fluid fluid : fluids) {
+                //vanilla bucket
+                Item bucketItem = fluid.getBucket();
+                if (!(bucketItem instanceof BucketItem) || ((BucketItem) bucketItem).getFluid() != fluid) {
+                    continue; //skip fluids that have no vanilla bucket
                 }
-                for (Fluid fluid : fluids) {
-                    Item bucketItem = fluid.getBucket();
-                    if (!(bucketItem instanceof BucketItem) || ((BucketItem) bucketItem).getFluid() != fluid) {
-                        continue;
+                stacks.add(new ItemStack(bucketItem));
+                //bucket lib buckets
+                BucketLibMod.getRegisteredBuckets().forEach(universalBucketItem -> {
+                    if (universalBucketItem.canHoldFluid(fluid)) {
+                        stacks.add(BucketLibUtil.addFluid(new ItemStack(universalBucketItem), fluid));
                     }
-                    stacks.add(new ItemStack(fluid.getBucket()));
-                    FluidStack fluidStack = new FluidStack(fluid, FluidType.BUCKET_VOLUME);
-                    FluidUtil.getFluidHandler(stack).ifPresent(fluidHandler -> {
-                        int filledAmount = fluidHandler.fill(fluidStack, IFluidHandler.FluidAction.EXECUTE);
-                        if (filledAmount == FluidType.BUCKET_VOLUME) {
-                            stacks.add(fluidHandler.getContainer());
-                        }
-                    });
-                }
-            });
+                });
+            }
             this.matchingStacks = stacks.toArray(new ItemStack[0]);
         }
         return this.matchingStacks;

@@ -276,9 +276,9 @@ public class BucketLibUtil {
         return itemStack.copy();
     }
 
-    public static ItemStack removeBlock(ItemStack itemStack) {
+    public static ItemStack removeBlock(ItemStack itemStack, boolean damage) {
         if (!containsMilk(itemStack)) {
-            return removeContent(itemStack);
+            return removeContent(itemStack, damage);
         }
         return itemStack.copy();
     }

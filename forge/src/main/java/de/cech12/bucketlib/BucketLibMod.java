@@ -3,7 +3,9 @@ package de.cech12.bucketlib;
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.api.BucketLibApi;
 import de.cech12.bucketlib.api.BucketLibTags;
+import de.cech12.bucketlib.api.crafting.BlockIngredient;
 import de.cech12.bucketlib.api.crafting.EmptyIngredient;
+import de.cech12.bucketlib.api.crafting.EntityIngredient;
 import de.cech12.bucketlib.api.crafting.FluidIngredient;
 import de.cech12.bucketlib.api.crafting.MilkIngredient;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
@@ -49,9 +51,11 @@ public class BucketLibMod {
 
     static {
         RECIPE_SERIALIZERS.register("bucket_dyeing", () -> BucketDyeingRecipe.Serializer.INSTANCE);
+        INGREDIENT_SERIALIZERS.register("block", () -> BlockIngredient.SERIALIZER);
+        INGREDIENT_SERIALIZERS.register("empty", () -> EmptyIngredient.SERIALIZER);
+        INGREDIENT_SERIALIZERS.register("entity", () -> EntityIngredient.SERIALIZER);
         INGREDIENT_SERIALIZERS.register("fluid", () -> FluidIngredient.SERIALIZER);
         INGREDIENT_SERIALIZERS.register("milk", () -> MilkIngredient.SERIALIZER);
-        INGREDIENT_SERIALIZERS.register("empty", () -> EmptyIngredient.SERIALIZER);
     }
 
     private static final Logger LOGGER = LogManager.getLogger();

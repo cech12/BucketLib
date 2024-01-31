@@ -3,6 +3,7 @@ package de.cech12.bucketlib.api.crafting;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
+import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -75,33 +76,30 @@ public class FluidIngredient extends Ingredient {
     public ItemStack[] getItems() {
         if (this.matchingStacks == null) {
             ArrayList<ItemStack> stacks = new ArrayList<>();
-            BucketLibMod.getRegisteredBuckets().forEach(universalBucketItem -> {
-                ItemStack stack = new ItemStack(universalBucketItem);
-                List<Fluid> fluids = new ArrayList<>();
-                Optional<HolderSet.Named<Fluid>> fluidTag = Optional.empty();
-                if (this.tag != null) {
-                    fluidTag = BuiltInRegistries.FLUID.getTag(this.tag);
+            List<Fluid> fluids = new ArrayList<>();
+            Optional<HolderSet.Named<Fluid>> fluidTag = Optional.empty();
+            if (this.tag != null) {
+                fluidTag = BuiltInRegistries.FLUID.getTag(this.tag);
+            }
+            if (fluidTag.isPresent()) {
+                fluidTag.get().forEach(fluid -> fluids.add(fluid.value()));
+            } else if (this.fluid != null) {
+                fluids.add(this.fluid);
+            }
+            for (Fluid fluid : fluids) {
+                //vanilla bucket
+                Item bucketItem = fluid.getBucket();
+                if (!(bucketItem instanceof BucketItem) || ((BucketItem) bucketItem).getFluid() != fluid) {
+                    continue; //skip fluids that have no vanilla bucket
                 }
-                if (fluidTag.isPresent()) {
-                    fluidTag.get().forEach(fluid -> fluids.add(fluid.value()));
-                } else if (this.fluid != null) {
-                    fluids.add(this.fluid);
-                }
-                for (Fluid fluid : fluids) {
-                    Item bucketItem = fluid.getBucket();
-                    if (!(bucketItem instanceof BucketItem) || ((BucketItem) bucketItem).getFluid() != fluid) {
-                        continue;
+                stacks.add(new ItemStack(bucketItem));
+                //bucket lib buckets
+                BucketLibMod.getRegisteredBuckets().forEach(universalBucketItem -> {
+                    if (universalBucketItem.canHoldFluid(fluid)) {
+                        stacks.add(BucketLibUtil.addFluid(new ItemStack(universalBucketItem), fluid));
                     }
-                    stacks.add(new ItemStack(fluid.getBucket()));
-                    FluidStack fluidStack = new FluidStack(fluid, FluidType.BUCKET_VOLUME);
-                    FluidUtil.getFluidHandler(stack).ifPresent(fluidHandler -> {
-                        int filledAmount = fluidHandler.fill(fluidStack, IFluidHandler.FluidAction.EXECUTE);
-                        if (filledAmount == FluidType.BUCKET_VOLUME) {
-                            stacks.add(fluidHandler.getContainer());
-                        }
-                    });
-                }
-            });
+                });
+            }
             this.matchingStacks = stacks.toArray(new ItemStack[0]);
         }
         return this.matchingStacks;

@@ -262,7 +262,7 @@ public class UniversalBucketItem extends Item {
                         InteractionResult interactionResult = fakeStack.useOn(new UseOnContext(player, interactionHand, blockHitResult));
                         player.setItemInHand(interactionHand, itemstack);
                         if (interactionResult.consumesAction()) {
-                            return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack), interactionHand));
+                            return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack, true), interactionHand));
                         }
                     }
                 }
@@ -402,8 +402,20 @@ public class UniversalBucketItem extends Item {
         if (BucketLibUtil.isAffectedByInfinityEnchantment(itemStack)) {
             return itemStack.copy();
         }
-        // AFAIK this method is only used by fluid handling. Other things like entities, blocks, etc. should not be affected by this.
-        return BucketLibUtil.removeFluid(itemStack);
+        //remove everything from bucket
+        ItemStack result = itemStack.copy();
+        boolean damaged = BucketLibUtil.containsFluid(result); //damaging is done by fluid handler
+        if (BucketLibUtil.containsBlock(result)) {
+            result = BucketLibUtil.removeBlock(result, !damaged);
+            damaged = true;
+        }
+        if (BucketLibUtil.containsEntityType(result)) {
+            result = BucketLibUtil.removeEntityType(result, !damaged);
+        }
+        if (BucketLibUtil.containsFluid(result) || BucketLibUtil.containsMilk(result)) {
+            result = BucketLibUtil.removeFluid(result);
+        }
+        return result;
     }
 
     private boolean getBooleanProperty(Supplier<Boolean> config, boolean defaultValue) {
