@@ -2,6 +2,7 @@ package cech12.bucketlib;
 
 import cech12.bucketlib.api.BucketLibApi;
 import cech12.bucketlib.api.BucketLibTags;
+import cech12.bucketlib.api.crafting.EmptyIngredient;
 import cech12.bucketlib.api.crafting.FluidIngredient;
 import cech12.bucketlib.api.crafting.MilkIngredient;
 import cech12.bucketlib.config.ServerConfig;
@@ -70,6 +71,7 @@ public class BucketLib {
         //ingredient serializer
         CraftingHelper.register(FluidIngredient.Serializer.NAME, FluidIngredient.Serializer.INSTANCE);
         CraftingHelper.register(MilkIngredient.Serializer.NAME, MilkIngredient.Serializer.INSTANCE);
+        CraftingHelper.register(EmptyIngredient.Serializer.NAME, EmptyIngredient.Serializer.INSTANCE);
     }
 
     public static List<UniversalBucketItem> getRegisteredBuckets() {

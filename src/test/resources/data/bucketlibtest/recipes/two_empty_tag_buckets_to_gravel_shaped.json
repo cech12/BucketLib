@@ -6,7 +6,8 @@
   ],
   "key": {
     "B": {
-      "item": "bucketlibtest:test_bucket"
+      "type": "bucketlib:empty",
+      "tag": "bucketlibtest:empty_buckets"
     }
   },
   "result": {

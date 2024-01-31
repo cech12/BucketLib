@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "bucketlibtest:test_bucket"
+    }
+  ],
+  "result": {
+    "item": "minecraft:dirt"
+  }
+}

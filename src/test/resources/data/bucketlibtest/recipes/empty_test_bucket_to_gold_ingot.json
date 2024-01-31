@@ -3,10 +3,11 @@
   "category": "misc",
   "ingredients": [
     {
+      "type": "bucketlib:empty",
       "item": "bucketlibtest:test_bucket"
     }
   ],
   "result": {
-    "item": "minecraft:gravel"
+    "item": "minecraft:gold_ingot"
   }
 }

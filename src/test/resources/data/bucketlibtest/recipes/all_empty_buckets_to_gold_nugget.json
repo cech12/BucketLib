@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "type": "bucketlib:empty"
+    }
+  ],
+  "result": {
+    "item": "minecraft:gold_nugget"
+  }
+}

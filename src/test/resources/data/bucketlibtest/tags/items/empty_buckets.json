@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "bucketlibtest:test_bucket",
+    "bucketlibtest:durability_bucket"
+  ]
+}
