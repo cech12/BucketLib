@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.4-3.1.1.0] - 2024-01-31
+### Added
+- new ingredient type "bucketlib:empty" to specify an empty bucket in a recipe (thanks to FreeFull for the idea) #34
+
 ## [1.20.4-3.1.0.1] - 2024-01-29
 ### Fixed
 - Fluid capability in NeoForge was not working correctly 
