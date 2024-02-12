@@ -1,6 +1,9 @@
 package de.cech12.bucketlib.platform;
 
 import de.cech12.bucketlib.platform.services.IPlatformHelper;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.ModList;
@@ -34,6 +37,11 @@ public class NeoforgePlatformHelper implements IPlatformHelper {
             return ServerLifecycleHooks.getCurrentServer().overworld();
         }
         return LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT).orElse(null);
+    }
+
+    @Override
+    public ResourceKey<CreativeModeTab> getToolsAndUtilitiesTab() {
+        return CreativeModeTabs.TOOLS_AND_UTILITIES;
     }
 
 }

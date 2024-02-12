@@ -2,7 +2,7 @@
   "required": true,
   "package": "de.cech12.bucketlib.mixin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "mixins.bucketlib.refmap.json",
+  "refmap": "bucketlib.refmap.json",
   "mixins": [
     "AxolotlAiMixin",
     "ItemMixin"

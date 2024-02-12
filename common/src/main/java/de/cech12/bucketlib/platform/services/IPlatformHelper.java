@@ -1,5 +1,7 @@
 package de.cech12.bucketlib.platform.services;
 
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.Level;
 
 /**
@@ -38,6 +40,18 @@ public interface IPlatformHelper {
         return isDevelopmentEnvironment() ? "development" : "production";
     }
 
+    /**
+     * Gets the current level.
+     *
+     * @return the current level.
+     */
     Level getCurrentLevel();
+
+    /**
+     * Gets the TOOLS_AND_UTILITIES creative tab.
+     *
+     * @return TOOLS_AND_UTILITIES creative tab.
+     */
+    ResourceKey<CreativeModeTab> getToolsAndUtilitiesTab();
 
 }
