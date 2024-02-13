@@ -2,6 +2,7 @@ package cech12.bucketlib.api.crafting;
 
 import cech12.bucketlib.BucketLib;
 import cech12.bucketlib.api.BucketLibApi;
+import cech12.bucketlib.api.item.UniversalBucketItem;
 import cech12.bucketlib.util.BucketLibUtil;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -55,7 +56,7 @@ public class EmptyIngredient extends Ingredient {
         }
         if (this.item != null && itemStack.getItem() == this.item
                 || this.tag != null && itemStack.is(this.tag)
-                || this.item == null && this.tag == null) {
+                || this.item == null && this.tag == null && itemStack.getItem() instanceof UniversalBucketItem) {
             return BucketLibUtil.isEmpty(itemStack);
         }
         return false;

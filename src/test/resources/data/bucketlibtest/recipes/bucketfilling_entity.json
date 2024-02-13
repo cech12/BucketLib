@@ -1,0 +1,15 @@
+{
+  "type": "bucketlib:bucket_filling_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "type": "bucketlib:empty"
+    },
+    {
+      "item": "minecraft:salmon"
+    }
+  ],
+  "filling_type": "entity",
+  "entity": "minecraft:salmon",
+  "fluid": "minecraft:water"
+}

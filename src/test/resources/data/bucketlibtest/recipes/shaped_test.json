@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SBS"
+  ],
+  "key": {
+    "B": {
+      "type": "bucketlib:empty"
+    },
+    "S" : {
+      "item": "minecraft:snowball"
+    }
+  },
+  "result": {
+    "item": "minecraft:wooden_shovel"
+  }
+}

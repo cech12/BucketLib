@@ -1,0 +1,14 @@
+{
+  "type": "bucketlib:bucket_filling_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "type": "bucketlib:empty",
+      "item": "bucketlibtest:test_bucket"
+    },
+    {
+      "item": "minecraft:bone_meal"
+    }
+  ],
+  "filling_type": "milk"
+}

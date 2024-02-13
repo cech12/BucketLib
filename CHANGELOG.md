@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.1-2.3.3.0] - 2024-02-13
+### Added
+- new recipe type "bucketlib:bucket_filling_shaped" to specify crafting recipes that fill buckets
+- new recipe type "bucketlib:bucket_filling_shapeless" to specify crafting recipes that fill buckets
+
+### Fixed
+- ingredients of type "bucketlib:empty" detected some not intended items
+
 ## [1.20.1-2.3.2.0] - 2024-01-31
 ### Added
 - new ingredient type "bucketlib:block" to specify buckets with blocks in a recipe

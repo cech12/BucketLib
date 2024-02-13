@@ -11,6 +11,8 @@ import cech12.bucketlib.config.ServerConfig;
 import cech12.bucketlib.api.item.UniversalBucketItem;
 import cech12.bucketlib.item.UniversalBucketDispenseBehaviour;
 import cech12.bucketlib.item.crafting.BucketDyeingRecipe;
+import cech12.bucketlib.item.crafting.BucketFillingShapedRecipe;
+import cech12.bucketlib.item.crafting.BucketFillingShapelessRecipe;
 import cech12.bucketlib.util.BucketLibUtil;
 import cech12.bucketlib.util.ColorUtil;
 import cech12.bucketlib.util.RegistryUtil;
@@ -53,6 +55,8 @@ public class BucketLib {
 
     public static DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, BucketLibApi.MOD_ID);
     public static RegistryObject<RecipeSerializer<?>> BUCKET_DYEING_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("bucket_dyeing", () -> BucketDyeingRecipe.Serializer.INSTANCE);
+    public static RegistryObject<RecipeSerializer<?>> BUCKET_FILLING_SHAPED_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("bucket_filling_shaped", () -> BucketFillingShapedRecipe.Serializer.INSTANCE);
+    public static RegistryObject<RecipeSerializer<?>> BUCKET_FILLING_SHAPELESS_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("bucket_filling_shapeless", () -> BucketFillingShapelessRecipe.Serializer.INSTANCE);
 
     private static final Logger LOGGER = LogManager.getLogger();
 

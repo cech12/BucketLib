@@ -1,0 +1,17 @@
+{
+  "type": "bucketlib:bucket_filling_shaped",
+  "category": "misc",
+  "pattern": [
+    "BS"
+  ],
+  "key": {
+    "B": {
+      "type": "bucketlib:empty"
+    },
+    "S" : {
+      "item": "minecraft:snowball"
+    }
+  },
+  "filling_type": "fluid",
+  "fluid": "minecraft:water"
+}
