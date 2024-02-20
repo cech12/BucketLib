@@ -28,4 +28,8 @@ public interface IRegistryHelper {
 
     Iterable<Fluid> getAllFluids();
 
+    Fluid getFluid(ResourceLocation location);
+
+    ResourceLocation getFluidLocation(Fluid fluid);
+
 }

@@ -48,4 +48,14 @@ public class ForgeRegistryHelper implements IRegistryHelper {
     public Iterable<Fluid> getAllFluids() {
         return ForgeRegistries.FLUIDS;
     }
+
+    @Override
+    public Fluid getFluid(ResourceLocation location) {
+        return ForgeRegistries.FLUIDS.getValue(location);
+    }
+
+    @Override
+    public ResourceLocation getFluidLocation(Fluid fluid) {
+        return ForgeRegistries.FLUIDS.getKey(fluid);
+    }
 }

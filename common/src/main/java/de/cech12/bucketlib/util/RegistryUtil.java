@@ -1,6 +1,13 @@
 package de.cech12.bucketlib.util;
 
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Decoder;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Encoder;
 import de.cech12.bucketlib.platform.Services;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.item.Item;
@@ -14,6 +21,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RegistryUtil {
+
+    public static Codec<Fluid> FLUID_CODEC = Codec.of(new Encoder<>() {
+        @Override
+        public <T> DataResult<T> encode(Fluid input, DynamicOps<T> ops, T prefix) {
+            return ops.mergeToPrimitive(prefix, ops.createString(Services.REGISTRY.getFluidLocation(input).toString()));
+        }
+    }, new Decoder<>() {
+        @Override
+        public <T> DataResult<Pair<Fluid, T>> decode(DynamicOps<T> ops, T input) {
+            return DataResult.success(Pair.of(Services.REGISTRY.getFluid(new ResourceLocation(ops.getStringValue(input).get().left().get())), ops.empty()));
+        }
+    });
+
+    public static Codec<Block> BLOCK_CODEC = Codec.of(new Encoder<>() {
+        @Override
+        public <T> DataResult<T> encode(Block input, DynamicOps<T> ops, T prefix) {
+            return ops.mergeToPrimitive(prefix, ops.createString(Services.REGISTRY.getBlockLocation(input).toString()));
+        }
+    }, new Decoder<>() {
+        @Override
+        public <T> DataResult<Pair<Block, T>> decode(DynamicOps<T> ops, T input) {
+            return DataResult.success(Pair.of(Services.REGISTRY.getBlock(new ResourceLocation(ops.getStringValue(input).get().left().get())), ops.empty()));
+        }
+    });
+
+    public static Codec<EntityType<?>> ENTITY_TYPE_CODEC = Codec.of(new Encoder<>() {
+        @Override
+        public <T> DataResult<T> encode(EntityType<?> input, DynamicOps<T> ops, T prefix) {
+            return ops.mergeToPrimitive(prefix, ops.createString(Services.REGISTRY.getEntityTypeLocation(input).toString()));
+        }
+    }, new Decoder<>() {
+        @Override
+        public <T> DataResult<Pair<EntityType<?>, T>> decode(DynamicOps<T> ops, T input) {
+            return DataResult.success(Pair.of(Services.REGISTRY.getEntityType(new ResourceLocation(ops.getStringValue(input).get().left().get())), ops.empty()));
+        }
+    });
 
     private static List<BucketBlock> bucketBlocks;
     private static List<BucketEntity> bucketEntities;

@@ -3,6 +3,7 @@ package de.cech12.bucketlib.api.crafting;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
+import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -56,7 +57,7 @@ public class EmptyIngredient extends Ingredient {
         }
         if (this.item != null && itemStack.getItem() == this.item
                 || this.tag != null && itemStack.is(this.tag)
-                || this.item == null && this.tag == null) {
+                || this.item == null && this.tag == null && itemStack.getItem() instanceof UniversalBucketItem) {
             return BucketLibUtil.isEmpty(itemStack);
         }
         return false;

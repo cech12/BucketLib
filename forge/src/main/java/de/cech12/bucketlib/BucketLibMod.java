@@ -11,6 +11,8 @@ import de.cech12.bucketlib.api.crafting.MilkIngredient;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.item.UniversalBucketDispenseBehaviour;
 import de.cech12.bucketlib.item.crafting.BucketDyeingRecipe;
+import de.cech12.bucketlib.item.crafting.BucketFillingShapedRecipe;
+import de.cech12.bucketlib.item.crafting.BucketFillingShapelessRecipe;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.ColorUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
@@ -51,6 +53,8 @@ public class BucketLibMod {
 
     static {
         RECIPE_SERIALIZERS.register("bucket_dyeing", () -> BucketDyeingRecipe.Serializer.INSTANCE);
+        RECIPE_SERIALIZERS.register("bucket_filling_shaped", () -> BucketFillingShapedRecipe.Serializer.INSTANCE);
+        RECIPE_SERIALIZERS.register("bucket_filling_shapeless", () -> BucketFillingShapelessRecipe.Serializer.INSTANCE);
         INGREDIENT_SERIALIZERS.register("block", () -> BlockIngredient.SERIALIZER);
         INGREDIENT_SERIALIZERS.register("empty", () -> EmptyIngredient.SERIALIZER);
         INGREDIENT_SERIALIZERS.register("entity", () -> EntityIngredient.SERIALIZER);

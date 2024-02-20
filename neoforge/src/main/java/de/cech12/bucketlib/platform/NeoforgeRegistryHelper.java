@@ -51,4 +51,14 @@ public class NeoforgeRegistryHelper implements IRegistryHelper {
     public Iterable<Fluid> getAllFluids() {
         return BuiltInRegistries.FLUID;
     }
+
+    @Override
+    public Fluid getFluid(ResourceLocation location) {
+        return BuiltInRegistries.FLUID.get(location);
+    }
+
+    @Override
+    public ResourceLocation getFluidLocation(Fluid fluid) {
+        return BuiltInRegistries.FLUID.getKey(fluid);
+    }
 }
