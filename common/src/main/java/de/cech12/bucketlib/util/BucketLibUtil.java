@@ -15,9 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MobBucketItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
@@ -25,7 +23,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
@@ -64,7 +61,12 @@ public class BucketLibUtil {
                     player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK, player.getSoundSource(), 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F, false);
                 }
                 try {
-                    Method method = LivingEntity.class.getDeclaredMethod("spawnItemParticles", ItemStack.class, int.class);
+                    Method method;
+                    try {
+                        method = LivingEntity.class.getDeclaredMethod("spawnItemParticles", ItemStack.class, int.class);
+                    } catch (NoSuchMethodException ex) {
+                        method = LivingEntity.class.getDeclaredMethod("m_21060_", ItemStack.class, int.class); //fallback to obfuscated method name
+                    }
                     method.setAccessible(true);
                     method.invoke(player, initialStack, 5);
                 } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {

@@ -71,7 +71,7 @@ public class ItemMixin {
      * @param stack ItemStack
      * @param cir CallbackInfoReturnable
      */
-    @Inject(at = @At("HEAD"), method = "getBarColor")
+    @Inject(at = @At("HEAD"), method = "getBarColor", cancellable = true)
     public void getBarColorProxy(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
         if (bucketLib$isUniversalBucket()) {
             int durability = bucketLib$getDurability();
