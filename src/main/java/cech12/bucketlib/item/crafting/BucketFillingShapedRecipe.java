@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
@@ -124,14 +125,22 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
             String s = GsonHelper.getAsString(json, "group", "");
             CraftingBookCategory category = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, "category", null), CraftingBookCategory.MISC);
             try {
-                Method keyFromJsonMethod = ShapedRecipe.class.getDeclaredMethod("keyFromJson", JsonObject.class);
-                keyFromJsonMethod.setAccessible(true);
-                Method shrinkMethod = ShapedRecipe.class.getDeclaredMethod("shrink", String[].class);
-                shrinkMethod.setAccessible(true);
-                Method patternFromJsonMethod = ShapedRecipe.class.getDeclaredMethod("patternFromJson", JsonArray.class);
-                patternFromJsonMethod.setAccessible(true);
-                Method dissolvePatternMethod = ShapedRecipe.class.getDeclaredMethod("dissolvePattern", String[].class , Map.class, int.class, int.class);
-                dissolvePatternMethod.setAccessible(true);
+                Method keyFromJsonMethod;
+                Method shrinkMethod;
+                Method patternFromJsonMethod;
+                Method dissolvePatternMethod;
+                try {
+                    keyFromJsonMethod = ObfuscationReflectionHelper.findMethod(ShapedRecipe.class, "keyFromJson", JsonObject.class);
+                    shrinkMethod = ObfuscationReflectionHelper.findMethod(ShapedRecipe.class, "shrink", String[].class);
+                    patternFromJsonMethod = ObfuscationReflectionHelper.findMethod(ShapedRecipe.class, "patternFromJson", JsonArray.class);
+                    dissolvePatternMethod = ObfuscationReflectionHelper.findMethod(ShapedRecipe.class, "dissolvePattern", String[].class , Map.class, int.class, int.class);
+                } catch (ObfuscationReflectionHelper.UnableToFindMethodException ex) {
+                    //fallback for Forge
+                    keyFromJsonMethod = ObfuscationReflectionHelper.findMethod(ShapedRecipe.class, "m_44210_", JsonObject.class);
+                    shrinkMethod = ObfuscationReflectionHelper.findMethod(ShapedRecipe.class, "m_44186_", String[].class);
+                    patternFromJsonMethod = ObfuscationReflectionHelper.findMethod(ShapedRecipe.class, "m_44196_", JsonArray.class);
+                    dissolvePatternMethod = ObfuscationReflectionHelper.findMethod(ShapedRecipe.class, "m_44202_", String[].class , Map.class, int.class, int.class);
+                }
 
                 Map<String, Ingredient> map = (Map<String, Ingredient>) keyFromJsonMethod.invoke(null, GsonHelper.getAsJsonObject(json, "key"));
                 String[] pattern = (String[]) patternFromJsonMethod.invoke(null, GsonHelper.getAsJsonArray(json, "pattern"));
@@ -158,7 +167,7 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
                     throw new JsonParseException("Cannot create a bucket filling recipe of fillingType \"" + fillingType + "\".");
                 }
                 return new BucketFillingShapedRecipe(id, s, category, width, height, ingredients, fillingType, fluid, block, entityType);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
+            } catch (IllegalAccessException | InvocationTargetException ex) {
                 throw new RuntimeException(ex);
             }
         }
