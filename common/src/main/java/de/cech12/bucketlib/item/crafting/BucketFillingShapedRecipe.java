@@ -37,7 +37,7 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
     private final EntityType<?> entityType;
 
     public BucketFillingShapedRecipe(String group, CraftingBookCategory category, ShapedRecipePattern pattern, BucketFillingType fillingType, Optional<Fluid> fluid, Optional<Block> block, Optional<EntityType<?>> entityType) {
-        super(group, category, pattern, getAffectedBucket(pattern.ingredients().stream().map(ingredient -> Arrays.stream(ingredient.getItems()).toList()).flatMap(List::stream).toList()));
+        super(group, category, pattern, getAssembledBucket(fillingType, fluid.orElse(null), block.orElse(null), entityType.orElse(null), pattern.ingredients().stream().map(ingredient -> Arrays.stream(ingredient.getItems()).toList()).flatMap(List::stream).toList()));
         this.category = category;
         this.pattern = pattern;
         this.fillingType = fillingType;
@@ -57,19 +57,19 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
         return ItemStack.EMPTY;
     }
 
-    private ItemStack getAssembledBucket(List<ItemStack> itemStacks) {
+    private static ItemStack getAssembledBucket(BucketFillingType fillingType, Fluid fluid, Block block, EntityType<?> entityType, List<ItemStack> itemStacks) {
         ItemStack bucket = getAffectedBucket(itemStacks);
         if (bucket.getItem() instanceof UniversalBucketItem universalBucketItem) {
-            if (this.fillingType == BucketFillingType.BLOCK && universalBucketItem.canHoldBlock(this.block)) {
-                return BucketLibUtil.addBlock(bucket, this.block);
-            } else if (this.fillingType == BucketFillingType.ENTITY && universalBucketItem.canHoldEntity(this.entityType) && (this.fluid == null || universalBucketItem.canHoldFluid(this.fluid))) {
-                if (this.fluid != null) {
-                    bucket = BucketLibUtil.addFluid(bucket, this.fluid);
+            if (fillingType == BucketFillingType.BLOCK && universalBucketItem.canHoldBlock(block)) {
+                return BucketLibUtil.addBlock(bucket, block);
+            } else if (fillingType == BucketFillingType.ENTITY && universalBucketItem.canHoldEntity(entityType) && (fluid == null || universalBucketItem.canHoldFluid(fluid))) {
+                if (fluid != null) {
+                    bucket = BucketLibUtil.addFluid(bucket, fluid);
                 }
-                return BucketLibUtil.addEntityType(bucket, this.entityType);
-            } else if (this.fillingType == BucketFillingType.FLUID && universalBucketItem.canHoldFluid(this.fluid)) {
-                return BucketLibUtil.addFluid(bucket, this.fluid);
-            } else if (this.fillingType == BucketFillingType.MILK && universalBucketItem.canMilkEntities()) {
+                return BucketLibUtil.addEntityType(bucket, entityType);
+            } else if (fillingType == BucketFillingType.FLUID && universalBucketItem.canHoldFluid(fluid)) {
+                return BucketLibUtil.addFluid(bucket, fluid);
+            } else if (fillingType == BucketFillingType.MILK && universalBucketItem.canMilkEntities()) {
                 return BucketLibUtil.addMilk(bucket);
             }
         }
@@ -99,7 +99,7 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
     @Override
     @Nonnull
     public ItemStack assemble(@Nonnull CraftingContainer inv, @Nonnull RegistryAccess registryAccess) {
-        return this.getAssembledBucket(inv.getItems());
+        return getAssembledBucket(this.fillingType, this.fluid, this.block, this.entityType, inv.getItems());
     }
 
 
