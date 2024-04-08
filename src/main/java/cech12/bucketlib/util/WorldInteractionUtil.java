@@ -80,16 +80,17 @@ public class WorldInteractionUtil {
 
     public static InteractionResultHolder<ItemStack> tryPlaceIntoCauldron(Level level, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         ItemStack itemstack = player.getItemInHand(interactionHand);
+        ItemStack itemStackWithSizeOne = itemstack.getCount() > 1 ? itemstack.copyWithCount(1) : itemstack;
         BlockPos hitBlockPos = blockHitResult.getBlockPos();
         BlockState hitBlockState = level.getBlockState(hitBlockPos);
         Block hitBlock = hitBlockState.getBlock();
         if (hitBlock instanceof AbstractCauldronBlock cauldronBlock
                 && itemstack.getItem() instanceof UniversalBucketItem
                 && cauldronBlock == Blocks.CAULDRON
-                && !BucketLibUtil.containsEntityType(itemstack)) {
+                && !BucketLibUtil.containsEntityType(itemStackWithSizeOne)) {
             //fake vanilla bucket using on cauldron
-            Fluid bucketFluid = BucketLibUtil.getFluid(itemstack);
-            Block bucketBlock = BucketLibUtil.getBlock(itemstack);
+            Fluid bucketFluid = BucketLibUtil.getFluid(itemStackWithSizeOne);
+            Block bucketBlock = BucketLibUtil.getBlock(itemStackWithSizeOne);
             if (bucketFluid == Fluids.LAVA || bucketFluid == Fluids.WATER) {
                 player.setItemInHand(interactionHand, new ItemStack(bucketFluid.getBucket()));
                 //deactivate instabuild for the fake interaction to avoid side effects like adding additional empty vanilla buckets into inventory
@@ -99,7 +100,7 @@ public class WorldInteractionUtil {
                 player.getAbilities().instabuild = previousInstabuildValue;
                 player.setItemInHand(interactionHand, itemstack);
                 if (interactionResult.consumesAction()) {
-                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeFluid(itemstack), interactionHand, true));
+                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeFluid(itemStackWithSizeOne), interactionHand, true));
                 }
             } else if (bucketBlock == Blocks.POWDER_SNOW) {
                 player.setItemInHand(interactionHand, new ItemStack(Items.POWDER_SNOW_BUCKET));
@@ -110,7 +111,7 @@ public class WorldInteractionUtil {
                 player.getAbilities().instabuild = previousInstabuildValue;
                 player.setItemInHand(interactionHand, itemstack);
                 if (interactionResult.consumesAction()) {
-                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack, true), interactionHand, true));
+                    return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemStackWithSizeOne, true), interactionHand, true));
                 }
             }
         }

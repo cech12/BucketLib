@@ -12,6 +12,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MobBucketItem;
@@ -68,6 +69,13 @@ public class BucketLibUtil {
                 player.spawnItemParticles(initialStack, 5);
             }
             player.awardStat(Stats.ITEM_BROKEN.get(initialStack.getItem()));
+        }
+        initialStack.shrink(1);
+        if (!initialStack.isEmpty()) {
+            if (!player.getInventory().add(resultStack)) {
+                player.drop(resultStack, false);
+            }
+            return initialStack;
         }
         return resultStack;
     }
@@ -254,8 +262,16 @@ public class BucketLibUtil {
         return setTagContent(itemStack, "EntityType", Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getKey(entityType)).toString());
     }
 
-    public static ItemStack removeEntityType(ItemStack itemStack, boolean damage) {
+    public static ItemStack removeEntityType(ItemStack itemStack, Entity entity, boolean damage) {
         ItemStack emptyStack = removeTagContent(itemStack, "EntityType");
+        //remove additional tag components
+        if (entity instanceof Bucketable bucketable) {
+            ItemStack dummyItemStack = new ItemStack(itemStack.getItem());
+            bucketable.saveToBucketTag(dummyItemStack);
+            for (String key : dummyItemStack.getOrCreateTag().getAllKeys()) {
+                removeTagContentNoCopy(emptyStack, key);
+            }
+        }
         if (damage) damageByOne(emptyStack);
         return emptyStack;
     }

@@ -33,7 +33,7 @@ public class BucketLibTestMod {
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, BucketLibTestMod.MOD_ID);
 
-    public static final RegistryObject<Item> TEST_BUCKET = ITEMS.register("test_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties()));
+    public static final RegistryObject<Item> TEST_BUCKET = ITEMS.register("test_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().stacksFilledTo(2)));
     public static final RegistryObject<Item> TEMPERATURE_BUCKET = ITEMS.register("temperature_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().maxTemperature(1000)));
     public static final RegistryObject<Item> WATER_ALLOWING_BUCKET = ITEMS.register("water_allowing_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().allowedFluids(Collections.singletonList(Fluids.WATER))));
     public static final RegistryObject<Item> WATER_ALLOWING_TAG_BUCKET = ITEMS.register("water_allowing_tag_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().allowedFluids(WATER_TAG)));

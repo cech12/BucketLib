@@ -45,7 +45,7 @@ public class BlockIngredient extends Ingredient {
 
     @Override
     public boolean test(ItemStack itemStack) {
-        if (itemStack == null || itemStack.isEmpty()) {
+        if (itemStack == null || itemStack.isEmpty() || itemStack.getCount() > 1) { //TODO count cannot be limited!
             return false;
         }
         Iterable<Block> blockIterator;

@@ -172,7 +172,7 @@ public class UniversalBucketItem extends Item {
 
     @Override
     public int getMaxStackSize(ItemStack stack) {
-        return BucketLibUtil.isEmpty(stack) ? this.properties.maxStackSize : 1;
+        return BucketLibUtil.isEmpty(stack) ? this.properties.maxStackSize : this.properties.maxFilledStackSize;
     }
 
     @Override
@@ -260,28 +260,31 @@ public class UniversalBucketItem extends Item {
                 if (caldronInteractionResult.getResult().consumesAction()) {
                     return caldronInteractionResult;
                 }
-                if (BucketLibUtil.containsFluid(itemstack)) {
+                ItemStack itemStackWithSizeOne = itemstack.getCount() > 1 ? itemstack.copyWithCount(1) : itemstack;
+                if (BucketLibUtil.containsFluid(itemStackWithSizeOne)) {
                     //place fluid interaction
-                    FluidStack fluidStack = FluidUtil.getFluidHandler(itemstack).map(fluidHandler -> fluidHandler.getFluidInTank(0)).orElse(FluidStack.EMPTY);
+                    FluidStack fluidStack = FluidUtil.getFluidHandler(itemStackWithSizeOne).map(fluidHandler -> fluidHandler.getFluidInTank(0)).orElse(FluidStack.EMPTY);
                     //try to place fluid at hit block and then at the relative block
                     for (BlockPos pos : Arrays.asList(hitBlockPos, relativeBlockPos)) {
                         //remove entity to be able to use tryPlaceFluid method
-                        FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, pos, BucketLibUtil.removeEntityType(itemstack, false), fluidStack);
+                        FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, pos, BucketLibUtil.removeEntityType(itemStackWithSizeOne, null, false), fluidStack);
                         if (fluidActionResult.isSuccess()) {
-                            if (BucketLibUtil.containsEntityType(itemstack)) {
+                            ItemStack resultStack = fluidActionResult.getResult();
+                            if (BucketLibUtil.containsEntityType(itemStackWithSizeOne)) {
                                 //place entity if exists
-                                spawnEntityFromBucket(player, level, itemstack, pos, false);
+                                resultStack = spawnEntityFromBucket(player, level, itemStackWithSizeOne, pos, false);
+                                resultStack = BucketLibUtil.removeFluid(resultStack);
                             }
-                            return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, fluidActionResult.getResult(), interactionHand), level.isClientSide());
+                            return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, resultStack, interactionHand), level.isClientSide());
                         }
                     }
-                } else if (BucketLibUtil.containsEntityType(itemstack)) {
+                } else if (BucketLibUtil.containsEntityType(itemStackWithSizeOne)) {
                     //place entity interaction
-                    ItemStack emptyBucket = spawnEntityFromBucket(player, level, itemstack, relativeBlockPos, true);
+                    ItemStack emptyBucket = spawnEntityFromBucket(player, level, itemStackWithSizeOne, relativeBlockPos, true);
                     return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, emptyBucket, interactionHand), level.isClientSide());
-                } else if (BucketLibUtil.containsBlock(itemstack)) {
+                } else if (BucketLibUtil.containsBlock(itemStackWithSizeOne)) {
                     //place block interaction
-                    Block block = BucketLibUtil.getBlock(itemstack);
+                    Block block = BucketLibUtil.getBlock(itemStackWithSizeOne);
                     RegistryUtil.BucketBlock bucketBlock = RegistryUtil.getBucketBlock(block);
                     if (block != null && bucketBlock != null) {
                         //fake vanilla bucket use
@@ -290,7 +293,7 @@ public class UniversalBucketItem extends Item {
                         InteractionResult interactionResult = fakeStack.useOn(new UseOnContext(player, interactionHand, blockHitResult));
                         player.setItemInHand(interactionHand, itemstack);
                         if (interactionResult.consumesAction()) {
-                            return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack, true), interactionHand));
+                            return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemStackWithSizeOne, true), interactionHand));
                         }
                     }
                 }
@@ -314,7 +317,7 @@ public class UniversalBucketItem extends Item {
                 if (player != null) {
                     serverLevel.gameEvent(player, GameEvent.ENTITY_PLACE, pos);
                 }
-                return BucketLibUtil.removeEntityType(itemStack, damage);
+                return BucketLibUtil.removeEntityType(itemStack, entity, damage);
             }
         }
         return itemStack.copy();
@@ -342,14 +345,14 @@ public class UniversalBucketItem extends Item {
             int age = axolotl.getAge();
             if (!axolotl.level().isClientSide && age == 0 && axolotl.canFallInLove()) {
                 if (!player.isCreative()) {
-                    player.setItemInHand(interactionHand, BucketLibUtil.removeEntityType(itemStack, BucketLibUtil.getFluid(itemStack) == Fluids.EMPTY));
+                    player.setItemInHand(interactionHand, BucketLibUtil.removeEntityType(itemStack, axolotl, BucketLibUtil.getFluid(itemStack) == Fluids.EMPTY));
                 }
                 axolotl.setInLove(player);
                 return InteractionResult.SUCCESS;
             }
             if (axolotl.isBaby()) {
                 if (!player.isCreative()) {
-                    player.setItemInHand(interactionHand, BucketLibUtil.removeEntityType(itemStack, BucketLibUtil.getFluid(itemStack) == Fluids.EMPTY));
+                    player.setItemInHand(interactionHand, BucketLibUtil.removeEntityType(itemStack, axolotl, BucketLibUtil.getFluid(itemStack) == Fluids.EMPTY));
                 }
                 axolotl.ageUp(AgeableMob.getSpeedUpSecondsWhenFeeding(-age), true);
                 return InteractionResult.sidedSuccess(axolotl.level().isClientSide);
@@ -363,13 +366,14 @@ public class UniversalBucketItem extends Item {
 
     private <T extends LivingEntity & Bucketable> InteractionResult pickupEntityWithBucket(Player player, InteractionHand interactionHand, T entity) {
         ItemStack itemStack = player.getItemInHand(interactionHand).copy(); //copy to avoid changing the real item stack
-        Fluid containedFluid = FluidUtil.getFluidContained(itemStack).orElse(FluidStack.EMPTY).getFluid();
+        ItemStack itemStackWithSizeOne = itemStack.getCount() > 1 ? itemStack.copyWithCount(1) : itemStack;
+        Fluid containedFluid = FluidUtil.getFluidContained(itemStackWithSizeOne).orElse(FluidStack.EMPTY).getFluid();
         Fluid entityBucketFluid = ((BucketItem) entity.getBucketItemStack().getItem()).getFluid();
-        if (itemStack.getItem() instanceof UniversalBucketItem
+        if (itemStackWithSizeOne.getItem() instanceof UniversalBucketItem
                 && entity.isAlive()
                 && entityBucketFluid == containedFluid) {
             entity.playSound(entity.getPickupSound(), 1.0F, 1.0F);
-            ItemStack filledItemStack = BucketLibUtil.addEntityType(itemStack, entity.getType());
+            ItemStack filledItemStack = BucketLibUtil.addEntityType(itemStackWithSizeOne, entity.getType());
             entity.saveToBucketTag(filledItemStack);
             Level level = entity.level();
             ItemStack handItemStack = ItemUtils.createFilledResult(itemStack, player, filledItemStack, false);
@@ -394,7 +398,15 @@ public class UniversalBucketItem extends Item {
             serverPlayer.awardStat(Stats.ITEM_USED.get(Items.MILK_BUCKET));
         }
         if (BucketLibUtil.notCreative(player)) {
-            return BucketLibUtil.removeMilk(itemStack);
+            if (itemStack.getCount() <= 1) {
+                return BucketLibUtil.removeMilk(itemStack);
+            }
+            ItemStack resultStack = BucketLibUtil.removeMilk(itemStack.copyWithCount(1));
+            itemStack.shrink(1);
+            if (player instanceof Player p && !p.getInventory().add(resultStack)) {
+                p.drop(resultStack, false);
+            }
+            return itemStack;
         }
         return itemStack;
     }
@@ -452,7 +464,7 @@ public class UniversalBucketItem extends Item {
             damaged = true;
         }
         if (BucketLibUtil.containsEntityType(result)) {
-            result = BucketLibUtil.removeEntityType(result, !damaged);
+            result = BucketLibUtil.removeEntityType(result, null, !damaged);
         }
         if (BucketLibUtil.containsFluid(result) || BucketLibUtil.containsMilk(result)) {
             result = BucketLibUtil.removeFluid(result);
@@ -604,6 +616,7 @@ public class UniversalBucketItem extends Item {
 
         ResourceKey<CreativeModeTab> tab = CreativeModeTabs.TOOLS_AND_UTILITIES;
         int maxStackSize = 16;
+        int maxFilledStackSize = 1;
 
         int durability = 0;
         ForgeConfigSpec.IntValue durabilityConfig = null;
@@ -668,6 +681,14 @@ public class UniversalBucketItem extends Item {
                 throw new RuntimeException("Unable to have stack size lower than 1.");
             }
             this.maxStackSize = maxStackSize;
+            return this;
+        }
+
+        public Properties stacksFilledTo(int maxFilledStackSize) {
+            if (maxFilledStackSize < 1) {
+                throw new RuntimeException("Unable to have a filled stack size lower than 1.");
+            }
+            this.maxFilledStackSize = maxFilledStackSize;
             return this;
         }
 
