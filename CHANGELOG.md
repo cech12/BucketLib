@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [1.20.4-3.2.0.0] - 2024-05-10
 ### Added
 - add Fabric (>=0.96.11+1.20.4) support (Fabric, Quilt)
+- entity textures of Upgrade Aquatic mod (all loaders)
 
 ### Known issues
 - Fabric: max stack size is not taken into account and defaults to 1
