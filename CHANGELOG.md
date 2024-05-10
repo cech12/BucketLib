@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.1-2.3.4.0] - 2024-05-10
+### Added
+- entity textures of Upgrade Aquatic mod
+
 ## [1.20.1-2.3.3.2] - 2024-02-27
 ### Fixed
 - The result of "bucketlib:bucket_filling_shaped" and "bucketlib:bucket_filling_shapeless" recipes was not shown correctly in JEI (thanks to FreeFull for the report)
