@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.19.4-1.3.1.0] - 2024-05-10
+### Added
+- entity textures of Upgrade Aquatic mod
+
 ## [1.19.4-1.3.0.2] - 2023-10-30
 ### Fixed
 - Milk string was not translated correctly https://github.com/cech12/CeramicBucket/issues/74
