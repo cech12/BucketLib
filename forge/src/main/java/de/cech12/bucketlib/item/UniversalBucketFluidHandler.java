@@ -74,8 +74,7 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
     @Override
     protected void setContainerToEmpty() {
         boolean wasCracked = false;
-        Item item = container.getItem();
-        if (item instanceof UniversalBucketItem bucketItem) {
+        if (container.getItem() instanceof UniversalBucketItem bucketItem) {
             wasCracked = bucketItem.isCracked(container);
         }
         super.setContainerToEmpty();

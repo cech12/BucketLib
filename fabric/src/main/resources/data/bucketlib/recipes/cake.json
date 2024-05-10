@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FFF",
+    "BEB",
+    "CCC"
+  ],
+  "key": {
+    "F": {
+      "fabric:type": "bucketlib:milk"
+    },
+    "B": {
+      "item": "minecraft:sugar"
+    },
+    "C": {
+      "item": "minecraft:wheat"
+    },
+    "E": {
+      "tag": "minecraft:egg"
+    }
+  },
+  "result": {
+    "item": "minecraft:cake"
+  }
+}

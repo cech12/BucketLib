@@ -11,7 +11,6 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.extensions.IItemExtension;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,9 +30,7 @@ public interface NeoforgeItemMixin {
             if (!BucketLibUtil.containsEntityType(itemStack)) {
                 Fluid fluid = Services.FLUID.getContainedFluid(itemStack);
                 if (fluid != Fluids.EMPTY) {
-                    //all fluids have their burn time in their bucket item.
-                    //get the burn time via ForgeHooks.getBurnTime to let other mods change burn times of buckets of vanilla and other fluids.
-                    return CommonHooks.getBurnTime(new ItemStack(fluid.getBucket()), recipeType);
+                    return new ItemStack(fluid.getBucket()).getBurnTime(recipeType);
                 }
             }
         }

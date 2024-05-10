@@ -56,7 +56,7 @@ public class UniversalBucketItem extends Item {
     private final Properties properties;
 
     public UniversalBucketItem(Properties properties) {
-        super((new Item.Properties()));
+        super((new Item.Properties().stacksTo(1)));
         this.properties = properties;
     }
 
@@ -79,7 +79,7 @@ public class UniversalBucketItem extends Item {
             argument = (block != null) ? block.getName() : Component.literal("?");
         } else if (BucketLibUtil.containsMilk(stack)) {
             descriptionId += ".filled";
-            argument = Component.translatable("fluid_type.minecraft.milk");
+            argument = Component.translatable(Services.PLATFORM.getMilkTranslationKey());
         } else {
             //is empty
             return Component.translatable(descriptionId);
@@ -151,7 +151,7 @@ public class UniversalBucketItem extends Item {
         return false;
     }
 
-    //@Override //overrides the (neo)forge implementation
+    //@Override //overrides the (neo)forge implementation //TODO Fabric - no possibility found to get stack related maxstacksize...
     public int getMaxStackSize(ItemStack stack) {
         return BucketLibUtil.isEmpty(stack) ? this.properties.maxStackSize : 1;
     }
@@ -413,6 +413,11 @@ public class UniversalBucketItem extends Item {
             result = BucketLibUtil.removeFluid(result);
         }
         return result;
+    }
+
+    //@Override //overrides the fabric implementation
+    public ItemStack getRecipeRemainder(ItemStack itemStack) {
+        return getCraftingRemainingItem(itemStack);
     }
 
     private boolean getBooleanProperty(Supplier<Boolean> config, boolean defaultValue) {

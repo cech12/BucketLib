@@ -54,4 +54,11 @@ public interface IPlatformHelper {
      */
     ResourceKey<CreativeModeTab> getToolsAndUtilitiesTab();
 
+    /**
+     * Gets the translation key for milk.
+     *
+     * @return translation key for milk
+     */
+    String getMilkTranslationKey();
+
 }

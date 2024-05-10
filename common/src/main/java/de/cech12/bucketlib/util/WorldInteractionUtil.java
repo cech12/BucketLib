@@ -44,6 +44,9 @@ public class WorldInteractionUtil {
 
     public static InteractionResultHolder<ItemStack> tryPickupFromCauldron(Level level, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         ItemStack itemstack = player.getItemInHand(interactionHand);
+        if (level.isClientSide()) {
+            return InteractionResultHolder.pass(itemstack);
+        }
         BlockPos hitBlockPos = blockHitResult.getBlockPos();
         BlockState hitBlockState = level.getBlockState(hitBlockPos);
         Block hitBlock = hitBlockState.getBlock();

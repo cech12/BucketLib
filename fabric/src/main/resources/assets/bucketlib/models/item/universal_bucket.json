@@ -1,0 +1,11 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "base": "bucketlib:item/universal_bucket_base",
+    "lowerBase": "bucketlib:item/universal_bucket_lower_base",
+    "fluidMask": "bucketlib:item/mask/bucket_fluid",
+    "crackedBase": "bucketlib:item/universal_bucket_cracked_base",
+    "crackedLowerBase": "bucketlib:item/universal_bucket_cracked_lower_base",
+    "crackedFluidMask": "bucketlib:item/mask/bucket_fluid"
+  }
+}

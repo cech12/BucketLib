@@ -44,4 +44,9 @@ public class NeoforgePlatformHelper implements IPlatformHelper {
         return CreativeModeTabs.TOOLS_AND_UTILITIES;
     }
 
+    @Override
+    public String getMilkTranslationKey() {
+        return "fluid_type.minecraft.milk";
+    }
+
 }

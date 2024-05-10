@@ -1,0 +1,64 @@
+{
+  "item.bucketlibtest.test_bucket": "Test Bucket",
+  "item.bucketlibtest.test_bucket.entity": "Test Bucket of %s",
+  "item.bucketlibtest.test_bucket.filled": "Test %s Bucket",
+
+  "item.bucketlibtest.temperature_bucket": "Temperature Bucket",
+  "item.bucketlibtest.temperature_bucket.entity": "Temperature Bucket of %s",
+  "item.bucketlibtest.temperature_bucket.filled": "Temperature %s Bucket",
+
+  "item.bucketlibtest.water_allowing_bucket": "Water Allowing Bucket",
+  "item.bucketlibtest.water_allowing_bucket.entity": "Water Allowing Bucket of %s",
+  "item.bucketlibtest.water_allowing_bucket.filled": "Water Allowing %s Bucket",
+
+  "item.bucketlibtest.water_allowing_tag_bucket": "Water Allowing (Tag) Bucket",
+  "item.bucketlibtest.water_allowing_tag_bucket.entity": "Water Allowing (Tag) Bucket of %s",
+  "item.bucketlibtest.water_allowing_tag_bucket.filled": "Water Allowing (Tag) %s Bucket",
+
+  "item.bucketlibtest.water_denying_bucket": "Water Denying Bucket",
+  "item.bucketlibtest.water_denying_bucket.entity": "Water Denying Bucket of %s",
+  "item.bucketlibtest.water_denying_bucket.filled": "Water Denying %s Bucket",
+
+  "item.bucketlibtest.water_denying_tag_bucket": "Water Denying (Tag) Bucket",
+  "item.bucketlibtest.water_denying_tag_bucket.entity": "Water Denying (Tag) Bucket of %s",
+  "item.bucketlibtest.water_denying_tag_bucket.filled": "Water Denying (Tag) %s Bucket",
+
+  "item.bucketlibtest.cracking_bucket": "Cracking Bucket",
+  "item.bucketlibtest.cracking_bucket.entity": "Cracking Bucket of %s",
+  "item.bucketlibtest.cracking_bucket.filled": "Cracking %s Bucket",
+
+  "item.bucketlibtest.colored_bucket": "Colored Bucket",
+  "item.bucketlibtest.colored_bucket.entity": "Colored Bucket of %s",
+  "item.bucketlibtest.colored_bucket.filled": "Colored %s Bucket",
+
+  "item.bucketlibtest.anti_milk_bucket": "Anti Milk Bucket",
+  "item.bucketlibtest.anti_milk_bucket.entity": "Anti Milk Bucket of %s",
+  "item.bucketlibtest.anti_milk_bucket.filled": "Anti Milk %s Bucket",
+
+  "item.bucketlibtest.no_entities_bucket": "No Entity Bucket",
+  "item.bucketlibtest.no_entities_bucket.filled": "No Entity %s Bucket",
+
+  "item.bucketlibtest.anti_salmon_bucket": "Anti Salmon Bucket",
+  "item.bucketlibtest.anti_salmon_bucket.entity": "Anti Salmon Bucket of %s",
+  "item.bucketlibtest.anti_salmon_bucket.filled": "Anti Salmon %s Bucket",
+
+  "item.bucketlibtest.only_puffer_bucket": "Only Pufferfish Bucket",
+  "item.bucketlibtest.only_puffer_bucket.entity": "Only Pufferfish Bucket of %s",
+  "item.bucketlibtest.only_puffer_bucket.filled": "Only Pufferfish %s Bucket",
+
+  "item.bucketlibtest.no_blocks_bucket": "No Blocks Bucket",
+  "item.bucketlibtest.no_blocks_bucket.entity": "No Blocks Bucket of %s",
+  "item.bucketlibtest.no_blocks_bucket.filled": "No Blocks %s Bucket",
+
+  "item.bucketlibtest.durability_bucket": "Durability Bucket",
+  "item.bucketlibtest.durability_bucket.entity": "Durability Bucket of %s",
+  "item.bucketlibtest.durability_bucket.filled": "Durability %s Bucket",
+
+  "item.bucketlibtest.burning_bucket": "Burning Bucket",
+  "item.bucketlibtest.burning_bucket.entity": "Burning Bucket of %s",
+  "item.bucketlibtest.burning_bucket.filled": "Burning %s Bucket",
+
+  "item.bucketlibtest.freezing_bucket": "Freezing Bucket",
+  "item.bucketlibtest.freezing_bucket.entity": "Freezing Bucket of %s",
+  "item.bucketlibtest.freezing_bucket.filled": "Freezing %s Bucket"
+}
