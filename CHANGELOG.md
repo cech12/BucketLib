@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.19.2-1.0.8.0] - 2024-05-10
+### Added
+- entity textures of Upgrade Aquatic mod
+
 ## [1.19.2-1.0.7.0] - 2023-10-30
 ### Changed
 - Update mod to Forge 1.19.2-43.1.38
