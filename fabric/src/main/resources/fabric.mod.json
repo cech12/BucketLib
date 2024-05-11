@@ -17,16 +17,16 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "${group}.BucketLibMod"
+      "de.cech12.bucketlib.BucketLibMod"
     ],
     "client": [
-      "${group}.client.BucketLibClientMod"
+      "de.cech12.bucketlib.client.BucketLibClientMod"
     ],
     "modmenu": [
-      "${group}.compat.ModMenuCompat"
+      "de.cech12.bucketlib.compat.ModMenuCompat"
     ],
     "jei_mod_plugin": [
-      "${group}.jei.ModJEIPlugin"
+      "de.cech12.bucketlib.jei.ModJEIPlugin"
     ]
   },
   "mixins": [

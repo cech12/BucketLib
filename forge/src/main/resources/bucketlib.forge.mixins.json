@@ -2,7 +2,7 @@
   "required": true,
   "package": "de.cech12.bucketlib.mixin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "bucketlib.refmap.json",
+  "refmap": "${mod_id}.refmap.json",
   "mixins": [
     "ForgeItemMixin"
   ],
