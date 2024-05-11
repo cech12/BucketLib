@@ -45,18 +45,37 @@ repositories {
       url 'https://jitpack.io'
     }
 }
+```
 
+Neoforge:
+```groovy
 dependencies {
-    implementation fg.deobf("com.github.cech12:BucketLib:${loader}:${bucketlib_version}")
+    implementation "com.github.cech12.BucketLib:neoforge:${bucketlib_version}"
 }
 ```
 
-Replace `${loader}` with the loader (`forge` or `neoforge`) you want to use.
+Forge:
+```groovy
+dependencies {
+    implementation fg.deobf("com.github.cech12.BucketLib:forge:${bucketlib_version}")
+}
+```
+
+Fabric:
+```groovy
+dependencies {
+    //required dependency by bucketlib
+    modImplementation("me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+    modImplementation("com.github.cech12.BucketLib:fabric:${bucketlib_version}")
+}
+```
 
 Replace `${bucketlib_version}` with the version of BucketLib that you want to use. The actual versions can be found [here](https://jitpack.io/api/builds/com.github.cech12/BucketLib) or on the Github Releases page.
 
-BucketLib adds mixins and developers need to make sure to tweak their run configurations in order to launch the game in their development environment.
-Add both of these lines to the `configureEach {}` run configuration block in the `build.gradle` (or to both the `client {}` and `server {}`). These can be placed anywhere within the run configuration, the order does not matter.
+Forge specific: BucketLib adds mixins and developers need to make sure to tweak their run configurations in order to launch the game in their development environment.
+Add both of these lines to the `configureEach {}` run configuration block in the `build.gradle` (or to both the `client {}` and `server {}`). These can be placed anywhere within the run configuration, the order does not matter. (**not required for versions before BucketLib 1.19.3-1.2.0.0**)
 
 ```groovy
 property 'mixin.env.remapRefMap', 'true'
