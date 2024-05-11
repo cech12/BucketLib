@@ -17,7 +17,7 @@
       "item": "minecraft:wheat"
     },
     "E": {
-      "tag": "minecraft:egg"
+      "item": "minecraft:egg"
     }
   },
   "result": {

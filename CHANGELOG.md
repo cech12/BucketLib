@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.4-3.2.0.3] - 2024-05-11
+### Fixed
+- egg was missing in BucketLib cake recipe
+
 ## [1.20.4-3.2.0.2] - 2024-05-11
 ### Fixed
 - added missing accesswidener to fix startup crash (Fabric)
