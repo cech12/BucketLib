@@ -1,8 +1,8 @@
 package de.cech12.bucketlib.util;
 
-import de.cech12.bucketlib.CommonLoader;
 import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
+import de.cech12.bucketlib.mixin.LivingEntityAccessor;
 import de.cech12.bucketlib.platform.Services;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -13,7 +13,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -23,8 +22,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class BucketLibUtil {
@@ -60,18 +57,7 @@ public class BucketLibUtil {
                 if (!player.isSilent()) {
                     player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK, player.getSoundSource(), 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F, false);
                 }
-                try {
-                    Method method;
-                    try {
-                        method = LivingEntity.class.getDeclaredMethod("spawnItemParticles", ItemStack.class, int.class);
-                    } catch (NoSuchMethodException ex) {
-                        method = LivingEntity.class.getDeclaredMethod("m_21060_", ItemStack.class, int.class); //fallback to obfuscated method name
-                    }
-                    method.setAccessible(true);
-                    method.invoke(player, initialStack, 5);
-                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
-                    CommonLoader.LOG.error("player.spawnItemParticles() could not be called by BucketLibUtil::createEmptyResult", ex);
-                }
+                ((LivingEntityAccessor) player).bucketlib_spawnItemParticles(initialStack, 5);
             }
             player.awardStat(Stats.ITEM_BROKEN.get(initialStack.getItem()));
         }
