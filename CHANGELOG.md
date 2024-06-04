@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.4-3.2.1.0] - 2024-06-04
+### Added
+- added Roughly Enough Items (REI) support (version 14.1.727) (all loaders)
+
+### Changed
+- optimize UniversalBucketItem mixins in Forge & Neoforge
+
 ## [1.20.4-3.2.0.3] - 2024-05-11
 ### Fixed
 - egg was missing in BucketLib cake recipe

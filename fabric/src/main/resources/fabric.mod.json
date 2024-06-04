@@ -27,6 +27,9 @@
     ],
     "jei_mod_plugin": [
       "de.cech12.bucketlib.jei.ModJEIPlugin"
+    ],
+    "rei_client": [
+      "de.cech12.bucketlib.rei.BucketLibReiClientPlugin"
     ]
   },
   "accessWidener" : "${mod_id}.accesswidener",
