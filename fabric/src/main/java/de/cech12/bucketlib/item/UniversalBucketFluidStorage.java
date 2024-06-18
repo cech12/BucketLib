@@ -1,5 +1,6 @@
 package de.cech12.bucketlib.item;
 
+import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
@@ -10,14 +11,22 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Optional;
+
 public class UniversalBucketFluidStorage extends SingleFluidStorage {
 
-    ContainerItemContext context;
+    private final ContainerItemContext context;
 
     public UniversalBucketFluidStorage(ContainerItemContext context) {
         this.context = context;
-        if (context.getItemVariant().hasNbt()) {
-            readNbt(context.getItemVariant().getNbt());
+        Optional<? extends FluidStorageData> optional = context.getItemVariant().getComponents().get(BucketLibMod.STORAGE);
+        if (optional != null) {
+            optional.ifPresent(data -> {
+                if (!data.isEmpty()) {
+                    this.variant = data.fluidVariant();
+                    this.amount = data.amount();
+                }
+            });
         }
     }
 

@@ -2,15 +2,16 @@ package de.cech12.bucketlib.item.crafting;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.util.ExtraCodecs;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -100,7 +101,7 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
      */
     @Override
     @Nonnull
-    public ItemStack assemble(@Nonnull CraftingContainer inv, @Nonnull RegistryAccess registryAccess) {
+    public ItemStack assemble(CraftingContainer inv, @Nonnull HolderLookup.Provider provider) {
         return getAssembledBucket(this.fillingType, this.fluid, this.block, this.entityType, inv.getItems());
     }
 
@@ -112,9 +113,11 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
 
     public static class Serializer implements RecipeSerializer<BucketFillingShapelessRecipe> {
 
-        public static final Codec<BucketFillingShapelessRecipe> CODEC = RecordCodecBuilder.create((record) ->
+        public static final Serializer INSTANCE = new Serializer();
+
+        private static final MapCodec<BucketFillingShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec((record) ->
                 record.group(
-                        ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(ShapelessRecipe::getGroup),
+                        Codec.STRING.optionalFieldOf("group", "").forGetter(ShapelessRecipe::getGroup),
                         CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter((recipe) -> recipe.category),
                         Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients").flatXmap(
                                 ($$0x) -> {
@@ -130,25 +133,32 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
                         RegistryUtil.ENTITY_TYPE_CODEC.optionalFieldOf("entity").forGetter(recipe -> Optional.of(recipe.entityType))
                 ).apply(record, BucketFillingShapelessRecipe::new));
 
-        public static final Serializer INSTANCE = new Serializer();
+        private static final StreamCodec<RegistryFriendlyByteBuf, BucketFillingShapelessRecipe> STREAM_CODEC = StreamCodec.of(
+                BucketFillingShapelessRecipe.Serializer::toNetwork,
+                BucketFillingShapelessRecipe.Serializer::fromNetwork);
 
-        public Serializer() {
+        private Serializer() {
         }
 
         @Override
         @Nonnull
-        public Codec<BucketFillingShapelessRecipe> codec() {
+        public MapCodec<BucketFillingShapelessRecipe> codec() {
             return CODEC;
         }
 
         @Override
         @Nonnull
-        public BucketFillingShapelessRecipe fromNetwork(FriendlyByteBuf buf) {
+        public StreamCodec<RegistryFriendlyByteBuf, BucketFillingShapelessRecipe> streamCodec() {
+            return STREAM_CODEC;
+        }
+
+        @Nonnull
+        private static BucketFillingShapelessRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
             String group = buf.readUtf();
             CraftingBookCategory category = buf.readEnum(CraftingBookCategory.class);
             int i = buf.readVarInt();
             NonNullList<Ingredient> ingredients = NonNullList.withSize(i, Ingredient.EMPTY);
-            ingredients.replaceAll(ignored -> Ingredient.fromNetwork(buf));
+            ingredients.replaceAll(ignored -> Ingredient.CONTENTS_STREAM_CODEC.decode(buf));
             BucketFillingType fillingType = BucketFillingType.valueOf(buf.readUtf());
             Optional<Fluid> fluid = Optional.empty();
             Optional<Block> block = Optional.empty();
@@ -167,13 +177,12 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
             return new BucketFillingShapelessRecipe(group, category, ingredients, fillingType, fluid, block, entityType);
         }
 
-        @Override
-        public void toNetwork(FriendlyByteBuf buf, BucketFillingShapelessRecipe recipe) {
+        private static void toNetwork(RegistryFriendlyByteBuf buf, BucketFillingShapelessRecipe recipe) {
             buf.writeUtf(recipe.getGroup());
             buf.writeEnum(recipe.category);
             buf.writeVarInt(recipe.ingredients.size());
             for (Ingredient ingredient : recipe.ingredients) {
-                ingredient.toNetwork(buf);
+                Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient);
             }
             buf.writeEnum(recipe.fillingType);
             if (recipe.fillingType == BucketFillingType.BLOCK) {

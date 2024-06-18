@@ -1,5 +1,7 @@
 package de.cech12.bucketlib.api;
 
+import net.minecraft.resources.ResourceLocation;
+
 /**
  * Class that contains all common constants.
  */
@@ -11,5 +13,9 @@ public class BucketLib {
     public static final String MOD_NAME = "BucketLib";
 
     private BucketLib() {}
+
+    public static ResourceLocation id(String name) {
+        return new ResourceLocation(MOD_ID, name);
+    }
 
 }

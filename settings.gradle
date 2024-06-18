@@ -38,5 +38,5 @@ plugins {
 rootProject.name = 'BucketLib'
 include("common")
 include("fabric")
-include("forge")
+//include("forge") //TODO wait until forge re-adds capability system
 include("neoforge")

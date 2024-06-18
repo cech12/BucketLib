@@ -12,8 +12,9 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -21,7 +22,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.Collections;
 
 @Mod(BucketLibTestMod.MOD_ID)
-@Mod.EventBusSubscriber(modid= BucketLibTestMod.MOD_ID, bus= Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid= BucketLibTestMod.MOD_ID, bus= EventBusSubscriber.Bus.MOD)
 public class BucketLibTestMod {
 
     public static final String MOD_ID = "bucketlibtest";
@@ -56,9 +57,9 @@ public class BucketLibTestMod {
     }
 
     @SubscribeEvent
-    public static void sendImc(InterModEnqueueEvent evt) {
+    public static void register(RegisterCapabilitiesEvent evt) {
         for (DeferredHolder<Item, ?> item : ITEMS.getEntries()) {
-            BucketLibApi.registerBucket(item.getId());
+            BucketLibApi.registerBucket(evt, item.getId());
         }
     }
 

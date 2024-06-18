@@ -1,6 +1,6 @@
 package de.cech12.bucketlib.api.crafting;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.util.BucketLibUtil;
@@ -10,8 +10,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 
 import javax.annotation.Nonnull;
@@ -20,14 +20,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class BlockIngredient extends Ingredient {
+public class BlockIngredient implements ICustomIngredient {
 
     protected final Block block;
     protected final TagKey<Block> tag;
     private ItemStack[] matchingStacks;
 
     private BlockIngredient(Block block, TagKey<Block> tag) {
-        super(Stream.of());
         this.block = block;
         this.tag = tag;
     }
@@ -45,8 +44,8 @@ public class BlockIngredient extends Ingredient {
     }
 
     @Override
-    public boolean test(ItemStack itemStack) {
-        if (itemStack == null || itemStack.isEmpty()) {
+    public boolean test(@Nonnull ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
             return false;
         }
         List<RegistryUtil.BucketBlock> bucketBlocks;
@@ -70,7 +69,7 @@ public class BlockIngredient extends Ingredient {
 
     @Override
     @Nonnull
-    public ItemStack[] getItems() {
+    public Stream<ItemStack> getItems() {
         if (this.matchingStacks == null) {
             ArrayList<ItemStack> stacks = new ArrayList<>();
             List<Block> blocks = new ArrayList<>();
@@ -98,12 +97,7 @@ public class BlockIngredient extends Ingredient {
             }
             this.matchingStacks = stacks.toArray(new ItemStack[0]);
         }
-        return this.matchingStacks;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return false;
+        return Stream.of(this.matchingStacks);
     }
 
     @Override
@@ -111,7 +105,13 @@ public class BlockIngredient extends Ingredient {
         return false;
     }
 
-    public static final Codec<BlockIngredient> CODEC = RecordCodecBuilder.create(builder ->
+    @Override
+    @Nonnull
+    public IngredientType<?> getType() {
+        return TYPE;
+    }
+
+    public static final MapCodec<BlockIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
             builder.group(
                     ResourceLocation.CODEC.optionalFieldOf("block").forGetter(i -> Optional.of(BuiltInRegistries.BLOCK.getKey(i.block))),
                     TagKey.codec(BuiltInRegistries.BLOCK.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))

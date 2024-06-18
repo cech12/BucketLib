@@ -1,11 +1,11 @@
 package de.cech12.bucketlib.api.crafting;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
@@ -127,22 +127,22 @@ public class EntityIngredient extends AbstractIngredient {
         return SERIALIZER;
     }
 
-    public static final Codec<EntityIngredient> CODEC = RecordCodecBuilder.create(builder ->
-            builder.group(
-                    ResourceLocation.CODEC.optionalFieldOf("entity").forGetter(i -> Optional.ofNullable(ForgeRegistries.ENTITY_TYPES.getKey(i.entityType))),
-                    TagKey.codec(ForgeRegistries.ENTITY_TYPES.getRegistryKey()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
-            ).apply(builder, EntityIngredient::new)
-    );
-
     public static final IIngredientSerializer<EntityIngredient> SERIALIZER = new IIngredientSerializer<>() {
 
+        private static final MapCodec<EntityIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
+                builder.group(
+                        ResourceLocation.CODEC.optionalFieldOf("entity").forGetter(i -> Optional.ofNullable(ForgeRegistries.ENTITY_TYPES.getKey(i.entityType))),
+                        TagKey.codec(ForgeRegistries.ENTITY_TYPES.getRegistryKey()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
+                ).apply(builder, EntityIngredient::new)
+        );
+
         @Override
-        public Codec<? extends EntityIngredient> codec() {
+        public MapCodec<? extends EntityIngredient> codec() {
             return CODEC;
         }
 
         @Override
-        public EntityIngredient read(FriendlyByteBuf buffer) {
+        public EntityIngredient read(RegistryFriendlyByteBuf buffer) {
             String block = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
@@ -156,7 +156,7 @@ public class EntityIngredient extends AbstractIngredient {
         }
 
         @Override
-        public void write(@Nonnull FriendlyByteBuf buffer, @Nonnull EntityIngredient ingredient) {
+        public void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull EntityIngredient ingredient) {
             buffer.writeUtf(ingredient.entityType != null ? Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getKey(ingredient.entityType)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }

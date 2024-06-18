@@ -1,6 +1,6 @@
 plugins {
     id 'idea'
-    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
+    id 'net.minecraftforge.gradle' version '6.0.24'
     id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
 }
 base {
@@ -14,6 +14,7 @@ mixin {
 
 minecraft {
     mappings channel: 'official', version: minecraft_version
+    reobf = false
 
     copyIdeResources = true //Calls processResources when in dev
 
@@ -57,16 +58,12 @@ dependencies {
     compileOnly project(":common")
     testCompileOnly project(":common")
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
+    //temporary necessary:
+    implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 
-    compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"))
-    testCompileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"))
-    //runtimeOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
-
-    compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-api-forge:$rei_version")
-    compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-default-plugin-forge:$rei_version")
-    runtimeOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:$rei_version")
-    implementation fg.deobf("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
-    implementation fg.deobf("dev.architectury:architectury-forge:${architectury_version}")
+    compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
+    testCompileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
+    runtimeOnly "mezz.jei:jei-${minecraft_version}-forge:${jei_version}"
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -79,19 +76,10 @@ tasks.withType(Javadoc).configureEach {
 tasks.named("sourcesJar", Jar) {
     from(project(":common").sourceSets.main.allSource)
 }
-tasks.named("apiJar", Jar) {
-    from(project(":common").sourceSets.main.allSource)
-}
 
 processResources {
     from project(":common").sourceSets.main.resources
 }
-
-artifacts {
-    archives apiJar
-}
-
-jar.finalizedBy('reobfJar')
 
 // Merge the resources and classes into the same directory.
 // This is done because java expects modules to be in a single directory.

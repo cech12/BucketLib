@@ -13,11 +13,13 @@ import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
@@ -41,7 +43,24 @@ public class ModJEIPlugin implements IModPlugin {
     @Override
     public void registerItemSubtypes(@Nonnull ISubtypeRegistration registration) {
         for (Item bucket : Services.REGISTRY.getRegisteredBuckets()) {
-            registration.useNbtForSubtypes(bucket);
+            registration.registerSubtypeInterpreter(bucket, (stack, context) -> {
+                if (BucketLibUtil.containsMilk(stack)) {
+                    return "milk";
+                }
+                EntityType<?> entityType = BucketLibUtil.getEntityType(stack);
+                if (entityType != null) {
+                    return entityType.getDescriptionId();
+                }
+                Block block = BucketLibUtil.getBlock(stack);
+                if (block != null) {
+                    return block.getDescriptionId();
+                }
+                Fluid fluid = BucketLibUtil.getFluid(stack);
+                if (fluid != null) {
+                    return fluid.toString();
+                }
+                return "empty";
+            });
         }
     }
 
@@ -49,7 +68,7 @@ public class ModJEIPlugin implements IModPlugin {
     public void registerRecipes(@Nonnull IRecipeRegistration registration) {
         if (Services.CONFIG.isInfinityEnchantmentEnabled()) {
             IVanillaRecipeFactory factory = registration.getVanillaRecipeFactory();
-            EnchantmentInstance data = new EnchantmentInstance(Enchantments.INFINITY_ARROWS, Enchantments.INFINITY_ARROWS.getMaxLevel());
+            EnchantmentInstance data = new EnchantmentInstance(Enchantments.INFINITY, Enchantments.INFINITY.getMaxLevel());
             List<IJeiAnvilRecipe> recipes = new ArrayList<>();
             for (UniversalBucketItem bucketItem : Services.REGISTRY.getRegisteredBuckets()) {
                 for (Fluid fluid : Services.REGISTRY.getAllFluids()) {

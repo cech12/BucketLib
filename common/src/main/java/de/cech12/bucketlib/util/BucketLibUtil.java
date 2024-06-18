@@ -1,9 +1,11 @@
 package de.cech12.bucketlib.util;
 
+import de.cech12.bucketlib.api.BucketLibComponents;
 import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.mixin.LivingEntityAccessor;
 import de.cech12.bucketlib.platform.Services;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,6 +17,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
@@ -71,11 +74,11 @@ public class BucketLibUtil {
      * @param player ServerPlayer object or null if no player is involved
      */
     public static void damageByOne(ItemStack stack, RandomSource random, ServerPlayer player) {
-        if (!stack.isEmpty() && stack.isDamageableItem()
-                && !BucketLibUtil.isAffectedByInfinityEnchantment(stack)
-                && stack.hurt(1, random, player)) {
-            stack.shrink(1);
-            stack.setDamageValue(0);
+        if (!stack.isEmpty() && stack.isDamageableItem() && !BucketLibUtil.isAffectedByInfinityEnchantment(stack)) {
+            stack.hurtAndBreak(1, random, player, () -> {
+                stack.shrink(1);
+                stack.setDamageValue(0);
+            });
         }
     }
 
@@ -101,41 +104,43 @@ public class BucketLibUtil {
             Fluid fluid = getFluid(itemStack);
             return fluid != Fluids.EMPTY
                     && fluid.defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)
-                    && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, itemStack) > 0
+                    && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY, itemStack) > 0
                     && bucket.canHoldFluid(fluid);
         }
         return false;
     }
 
     private static boolean containsTagContent(ItemStack itemStack, String tagName) {
-        CompoundTag nbt = itemStack.getTag();
-        return nbt != null && nbt.contains(tagName);
+        CustomData customdata = itemStack.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
+        return customdata.contains(tagName);
     }
 
     private static String getTagContent(ItemStack itemStack, String tagName) {
-        CompoundTag nbt = itemStack.getTag();
-        if (nbt != null && nbt.contains(tagName)) {
-            return nbt.getString(tagName);
+        CustomData customdata = itemStack.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
+        if (customdata.contains(tagName)) {
+            return customdata.copyTag().getString(tagName);
         }
         return null;
     }
 
     private static ItemStack setTagContent(ItemStack itemStack, String tagName, String tagContent) {
         ItemStack result = itemStack.copy();
-        CompoundTag nbt = result.getOrCreateTag();
+        CustomData customdata = result.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
+        CompoundTag nbt = customdata.copyTag();
         nbt.putString(tagName, tagContent);
-        result.setTag(nbt);
+        result.set(BucketLibComponents.BUCKET_CONTENT, CustomData.of(nbt));
         return result;
     }
 
     private static ItemStack removeTagContentNoCopy(ItemStack itemStack, String tagName) {
-        CompoundTag nbt = itemStack.getTag();
-        if (nbt != null && nbt.contains(tagName)) {
+        CustomData customdata = itemStack.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
+        CompoundTag nbt = customdata.copyTag();
+        if (nbt.contains(tagName)) {
             nbt.remove(tagName);
             if (nbt.isEmpty()) {
-                itemStack.setTag(null);
+                itemStack.remove(BucketLibComponents.BUCKET_CONTENT);
             } else {
-                itemStack.setTag(nbt);
+                itemStack.set(BucketLibComponents.BUCKET_CONTENT, CustomData.of(nbt));
             }
         }
         return itemStack;
@@ -238,6 +243,7 @@ public class BucketLibUtil {
 
     public static ItemStack removeEntityType(ItemStack itemStack, boolean damage) {
         ItemStack emptyStack = removeTagContent(itemStack, "EntityType");
+        emptyStack.remove(DataComponents.BUCKET_ENTITY_DATA); //remove entity data
         if (damage) damageByOne(emptyStack);
         return emptyStack;
     }

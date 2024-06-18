@@ -1,10 +1,10 @@
 package de.cech12.bucketlib.api.crafting;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.util.BucketLibUtil;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BucketItem;
@@ -127,22 +127,22 @@ public class FluidIngredient extends AbstractIngredient {
         return SERIALIZER;
     }
 
-    public static final Codec<FluidIngredient> CODEC = RecordCodecBuilder.create(builder ->
-            builder.group(
-                    ResourceLocation.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.ofNullable(ForgeRegistries.FLUIDS.getKey(i.fluid))),
-                    TagKey.codec(ForgeRegistries.FLUIDS.getRegistryKey()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
-            ).apply(builder, FluidIngredient::new)
-    );
-
     public static final IIngredientSerializer<FluidIngredient> SERIALIZER = new IIngredientSerializer<>() {
 
+        private static final MapCodec<FluidIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
+                builder.group(
+                        ResourceLocation.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.ofNullable(ForgeRegistries.FLUIDS.getKey(i.fluid))),
+                        TagKey.codec(ForgeRegistries.FLUIDS.getRegistryKey()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
+                ).apply(builder, FluidIngredient::new)
+        );
+
         @Override
-        public Codec<? extends FluidIngredient> codec() {
+        public MapCodec<? extends FluidIngredient> codec() {
             return CODEC;
         }
 
         @Override
-        public FluidIngredient read(FriendlyByteBuf buffer) {
+        public FluidIngredient read(RegistryFriendlyByteBuf buffer) {
             String fluid = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
@@ -156,7 +156,7 @@ public class FluidIngredient extends AbstractIngredient {
         }
 
         @Override
-        public void write(@Nonnull FriendlyByteBuf buffer, @Nonnull FluidIngredient ingredient) {
+        public void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull FluidIngredient ingredient) {
             buffer.writeUtf(ingredient.fluid != null ? Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(ingredient.fluid)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }

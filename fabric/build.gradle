@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'idea'
     id 'maven-publish'
-    id 'fabric-loom' version '[1.6.6,1.7)'
+    id 'fabric-loom' version '1.6-SNAPSHOT'
 }
 base {
     archivesName = "${mod_id}-fabric"
@@ -63,6 +63,7 @@ loom {
 
 tasks.withType(JavaCompile).configureEach {
     source(project(":common").sourceSets.main.allSource)
+    //source(sourceSets.test.allSource)
 }
 tasks.withType(Javadoc).configureEach {
     source(project(":common").sourceSets.main.allJava)
@@ -73,4 +74,5 @@ tasks.named("sourcesJar", Jar) {
 
 processResources {
     from project(":common").sourceSets.main.resources
+    //from sourceSets.test.resources
 }

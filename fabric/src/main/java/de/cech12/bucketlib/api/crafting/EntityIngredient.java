@@ -1,6 +1,6 @@
 package de.cech12.bucketlib.api.crafting;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.api.BucketLib;
@@ -11,7 +11,8 @@ import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
@@ -117,16 +118,21 @@ public class EntityIngredient implements CustomIngredient {
         return Serializer.INSTANCE;
     }
 
-    public static final Codec<EntityIngredient> CODEC = RecordCodecBuilder.create(builder ->
-            builder.group(
-                    ResourceLocation.CODEC.optionalFieldOf("entity").forGetter(i -> Optional.of(BuiltInRegistries.ENTITY_TYPE.getKey(i.entityType))),
-                    TagKey.codec(BuiltInRegistries.ENTITY_TYPE.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
-            ).apply(builder, EntityIngredient::new)
-    );
-
     public static final class Serializer implements CustomIngredientSerializer<EntityIngredient> {
+
         public static final Serializer INSTANCE = new Serializer();
         public static final ResourceLocation NAME = new ResourceLocation(BucketLib.MOD_ID, "entity");
+
+        public static final MapCodec<EntityIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
+                builder.group(
+                        ResourceLocation.CODEC.optionalFieldOf("entity").forGetter(i -> Optional.of(BuiltInRegistries.ENTITY_TYPE.getKey(i.entityType))),
+                        TagKey.codec(BuiltInRegistries.ENTITY_TYPE.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
+                ).apply(builder, EntityIngredient::new)
+        );
+
+        private static final StreamCodec<RegistryFriendlyByteBuf, EntityIngredient> PACKET_CODEC = StreamCodec.of(
+                EntityIngredient.Serializer::write,
+                EntityIngredient.Serializer::read);
 
         private Serializer() {}
 
@@ -136,7 +142,17 @@ public class EntityIngredient implements CustomIngredient {
         }
 
         @Override
-        public EntityIngredient read(FriendlyByteBuf buffer) {
+        public MapCodec<EntityIngredient> getCodec(boolean allowEmpty) {
+            return CODEC;
+        }
+
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, EntityIngredient> getPacketCodec() {
+            return PACKET_CODEC;
+        }
+
+        @Nonnull
+        private static EntityIngredient read(RegistryFriendlyByteBuf buffer) {
             String entity = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
@@ -149,15 +165,9 @@ public class EntityIngredient implements CustomIngredient {
             return new EntityIngredient(BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(entity)));
         }
 
-        @Override
-        public void write(@Nonnull FriendlyByteBuf buffer, @Nonnull EntityIngredient ingredient) {
+        private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull EntityIngredient ingredient) {
             buffer.writeUtf(ingredient.entityType != null ? Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.getKey(ingredient.entityType)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
-        }
-
-        @Override
-        public Codec<EntityIngredient> getCodec(boolean allowEmpty) {
-            return CODEC;
         }
     }
 

@@ -1,7 +1,7 @@
 package de.cech12.bucketlib;
 
 import de.cech12.bucketlib.api.BucketLib;
-import de.cech12.bucketlib.api.BucketLibApi;
+import de.cech12.bucketlib.api.BucketLibComponents;
 import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.crafting.BlockIngredient;
 import de.cech12.bucketlib.api.crafting.EmptyIngredient;
@@ -11,17 +11,17 @@ import de.cech12.bucketlib.api.crafting.MilkIngredient;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.item.UniversalBucketDispenseBehaviour;
 import de.cech12.bucketlib.item.UniversalBucketFluidHandler;
-import de.cech12.bucketlib.item.crafting.BucketDyeingRecipe;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapedRecipe;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapelessRecipe;
 import de.cech12.bucketlib.util.BucketLibUtil;
-import de.cech12.bucketlib.util.ColorUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.material.Fluid;
@@ -31,36 +31,37 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.DistExecutor;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.ICapabilityProvider;
-import net.neoforged.neoforge.capabilities.ItemCapability;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.fluids.SimpleFluidContent;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Mod(BucketLib.MOD_ID)
 public class BucketLibMod {
 
+    public static DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(BuiltInRegistries.DATA_COMPONENT_TYPE, BucketLib.MOD_ID);
     public static DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(BuiltInRegistries.RECIPE_SERIALIZER, BucketLib.MOD_ID);
     public static DeferredRegister<IngredientType<?>> INGREDIENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.INGREDIENT_TYPES, BucketLib.MOD_ID);
 
+    public static DeferredHolder<DataComponentType<?>, DataComponentType<SimpleFluidContent>> FLUID_COMPONENT = DATA_COMPONENT_TYPES.register(BucketLibComponents.FLUID_LOCATION.getPath(), () -> new DataComponentType.Builder<SimpleFluidContent>().persistent(SimpleFluidContent.CODEC).networkSynchronized(SimpleFluidContent.STREAM_CODEC).build());
+
     static {
-        RECIPE_SERIALIZERS.register("bucket_dyeing", () -> BucketDyeingRecipe.Serializer.INSTANCE);
+        DATA_COMPONENT_TYPES.register(BucketLibComponents.BUCKET_CONTENT_LOCATION.getPath(), () -> BucketLibComponents.BUCKET_CONTENT);
+
         RECIPE_SERIALIZERS.register("bucket_filling_shaped", () -> BucketFillingShapedRecipe.Serializer.INSTANCE);
         RECIPE_SERIALIZERS.register("bucket_filling_shapeless", () -> BucketFillingShapelessRecipe.Serializer.INSTANCE);
         INGREDIENT_TYPES.register("block", () -> BlockIngredient.TYPE);
@@ -78,7 +79,6 @@ public class BucketLibMod {
         CommonLoader.init();
 
         eventBus.addListener(this::commonSetup);
-        eventBus.addListener(this::processIMC);
         eventBus.addListener(this::addItemsToTabs);
 
         //dye recipe serializer
@@ -96,50 +96,33 @@ public class BucketLibMod {
         BucketLibTags.init();
     }
 
-    private void processIMC(final InterModProcessEvent event) {
-        event.getIMCStream().forEach(imcMessage -> {
-            if (!BucketLib.MOD_ID.equals(imcMessage.modId())) {
-                LOGGER.warn("Bucket could not be registered. The mod id \"{}\" of the IMCMessage is not \"{}\"", imcMessage.modId(), BucketLib.MOD_ID);
+    public static void processRegistration(RegisterCapabilitiesEvent event, ResourceLocation bucketLocation) {
+        if (bucketLocation != null) {
+            Optional<Item> bucketItem = BuiltInRegistries.ITEM.getOptional(bucketLocation);
+            if (bucketItem.isEmpty()) {
+                LOGGER.info("Bucket could not be registered. The given ResourceLocation \"{}\" does not match any registered item in Forge registry.", bucketLocation);
                 return;
             }
-            if (!BucketLibApi.REGISTER_BUCKET.equals(imcMessage.method())) {
-                LOGGER.warn("Bucket could not be registered. The method \"{}\" of the IMCMessage is not \"{}\"", imcMessage.method(), BucketLibApi.REGISTER_BUCKET);
-                return;
-            }
-            if (imcMessage.messageSupplier().get() instanceof ResourceLocation bucketLocation && bucketLocation != null) {
-                Optional<Item> bucketItem = BuiltInRegistries.ITEM.getOptional(bucketLocation);
-                if (bucketItem.isEmpty()) {
-                    LOGGER.info("Bucket could not be registered. The given ResourceLocation \"{}\" does not match any registered item in Forge registry.", bucketLocation);
-                    return;
-                }
-                if (bucketItem.get() instanceof UniversalBucketItem bucket) {
-                    registerBucket(bucket);
-                } else {
-                    LOGGER.info("Bucket could not be registered. The item \"{}\" is not a {}.", bucketLocation, UniversalBucketItem.class.getName());
-                }
+            if (bucketItem.get() instanceof UniversalBucketItem bucket) {
+                registerBucket(event, bucket);
             } else {
-                LOGGER.warn("Bucket could not be registered. The message supplier of the IMCMessage does not contain a ResourceLocation");
+                LOGGER.info("Bucket could not be registered. The item \"{}\" is not a {}.", bucketLocation, UniversalBucketItem.class.getName());
             }
-        });
+        } else {
+            LOGGER.warn("Bucket could not be registered. The message supplier of the IMCMessage does not contain a ResourceLocation");
+        }
     }
 
-    private void registerBucket(UniversalBucketItem bucket) {
+    private static void registerBucket(RegisterCapabilitiesEvent event, UniversalBucketItem bucket) {
         buckets.add(bucket);
-        //register item capability, because RegisterCapabilitiesEvent fires before InterModProcessEvent
-        try {
-            Field providersField = ItemCapability.class.getDeclaredField("providers");
-            providersField.setAccessible(true);
-            Map<Item, List<ICapabilityProvider<ItemStack, Void, IFluidHandlerItem>>> providers = (Map<Item, List<ICapabilityProvider<ItemStack, Void, IFluidHandlerItem>>>) providersField.get(Capabilities.FluidHandler.ITEM);
-            (providers.computeIfAbsent(bucket, (i) -> new ArrayList<>())).add((stack, ctx) -> new UniversalBucketFluidHandler(stack));
-        } catch (IllegalAccessException | NoSuchFieldException ex) {
-            LOGGER.error("Bucket could not be registered completely. The capability provider registration failed.", ex);
-        }
+        //register item capability
+        event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new UniversalBucketFluidHandler(stack), bucket);
         //register dispense behaviour
         DispenserBlock.registerBehavior(bucket, UniversalBucketDispenseBehaviour.getInstance());
         //register color
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> Minecraft.getInstance().getItemColors().register((stack, layer) -> {
             if (layer == 0 && bucket.isDyeable()) {
-                return ColorUtil.getColor(stack, bucket.getDefaultColor());
+                return DyedItemColor.getOrDefault(stack, bucket.getDefaultColor());
             }
             if (layer == 1) {
                 return FluidUtil.getFluidContained(stack)

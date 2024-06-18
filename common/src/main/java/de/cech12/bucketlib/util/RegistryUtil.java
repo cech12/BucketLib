@@ -30,7 +30,7 @@ public class RegistryUtil {
     }, new Decoder<>() {
         @Override
         public <T> DataResult<Pair<Fluid, T>> decode(DynamicOps<T> ops, T input) {
-            return DataResult.success(Pair.of(Services.REGISTRY.getFluid(new ResourceLocation(ops.getStringValue(input).get().left().get())), ops.empty()));
+            return DataResult.success(Pair.of(Services.REGISTRY.getFluid(new ResourceLocation(ops.getStringValue(input).getOrThrow())), ops.empty()));
         }
     });
 
@@ -42,7 +42,7 @@ public class RegistryUtil {
     }, new Decoder<>() {
         @Override
         public <T> DataResult<Pair<Block, T>> decode(DynamicOps<T> ops, T input) {
-            return DataResult.success(Pair.of(Services.REGISTRY.getBlock(new ResourceLocation(ops.getStringValue(input).get().left().get())), ops.empty()));
+            return DataResult.success(Pair.of(Services.REGISTRY.getBlock(new ResourceLocation(ops.getStringValue(input).getOrThrow())), ops.empty()));
         }
     });
 
@@ -54,7 +54,7 @@ public class RegistryUtil {
     }, new Decoder<>() {
         @Override
         public <T> DataResult<Pair<EntityType<?>, T>> decode(DynamicOps<T> ops, T input) {
-            return DataResult.success(Pair.of(Services.REGISTRY.getEntityType(new ResourceLocation(ops.getStringValue(input).get().left().get())), ops.empty()));
+            return DataResult.success(Pair.of(Services.REGISTRY.getEntityType(new ResourceLocation(ops.getStringValue(input).getOrThrow())), ops.empty()));
         }
     });
 

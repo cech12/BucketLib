@@ -17,10 +17,10 @@
       "item": "minecraft:wheat"
     },
     "E": {
-      "tag": "forge:eggs"
+      "item": "minecraft:egg"
     }
   },
   "result": {
-    "item": "minecraft:cake"
+    "id": "minecraft:cake"
   }
 }

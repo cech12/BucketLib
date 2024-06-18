@@ -10,18 +10,29 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStack;
+import net.minecraftforge.fluids.capability.templates.FluidTank;
 
 import javax.annotation.Nonnull;
 
-public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
-
-    public UniversalBucketFluidHandler(@Nonnull ItemStack container) {
-        super(container, FluidType.BUCKET_VOLUME);
-    }
+//TODO wait until forge re-adds capability system
+public class UniversalBucketFluidHandler extends FluidTank {
 
     @Nonnull
+    protected ItemStack container;
+
+    public UniversalBucketFluidHandler(@Nonnull ItemStack container) {
+        super(FluidType.BUCKET_VOLUME, e -> {
+            Item item = container.getItem();
+            if (item instanceof UniversalBucketItem bucketItem) {
+                return e.getFluid() != Fluids.EMPTY && bucketItem.canHoldFluid(e.getFluid());
+            }
+            return false;
+        });
+        this.container = container;
+    }
+
     @Override
+    @Nonnull
     public FluidStack getFluid() {
         FluidStack fluidStack = super.getFluid();
         //fill milk bucket with milk fluid if it is enabled
@@ -38,7 +49,7 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
     @Override
     public int fill(FluidStack resource, IFluidHandler.FluidAction doFill) {
         //only fill the bucket, if there is no milk inside it.
-        if (BucketLibUtil.containsMilk(getContainer())) {
+        if (BucketLibUtil.containsMilk(container)) {
             return 0;
         }
         //only fill the bucket, if there is enough fluid to fill the bucket completely
@@ -52,11 +63,11 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
     @Override
     public FluidStack drain(int maxDrain, FluidAction action) {
         //only drain the bucket, if there is no entity in the bucket
-        if (BucketLibUtil.containsEntityType(getContainer())) {
+        if (BucketLibUtil.containsEntityType(container)) {
             return FluidStack.EMPTY;
         }
         //only drain milk if the fluid is active
-        if (!ForgeMod.MILK.isPresent() && BucketLibUtil.containsMilk(getContainer())) {
+        if (!ForgeMod.MILK.isPresent() && BucketLibUtil.containsMilk(container)) {
             return FluidStack.EMPTY;
         }
         //only drain the bucket, if there is enough space to drain the bucket completely
@@ -72,22 +83,25 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
     }
 
     @Override
-    protected void setContainerToEmpty() {
-        boolean wasCracked = false;
-        if (container.getItem() instanceof UniversalBucketItem bucketItem) {
-            wasCracked = bucketItem.isCracked(container);
-        }
-        super.setContainerToEmpty();
-        if (wasCracked) {
-            container.shrink(1);
-        } else {
-            if (BucketLibUtil.containsContent(container)) { //remove milk content tag
-                BucketLibUtil.removeContentNoCopy(container, false);
+    protected void onContentsChanged() {
+        if (fluid.isEmpty()) {
+            boolean wasCracked = false;
+            if (container.getItem() instanceof UniversalBucketItem bucketItem) {
+                wasCracked = bucketItem.isCracked(container);
             }
-            BucketLibUtil.damageByOne(container);
+            super.setContainerToEmpty();
+            if (wasCracked) {
+                container.shrink(1);
+            } else {
+                if (BucketLibUtil.containsContent(container)) { //remove milk content tag
+                    BucketLibUtil.removeContentNoCopy(container, false);
+                }
+                BucketLibUtil.damageByOne(container);
+            }
         }
     }
 
+    /*
     @Override
     public boolean canFillFluidType(FluidStack fluid) {
         Item item = container.getItem();
@@ -96,5 +110,6 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
         }
         return super.canFillFluidType(fluid);
     }
+     */
 
 }

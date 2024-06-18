@@ -13,7 +13,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.fluids.*;
+import net.minecraftforge.fluids.DispenseFluidContainer;
+import net.minecraftforge.fluids.FluidActionResult;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -91,7 +95,7 @@ public class ForgeFluidHelper implements IFluidHelper {
 
     @Override
     public void curePotionEffects(LivingEntity entity, ItemStack curativeItem) {
-        entity.curePotionEffects(curativeItem);
+        entity.removeAllEffects();
     }
 
 }

@@ -2,6 +2,7 @@ package de.cech12.bucketlib;
 
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.api.BucketLibApi;
+import de.cech12.bucketlib.api.BucketLibComponents;
 import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.crafting.BlockIngredient;
 import de.cech12.bucketlib.api.crafting.EmptyIngredient;
@@ -10,16 +11,18 @@ import de.cech12.bucketlib.api.crafting.FluidIngredient;
 import de.cech12.bucketlib.api.crafting.MilkIngredient;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.item.UniversalBucketDispenseBehaviour;
-import de.cech12.bucketlib.item.crafting.BucketDyeingRecipe;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapedRecipe;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapelessRecipe;
 import de.cech12.bucketlib.util.BucketLibUtil;
-import de.cech12.bucketlib.util.ColorUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.material.Fluid;
@@ -48,11 +51,16 @@ import java.util.List;
 @Mod(BucketLib.MOD_ID)
 public class BucketLibMod {
 
+    public static DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(BuiltInRegistries.DATA_COMPONENT_TYPE.key(), BucketLib.MOD_ID);
     public static DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, BucketLib.MOD_ID);
     public static DeferredRegister<IIngredientSerializer<?>> INGREDIENT_SERIALIZERS = DeferredRegister.create(ForgeRegistries.Keys.INGREDIENT_SERIALIZERS, BucketLib.MOD_ID);
 
+    //TODO wait until forge re-adds capability system
+    public static DeferredHolder<DataComponentType<?>, DataComponentType<SimpleFluidContent>> FLUID_COMPONENT = DATA_COMPONENT_TYPES.register(BucketLibComponents.FLUID_LOCATION.getPath(), () -> new DataComponentType.Builder<SimpleFluidContent>().persistent(SimpleFluidContent.CODEC).networkSynchronized(SimpleFluidContent.STREAM_CODEC).build());
+
     static {
-        RECIPE_SERIALIZERS.register("bucket_dyeing", () -> BucketDyeingRecipe.Serializer.INSTANCE);
+        DATA_COMPONENT_TYPES.register(BucketLibComponents.BUCKET_CONTENT_LOCATION.getPath(), () -> new DataComponentType.Builder<CustomData>().persistent(CustomData.CODEC).networkSynchronized(CustomData.STREAM_CODEC).build());
+
         RECIPE_SERIALIZERS.register("bucket_filling_shaped", () -> BucketFillingShapedRecipe.Serializer.INSTANCE);
         RECIPE_SERIALIZERS.register("bucket_filling_shapeless", () -> BucketFillingShapelessRecipe.Serializer.INSTANCE);
         INGREDIENT_SERIALIZERS.register("block", () -> BlockIngredient.SERIALIZER);
@@ -123,7 +131,7 @@ public class BucketLibMod {
         //register color
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> Minecraft.getInstance().getItemColors().register((stack, layer) -> {
             if (layer == 0 && bucket.isDyeable()) {
-                return ColorUtil.getColor(stack, bucket.getDefaultColor());
+                return DyedItemColor.getOrDefault(stack, bucket.getDefaultColor());
             }
             if (layer == 1) {
                 return FluidUtil.getFluidContained(stack)

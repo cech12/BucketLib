@@ -17,7 +17,7 @@ public class NeoforgeBucketHelper implements IBucketHelper {
 
     @Override
     public Fluid getFluidOfBucketItem(BucketItem bucket) {
-        return bucket.getFluid();
+        return bucket.content;
     }
 
     @Override

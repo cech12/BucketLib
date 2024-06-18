@@ -26,7 +26,7 @@ public class BucketLibReiClientPlugin implements REIClientPlugin {
         //ItemStack sensitive fuel is not supported by Fabrics FuelRegistry
         //register infinity enchanting
         if (Services.CONFIG.isInfinityEnchantmentEnabled()) {
-            EnchantmentInstance data = new EnchantmentInstance(Enchantments.INFINITY_ARROWS, Enchantments.INFINITY_ARROWS.getMaxLevel());
+            EnchantmentInstance data = new EnchantmentInstance(Enchantments.INFINITY, Enchantments.INFINITY.getMaxLevel());
             for (UniversalBucketItem bucketItem : Services.REGISTRY.getRegisteredBuckets()) {
                 for (Fluid fluid : Services.REGISTRY.getAllFluids()) {
                     if (fluid != Fluids.EMPTY && bucketItem.canHoldFluid(fluid) && fluid.defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {

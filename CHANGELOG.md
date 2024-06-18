@@ -3,6 +3,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.6-3.3.0.0] - 2024-06-18
+### Changed
+- Updated to Minecraft 1.20.6 (Fabric 0.98.0+1.20.6, Neoforge 20.6.119)
+- Removed Forge support until the capability system is re-added
+- Updated Cloth Config support (14.0.126) (Fabric/Quilt)
+- Updated ModMenu support (10.0.0-beta.1) (Fabric/Quilt)
+- Updated JEI support (18.0.0.62) (all loaders)
+- Updated REI support (15.0.728) (Neoforge, Fabric/Quilt)
+- Changed bucket registration for Neoforge: must be called during RegisterCapabilitiesEvent
+
+### Fixed
+- fixed known issue: max stack size was not taken into account and defaulted to 1 (Fabric)
+
 ## [1.20.4-3.2.1.0] - 2024-06-04
 ### Added
 - added Roughly Enough Items (REI) support (version 14.1.727) (all loaders)

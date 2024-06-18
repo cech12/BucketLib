@@ -1,5 +1,6 @@
 package de.cech12.bucketlib.item;
 
+import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +18,7 @@ import javax.annotation.Nonnull;
 public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
 
     public UniversalBucketFluidHandler(@Nonnull ItemStack container) {
-        super(container, FluidType.BUCKET_VOLUME);
+        super(BucketLibMod.FLUID_COMPONENT, container, FluidType.BUCKET_VOLUME);
     }
 
     @Nonnull

@@ -1,6 +1,6 @@
 package de.cech12.bucketlib.api.crafting;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.api.BucketLib;
@@ -17,13 +17,15 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
+
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,16 +124,21 @@ public class FluidIngredient implements CustomIngredient {
         return Serializer.INSTANCE;
     }
 
-    public static final Codec<FluidIngredient> CODEC = RecordCodecBuilder.create(builder ->
-            builder.group(
-                    ResourceLocation.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.of(BuiltInRegistries.FLUID.getKey(i.fluid))),
-                    TagKey.codec(BuiltInRegistries.FLUID.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
-            ).apply(builder, FluidIngredient::new)
-    );
-
     public static final class Serializer implements CustomIngredientSerializer<FluidIngredient> {
+
         public static final Serializer INSTANCE = new Serializer();
         public static final ResourceLocation NAME = new ResourceLocation(BucketLib.MOD_ID, "fluid");
+
+        private static final MapCodec<FluidIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
+                builder.group(
+                        ResourceLocation.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.of(BuiltInRegistries.FLUID.getKey(i.fluid))),
+                        TagKey.codec(BuiltInRegistries.FLUID.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
+                ).apply(builder, FluidIngredient::new)
+        );
+
+        private static final StreamCodec<RegistryFriendlyByteBuf, FluidIngredient> PACKET_CODEC = StreamCodec.of(
+                FluidIngredient.Serializer::write,
+                FluidIngredient.Serializer::read);
 
         private Serializer() {}
 
@@ -141,7 +148,17 @@ public class FluidIngredient implements CustomIngredient {
         }
 
         @Override
-        public FluidIngredient read(FriendlyByteBuf buffer) {
+        public MapCodec<FluidIngredient> getCodec(boolean allowEmpty) {
+            return CODEC;
+        }
+
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, FluidIngredient> getPacketCodec() {
+            return PACKET_CODEC;
+        }
+
+        @Nonnull
+        private static FluidIngredient read(RegistryFriendlyByteBuf buffer) {
             String fluid = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
@@ -154,15 +171,9 @@ public class FluidIngredient implements CustomIngredient {
             return new FluidIngredient(BuiltInRegistries.FLUID.get(new ResourceLocation(fluid)));
         }
 
-        @Override
-        public void write(@Nonnull FriendlyByteBuf buffer, @Nonnull FluidIngredient ingredient) {
+        private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull FluidIngredient ingredient) {
             buffer.writeUtf(ingredient.fluid != null ? Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(ingredient.fluid)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
-        }
-
-        @Override
-        public Codec<FluidIngredient> getCodec(boolean allowEmpty) {
-            return CODEC;
         }
     }
 

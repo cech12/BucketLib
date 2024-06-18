@@ -1,6 +1,6 @@
 package de.cech12.bucketlib.api.crafting;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.util.BucketLibUtil;
@@ -11,8 +11,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 
 import javax.annotation.Nonnull;
@@ -21,14 +21,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class EntityIngredient extends Ingredient {
+public class EntityIngredient implements ICustomIngredient {
 
     protected final EntityType<?> entityType;
     protected final TagKey<EntityType<?>> tag;
     private ItemStack[] matchingStacks;
 
     private EntityIngredient(EntityType<?> entityType, TagKey<EntityType<?>> tag) {
-        super(Stream.of());
         this.entityType = entityType;
         this.tag = tag;
     }
@@ -46,8 +45,8 @@ public class EntityIngredient extends Ingredient {
     }
 
     @Override
-    public boolean test(ItemStack itemStack) {
-        if (itemStack == null || itemStack.isEmpty()) {
+    public boolean test(@Nonnull ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
             return false;
         }
         List<RegistryUtil.BucketEntity> bucketEntities;
@@ -71,7 +70,7 @@ public class EntityIngredient extends Ingredient {
 
     @Override
     @Nonnull
-    public ItemStack[] getItems() {
+    public Stream<ItemStack> getItems() {
         if (this.matchingStacks == null) {
             ArrayList<ItemStack> stacks = new ArrayList<>();
             List<EntityType<?>> entityTypes = new ArrayList<>();
@@ -104,12 +103,7 @@ public class EntityIngredient extends Ingredient {
             }
             this.matchingStacks = stacks.toArray(new ItemStack[0]);
         }
-        return this.matchingStacks;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return false;
+        return Stream.of(this.matchingStacks);
     }
 
     @Override
@@ -117,7 +111,13 @@ public class EntityIngredient extends Ingredient {
         return false;
     }
 
-    public static final Codec<EntityIngredient> CODEC = RecordCodecBuilder.create(builder ->
+    @Override
+    @Nonnull
+    public IngredientType<?> getType() {
+        return TYPE;
+    }
+
+    public static final MapCodec<EntityIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
             builder.group(
                     ResourceLocation.CODEC.optionalFieldOf("entity").forGetter(i -> Optional.of(BuiltInRegistries.ENTITY_TYPE.getKey(i.entityType))),
                     TagKey.codec(BuiltInRegistries.ENTITY_TYPE.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))

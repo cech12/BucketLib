@@ -1,12 +1,11 @@
 package de.cech12.bucketlib.api.crafting;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Encoder;
 import com.mojang.serialization.MapCodec;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.util.BucketLibUtil;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -73,22 +72,22 @@ public class MilkIngredient extends AbstractIngredient {
         return SERIALIZER;
     }
 
-    public static final Codec<MilkIngredient> CODEC = MapCodec.of(Encoder.empty(), Decoder.unit(new MilkIngredient())).codec();
-
     public static final IIngredientSerializer<MilkIngredient> SERIALIZER = new IIngredientSerializer<>() {
 
+        private static final MapCodec<MilkIngredient> CODEC = MapCodec.of(Encoder.empty(), Decoder.unit(new MilkIngredient()));
+
         @Override
-        public Codec<? extends MilkIngredient> codec() {
+        public MapCodec<? extends MilkIngredient> codec() {
             return CODEC;
         }
 
         @Override
-        public MilkIngredient read(FriendlyByteBuf buffer) {
+        public MilkIngredient read(RegistryFriendlyByteBuf buffer) {
             return new MilkIngredient();
         }
 
         @Override
-        public void write(@Nonnull FriendlyByteBuf buffer, @Nonnull MilkIngredient ingredient) {
+        public void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull MilkIngredient ingredient) {
         }
     };
 }

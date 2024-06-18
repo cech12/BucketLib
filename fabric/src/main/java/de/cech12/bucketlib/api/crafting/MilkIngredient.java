@@ -1,6 +1,5 @@
 package de.cech12.bucketlib.api.crafting;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Encoder;
 import com.mojang.serialization.MapCodec;
@@ -9,7 +8,8 @@ import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -60,11 +60,16 @@ public class MilkIngredient implements CustomIngredient {
         return Serializer.INSTANCE;
     }
 
-    public static final Codec<MilkIngredient> CODEC = MapCodec.of(Encoder.empty(), Decoder.unit(new MilkIngredient())).codec();
-
     public static final class Serializer implements CustomIngredientSerializer<MilkIngredient> {
+
         public static final Serializer INSTANCE = new Serializer();
         public static final ResourceLocation NAME = new ResourceLocation(BucketLib.MOD_ID, "milk");
+
+        public static final MapCodec<MilkIngredient> CODEC = MapCodec.of(Encoder.empty(), Decoder.unit(new MilkIngredient()));
+
+        private static final StreamCodec<RegistryFriendlyByteBuf, MilkIngredient> PACKET_CODEC = StreamCodec.of(
+                MilkIngredient.Serializer::write,
+                MilkIngredient.Serializer::read);
 
         private Serializer() {}
 
@@ -74,17 +79,20 @@ public class MilkIngredient implements CustomIngredient {
         }
 
         @Override
-        public MilkIngredient read(FriendlyByteBuf buffer) {
+        public MapCodec<MilkIngredient> getCodec(boolean allowEmpty) {
+            return CODEC;
+        }
+
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, MilkIngredient> getPacketCodec() {
+            return null;
+        }
+
+        private static MilkIngredient read(RegistryFriendlyByteBuf buffer) {
             return new MilkIngredient();
         }
 
-        @Override
-        public void write(@Nonnull FriendlyByteBuf buffer, @Nonnull MilkIngredient ingredient) {
-        }
-
-        @Override
-        public Codec<MilkIngredient> getCodec(boolean allowEmpty) {
-            return CODEC;
+        private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull MilkIngredient ingredient) {
         }
     }
 

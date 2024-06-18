@@ -1,8 +1,9 @@
 package de.cech12.bucketlib.api.crafting;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
+import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -11,28 +12,27 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
+import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class FluidIngredient extends Ingredient {
+public class FluidIngredient implements ICustomIngredient {
 
     protected final Fluid fluid;
     protected final TagKey<Fluid> tag;
     private ItemStack[] matchingStacks;
 
     private FluidIngredient(Fluid fluid, TagKey<Fluid> tag) {
-        super(Stream.of());
         this.fluid = fluid;
         this.tag = tag;
     }
@@ -57,11 +57,11 @@ public class FluidIngredient extends Ingredient {
     }
 
     @Override
-    public boolean test(ItemStack itemStack) {
-        if (itemStack == null || itemStack.isEmpty()) {
+    public boolean test(@Nonnull ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
             return false;
         }
-        ItemStack container = ItemHandlerHelper.copyStackWithSize(itemStack, 1);
+        ItemStack container = itemStack.copyWithCount(1);
         Optional<FluidStack> drainedFluidOptional = FluidUtil.getFluidHandler(container)
                 .map(fluidHandler -> fluidHandler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE));
         if (drainedFluidOptional.isPresent() && !drainedFluidOptional.get().isEmpty()) {
@@ -73,7 +73,7 @@ public class FluidIngredient extends Ingredient {
 
     @Override
     @Nonnull
-    public ItemStack[] getItems() {
+    public Stream<ItemStack> getItems() {
         if (this.matchingStacks == null) {
             ArrayList<ItemStack> stacks = new ArrayList<>();
             List<Fluid> fluids = new ArrayList<>();
@@ -89,7 +89,7 @@ public class FluidIngredient extends Ingredient {
             for (Fluid fluid : fluids) {
                 //vanilla bucket
                 Item bucketItem = fluid.getBucket();
-                if (!(bucketItem instanceof BucketItem) || ((BucketItem) bucketItem).getFluid() != fluid) {
+                if (!(bucketItem instanceof BucketItem) || Services.BUCKET.getFluidOfBucketItem((BucketItem) bucketItem) != fluid) {
                     continue; //skip fluids that have no vanilla bucket
                 }
                 stacks.add(new ItemStack(bucketItem));
@@ -102,12 +102,7 @@ public class FluidIngredient extends Ingredient {
             }
             this.matchingStacks = stacks.toArray(new ItemStack[0]);
         }
-        return this.matchingStacks;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return false;
+        return Stream.of(this.matchingStacks);
     }
 
     @Override
@@ -115,7 +110,13 @@ public class FluidIngredient extends Ingredient {
         return false;
     }
 
-    public static final Codec<FluidIngredient> CODEC = RecordCodecBuilder.create(builder ->
+    @Override
+    @Nonnull
+    public IngredientType<?> getType() {
+        return TYPE;
+    }
+
+    public static final MapCodec<FluidIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
             builder.group(
                     ResourceLocation.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.of(BuiltInRegistries.FLUID.getKey(i.fluid))),
                     TagKey.codec(BuiltInRegistries.FLUID.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))

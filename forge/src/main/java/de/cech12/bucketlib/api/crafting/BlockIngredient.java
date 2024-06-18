@@ -1,11 +1,11 @@
 package de.cech12.bucketlib.api.crafting;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
@@ -121,22 +121,22 @@ public class BlockIngredient extends AbstractIngredient {
         return SERIALIZER;
     }
 
-    public static final Codec<BlockIngredient> CODEC = RecordCodecBuilder.create(builder ->
-            builder.group(
-                    ResourceLocation.CODEC.optionalFieldOf("block").forGetter(i -> Optional.ofNullable(ForgeRegistries.BLOCKS.getKey(i.block))),
-                    TagKey.codec(ForgeRegistries.BLOCKS.getRegistryKey()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
-            ).apply(builder, BlockIngredient::new)
-    );
-
     public static final IIngredientSerializer<BlockIngredient> SERIALIZER = new IIngredientSerializer<>() {
 
+        private static final MapCodec<BlockIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
+                builder.group(
+                        ResourceLocation.CODEC.optionalFieldOf("block").forGetter(i -> Optional.ofNullable(ForgeRegistries.BLOCKS.getKey(i.block))),
+                        TagKey.codec(ForgeRegistries.BLOCKS.getRegistryKey()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
+                ).apply(builder, BlockIngredient::new)
+        );
+
         @Override
-        public Codec<? extends BlockIngredient> codec() {
+        public MapCodec<? extends BlockIngredient> codec() {
             return CODEC;
         }
 
         @Override
-        public BlockIngredient read(FriendlyByteBuf buffer) {
+        public BlockIngredient read(RegistryFriendlyByteBuf buffer) {
             String block = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
@@ -150,7 +150,7 @@ public class BlockIngredient extends AbstractIngredient {
         }
 
         @Override
-        public void write(@Nonnull FriendlyByteBuf buffer, @Nonnull BlockIngredient ingredient) {
+        public void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull BlockIngredient ingredient) {
             buffer.writeUtf(ingredient.block != null ? Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(ingredient.block)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }

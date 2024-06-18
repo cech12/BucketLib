@@ -1,5 +1,7 @@
 package de.cech12.bucketlib.platform;
 
+import de.cech12.bucketlib.BucketLibMod;
+import de.cech12.bucketlib.item.FluidStorageData;
 import de.cech12.bucketlib.item.StackItemContext;
 import de.cech12.bucketlib.item.UniversalBucketFluidStorage;
 import de.cech12.bucketlib.platform.services.IFluidHelper;
@@ -18,7 +20,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -85,9 +86,10 @@ public class FabricFluidHelper implements IFluidHelper {
 
     @Override
     public Fluid getContainedFluid(ItemStack stack) {
-        Storage<FluidVariant> storage = ContainerItemContext.withConstant(stack).find(FluidStorage.ITEM);
-        if (storage != null) {
-            for (StorageView<FluidVariant> view : storage.nonEmptyViews()) {
+        ContainerItemContext context = new StackItemContext(stack);
+        Storage<FluidVariant> storage = context.find(FluidStorage.ITEM);
+        if (storage instanceof UniversalBucketFluidStorage bucketFluidStorage) {
+            for (StorageView<FluidVariant> view : bucketFluidStorage.nonEmptyViews()) {
                 return view.getResource().getFluid();
             }
         }
@@ -106,9 +108,7 @@ public class FabricFluidHelper implements IFluidHelper {
             }
             ItemStack resultStack = context.getItemVariant().toStack();
             if (!resultStack.isEmpty()) {
-                CompoundTag tag = resultStack.getOrCreateTag();
-                bucketFluidStorage.writeNbt(tag);
-                resultStack.setTag(tag);
+                resultStack.set(BucketLibMod.STORAGE, new FluidStorageData(FluidVariant.of(fluid), FluidConstants.BUCKET));
             }
             return resultStack;
         }
@@ -128,9 +128,7 @@ public class FabricFluidHelper implements IFluidHelper {
             }
             ItemStack resultStack = context.getItemVariant().toStack();
             if (!resultStack.isEmpty()) {
-                CompoundTag tag = resultStack.getOrCreateTag();
-                bucketFluidStorage.writeNbt(tag);
-                resultStack.setTag(tag);
+                resultStack.remove(BucketLibMod.STORAGE);
             }
             return resultStack;
         }

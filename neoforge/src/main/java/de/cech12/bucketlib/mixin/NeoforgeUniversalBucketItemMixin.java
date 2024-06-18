@@ -8,7 +8,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -37,9 +36,9 @@ public class NeoforgeUniversalBucketItemMixin extends Item {
 
     @Override
     public boolean canApplyAtEnchantingTable(@NotNull ItemStack stack, @NotNull Enchantment enchantment) {
-        if (enchantment == Enchantments.INFINITY_ARROWS
+        if (enchantment == Enchantments.INFINITY
                 && Services.CONFIG.isInfinityEnchantmentEnabled()
-                && EnchantmentHelper.getTagEnchantmentLevel(Enchantments.INFINITY_ARROWS, stack) <= 0
+                && stack.getEnchantmentLevel(Enchantments.INFINITY) <= 0
                 && Services.FLUID.getContainedFluid(stack).defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {
             return true;
         }
