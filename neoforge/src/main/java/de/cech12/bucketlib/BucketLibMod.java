@@ -81,6 +81,8 @@ public class BucketLibMod {
         eventBus.addListener(this::commonSetup);
         eventBus.addListener(this::addItemsToTabs);
 
+        //data components
+        DATA_COMPONENT_TYPES.register(eventBus);
         //dye recipe serializer
         RECIPE_SERIALIZERS.register(eventBus);
         //ingredient serializer

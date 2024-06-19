@@ -1,6 +1,9 @@
 {
   "tag.fluid.c.milk": "Milk",
 
+  "tag.entity_type.bucketlib.milkable": "Milkable entities",
+  "tag.fluid.bucketlib.infinity_enchantable": "Fluids that enable infinity enchanting",
+
   "text.autoconfig.bucketlib.title": "BucketLib Settings",
 
   "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED": "Infinity enchantment enabled",
