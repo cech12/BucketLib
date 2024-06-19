@@ -6,6 +6,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Encoder;
+import de.cech12.bucketlib.mixin.MobBucketItemAccessor;
 import de.cech12.bucketlib.platform.Services;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -72,7 +73,7 @@ public class RegistryUtil {
                 bucketBlocks.add(new BucketBlock(bucket.getBlock(), bucket));
             }
             if (item instanceof MobBucketItem bucket) {
-                EntityType<?> entityType = Services.BUCKET.getEntityTypeOfMobBucketItem(bucket);
+                EntityType<?> entityType = ((MobBucketItemAccessor) bucket).bucketlib_getEntityType();
                 if (entityType != null && level != null && entityType.create(level) instanceof Bucketable) {
                     bucketEntities.add(new BucketEntity(entityType, Services.BUCKET.getFluidOfBucketItem(bucket), bucket));
                 }

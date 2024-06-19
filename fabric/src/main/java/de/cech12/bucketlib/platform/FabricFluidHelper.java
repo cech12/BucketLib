@@ -19,6 +19,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -73,7 +74,15 @@ public class FabricFluidHelper implements IFluidHelper {
         if (BucketLibUtil.isEmpty(stack)) {
             Tuple<Boolean, ItemStack> result = tryPickUpFluid(stack, null, level, null, pos, dispenserFacing);
             if (result.getA()) {
-                return result.getB();
+                if (stack.getCount() == 1) {
+                    return result.getB();
+                }
+                if ((source.blockEntity()).addItem(result.getB()) < 0) {
+                    new DefaultDispenseItemBehavior().dispense(source, result.getB());
+                }
+                ItemStack stackCopy = stack.copy();
+                stackCopy.shrink(1);
+                return stackCopy;
             }
         } else {
             Tuple<Boolean, ItemStack> result = tryPlaceFluid(stack, null, level, null, pos);
@@ -150,7 +159,10 @@ public class FabricFluidHelper implements IFluidHelper {
             if (!fullVanillaBucket.isEmpty() && fullVanillaBucket.getItem() instanceof BucketItem bucketItem) {
                 Fluid fluid = Services.BUCKET.getFluidOfBucketItem(bucketItem);
                 level.playSound(player, pos, FluidVariantAttributes.getFillSound(FluidVariant.of(fluid)), SoundSource.BLOCKS, 1.0F, 1.0F);
-                return new Tuple<>(true, BucketLibUtil.addFluid(stack, fluid));
+                ItemStack usedStack = stack.copy();
+                usedStack.setCount(1);
+                usedStack = BucketLibUtil.addFluid(usedStack, fluid);
+                return new Tuple<>(true, usedStack);
             }
         }
         return new Tuple<>(false, stack);

@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.6-3.3.0.3] - 2024-06-19
+### Fixed
+- Entity buckets were missing in creative menu (Neoforge)
+- Dispenser replaced multiple stacked buckets with only one filled bucket (Fabric/Quilt)
+
 ## [1.20.6-3.3.0.2] - 2024-06-19
 ### Fixed
 - Data components were not registered correctly (Neoforge)
