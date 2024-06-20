@@ -115,7 +115,7 @@ public class BlockIngredient implements CustomIngredient {
     public static final class Serializer implements CustomIngredientSerializer<BlockIngredient> {
 
         public static final Serializer INSTANCE = new Serializer();
-        public static final ResourceLocation NAME = new ResourceLocation(BucketLib.MOD_ID, "block");
+        public static final ResourceLocation NAME = BucketLib.id("block");
 
         private static final MapCodec<BlockIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
                 builder.group(
@@ -149,13 +149,13 @@ public class BlockIngredient implements CustomIngredient {
             String block = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
-                TagKey<Block> tag = TagKey.create(Registries.BLOCK, new ResourceLocation(tagId));
+                TagKey<Block> tag = TagKey.create(Registries.BLOCK, ResourceLocation.parse(tagId));
                 return new BlockIngredient(tag);
             }
             if (block.isEmpty()) {
                 throw new IllegalArgumentException("Cannot create a block ingredient with no block or tag.");
             }
-            return new BlockIngredient(BuiltInRegistries.BLOCK.get(new ResourceLocation(block)));
+            return new BlockIngredient(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(block)));
         }
 
         private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull BlockIngredient ingredient) {

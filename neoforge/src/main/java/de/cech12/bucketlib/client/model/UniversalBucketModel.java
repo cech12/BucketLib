@@ -1,12 +1,12 @@
 package de.cech12.bucketlib.client.model;
 
-import de.cech12.bucketlib.api.BucketLib;
-import de.cech12.bucketlib.api.item.UniversalBucketItem;
-import de.cech12.bucketlib.util.BucketLibUtil;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.mojang.math.Transformation;
+import de.cech12.bucketlib.api.BucketLib;
+import de.cech12.bucketlib.api.item.UniversalBucketItem;
+import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -30,9 +30,9 @@ import net.neoforged.neoforge.client.model.CompositeModel;
 import net.neoforged.neoforge.client.model.DynamicFluidContainerModel;
 import net.neoforged.neoforge.client.model.IQuadTransformer;
 import net.neoforged.neoforge.client.model.QuadTransformers;
+import net.neoforged.neoforge.client.model.SimpleModelState;
 import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
-import net.neoforged.neoforge.client.model.SimpleModelState;
 import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
 import net.neoforged.neoforge.client.model.geometry.StandaloneGeometryBakingContext;
 import net.neoforged.neoforge.client.model.geometry.UnbakedGeometryHelper;
@@ -56,7 +56,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
     // Transformer to set quads to max brightness
     private static final IQuadTransformer MAX_LIGHTMAP_TRANSFORMER = QuadTransformers.applyingLightmap(0x00F000F0);
 
-    private static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(new ResourceLocation(BucketLib.MOD_ID, "missing_lower_content")));
+    private static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(BucketLib.id("missing_lower_content")));
 
     @Nonnull
     private final Fluid fluid;
@@ -91,14 +91,15 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         ResourceLocation texture = TEXTURE_MAP.get(otherContentLocation);
         if (texture == null) {
             String textureLocation = String.format("item/bucket_content/%s", otherContentLocation.getPath());
-            texture = new ResourceLocation(otherContentLocation.getNamespace(), textureLocation);
+            texture = otherContentLocation.withPath(textureLocation);
             TEXTURE_MAP.put(otherContentLocation, texture);
         }
         return texture;
     }
 
     @Override
-    public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation) {
+    @Nonnull
+    public BakedModel bake(IGeometryBakingContext owner, @Nonnull ModelBaker baker, @Nonnull Function<Material, TextureAtlasSprite> spriteGetter, @Nonnull ModelState modelState, @Nonnull ItemOverrides overrides) {
         Material particleLocation = owner.hasMaterial("particle") ? owner.getMaterial("particle") : null;
 
         Material baseLocation = null;
@@ -154,7 +155,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         }
 
         // We need to disable GUI 3D and block lighting for this to render properly
-        var itemContext = StandaloneGeometryBakingContext.builder(owner).withGui3d(false).withUseBlockLight(false).build(modelLocation);
+        var itemContext = StandaloneGeometryBakingContext.builder(owner).withGui3d(false).withUseBlockLight(false).build(BucketLib.id("universal_bucket"));
         var modelBuilder = CompositeModel.Baked.builder(itemContext, particleSprite, new ContainedFluidOverrideHandler(overrides, baker, itemContext, this), owner.getTransforms());
 
         var normalRenderTypes = DynamicFluidContainerModel.getLayerRenderTypes(false);
@@ -162,7 +163,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         if (baseSprite != null) {
             // build base (insidest)
             var unbaked = UnbakedGeometryHelper.createUnbakedItemElements(0, baseSprite);
-            var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> baseSprite, modelState, modelLocation);
+            var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> baseSprite, modelState);
             modelBuilder.addQuads(normalRenderTypes, quads);
         }
 
@@ -171,7 +172,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
             var transformedState = new SimpleModelState(modelState.getRotation().compose(DEPTH_OFFSET_TRANSFORM), modelState.isUvLocked());
             var unbaked = UnbakedGeometryHelper.createUnbakedItemElements(2, otherContentSprite);
             TextureAtlasSprite finalOtherContentSprite = otherContentSprite;
-            var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> finalOtherContentSprite, transformedState, modelLocation);
+            var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> finalOtherContentSprite, transformedState);
             modelBuilder.addQuads(normalRenderTypes, quads);
         } else if (fluidMaskLocation != null && fluidSprite != null) {
             TextureAtlasSprite templateSprite = spriteGetter.apply(fluidMaskLocation);
@@ -179,7 +180,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
                 // build liquid layer (inside)
                 var transformedState = new SimpleModelState(modelState.getRotation().compose(DEPTH_OFFSET_TRANSFORM), modelState.isUvLocked());
                 var unbaked = UnbakedGeometryHelper.createUnbakedItemMaskElements(1, templateSprite); // Use template as mask
-                var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> fluidSprite, transformedState, modelLocation); // Bake with fluid texture
+                var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> fluidSprite, transformedState); // Bake with fluid texture
 
                 var unlit = fluid.getFluidType().getLightLevel() > 0;
                 var renderTypes = DynamicFluidContainerModel.getLayerRenderTypes(unlit);
@@ -200,16 +201,14 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
 
         @Override
         @Nonnull
-        public UniversalBucketModel read(JsonObject jsonObject, JsonDeserializationContext deserializationContext)
+        public UniversalBucketModel read(@Nonnull JsonObject jsonObject, @Nonnull JsonDeserializationContext deserializationContext)
         {
             // create new model
             return new UniversalBucketModel(Fluids.EMPTY, null, false, false);
         }
     }
 
-    private static final class ContainedFluidOverrideHandler extends ItemOverrides
-    {
-        private static final ResourceLocation REBAKE_LOCATION = new ResourceLocation(BucketLib.MOD_ID, "bucket_override");
+    private static final class ContainedFluidOverrideHandler extends ItemOverrides {
 
         private final Map<ResourceLocation, BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
         private final ItemOverrides nested;
@@ -255,7 +254,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
                 }
                 if (!cache.containsKey(content)) {
                     UniversalBucketModel unbaked = (entityType != null || fluid == null) ? this.parent.withOtherContent(content, isCracked, entityType != null) : this.parent.withFluid(fluid, isCracked);
-                    BakedModel bakedModel = unbaked.bake(owner, baker, Material::sprite, BlockModelRotation.X0_Y0, this, REBAKE_LOCATION);
+                    BakedModel bakedModel = unbaked.bake(owner, baker, Material::sprite, BlockModelRotation.X0_Y0, this);
                     cache.put(content, bakedModel);
                     return bakedModel;
                 }

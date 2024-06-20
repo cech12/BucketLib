@@ -121,7 +121,7 @@ public class EntityIngredient implements CustomIngredient {
     public static final class Serializer implements CustomIngredientSerializer<EntityIngredient> {
 
         public static final Serializer INSTANCE = new Serializer();
-        public static final ResourceLocation NAME = new ResourceLocation(BucketLib.MOD_ID, "entity");
+        public static final ResourceLocation NAME = BucketLib.id("entity");
 
         public static final MapCodec<EntityIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
                 builder.group(
@@ -156,13 +156,13 @@ public class EntityIngredient implements CustomIngredient {
             String entity = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
-                TagKey<EntityType<?>> tag = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(tagId));
+                TagKey<EntityType<?>> tag = TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.parse(tagId));
                 return new EntityIngredient(tag);
             }
             if (entity.isEmpty()) {
                 throw new IllegalArgumentException("Cannot create a entity ingredient with no entity or tag.");
             }
-            return new EntityIngredient(BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(entity)));
+            return new EntityIngredient(BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(entity)));
         }
 
         private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull EntityIngredient ingredient) {

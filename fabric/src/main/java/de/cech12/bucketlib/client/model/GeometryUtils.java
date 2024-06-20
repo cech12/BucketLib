@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import org.joml.Vector3f;
 
@@ -93,31 +92,31 @@ public class GeometryUtils {
         return elements;
     }
 
-    public static List<BakedQuad> bakeElements(BlockModel blockModel, ItemOverrides itemOverrides, List<BlockElement> elements, TextureAtlasSprite sprite, ModelState modelState, ResourceLocation modelLocation) {
+    public static List<BakedQuad> bakeElements(BlockModel blockModel, ItemOverrides itemOverrides, List<BlockElement> elements, TextureAtlasSprite sprite, ModelState modelState) {
         if (elements.isEmpty()) {
             return List.of();
         } else {
             SimpleBakedModel.Builder simplebakedmodel$builder = (new SimpleBakedModel.Builder(blockModel, itemOverrides, false)).particle(sprite);
-            bakeElements(simplebakedmodel$builder, elements, sprite, modelState, modelLocation);
+            bakeElements(simplebakedmodel$builder, elements, sprite, modelState);
             return simplebakedmodel$builder.build().getQuads(null, null, RandomSource.create());
         }
     }
 
-    private static void bakeElements(SimpleBakedModel.Builder builder, List<BlockElement> elements, TextureAtlasSprite sprite, ModelState modelState, ResourceLocation modelLocation) {
+    private static void bakeElements(SimpleBakedModel.Builder builder, List<BlockElement> elements, TextureAtlasSprite sprite, ModelState modelState) {
         for (BlockElement element : elements) {
             element.faces.forEach((side, face) -> {
-                BakedQuad quad = bakeElementFace(element, face, sprite, side, modelState, modelLocation);
-                if (face.cullForDirection == null) {
+                BakedQuad quad = bakeElementFace(element, face, sprite, side, modelState);
+                if (face.cullForDirection() == null) {
                     builder.addUnculledFace(quad);
                 } else {
-                    builder.addCulledFace(Direction.rotate(modelState.getRotation().getMatrix(), face.cullForDirection), quad);
+                    builder.addCulledFace(Direction.rotate(modelState.getRotation().getMatrix(), face.cullForDirection()), quad);
                 }
             });
         }
     }
 
-    private static BakedQuad bakeElementFace(BlockElement element, BlockElementFace face, TextureAtlasSprite sprite, Direction direction, ModelState state, ResourceLocation modelLocation) {
-        return FACE_BAKERY.bakeQuad(element.from, element.to, face, sprite, direction, state, element.rotation, element.shade, modelLocation);
+    private static BakedQuad bakeElementFace(BlockElement element, BlockElementFace face, TextureAtlasSprite sprite, Direction direction, ModelState state) {
+        return FACE_BAKERY.bakeQuad(element.from, element.to, face, sprite, direction, state, element.rotation, element.shade);
     }
 
 }

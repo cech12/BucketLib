@@ -28,7 +28,7 @@ public class EntityTests {
                     testFunctions.add(new TestFunction(
                             "defaultBatch",
                             testName,
-                            new ResourceLocation(BucketLib.MOD_ID, "entitytests.pit").toString(),
+                            BucketLib.id("entitytests.pit").toString(),
                             Rotation.NONE,
                             100,
                             0,
@@ -74,7 +74,7 @@ public class EntityTests {
                 testFunctions.add(new TestFunction(
                         "defaultBatch",
                         testName,
-                        new ResourceLocation(BucketLib.MOD_ID, "entitytests.waterpit").toString(),
+                        BucketLib.id("entitytests.waterpit").toString(),
                         Rotation.NONE,
                         100,
                         0,
@@ -103,7 +103,7 @@ public class EntityTests {
             testFunctions.add(new TestFunction(
                     "defaultBatch",
                     testName,
-                    new ResourceLocation(BucketLib.MOD_ID, "entitytests.pit").toString(),
+                    BucketLib.id("entitytests.pit").toString(),
                     Rotation.NONE,
                     100,
                     0,
@@ -139,7 +139,7 @@ public class EntityTests {
                     testFunctions.add(new TestFunction(
                             "defaultBatch",
                             testName,
-                            new ResourceLocation(BucketLib.MOD_ID, "entitytests.waterpit").toString(),
+                            BucketLib.id("entitytests.waterpit").toString(),
                             Rotation.NONE,
                             100,
                             0,
@@ -185,7 +185,7 @@ public class EntityTests {
                 testFunctions.add(new TestFunction(
                         "defaultBatch",
                         testName,
-                        new ResourceLocation(BucketLib.MOD_ID, "entitytests.waterpit").toString(),
+                        BucketLib.id("entitytests.waterpit").toString(),
                         Rotation.NONE,
                         100,
                         0,
@@ -216,7 +216,7 @@ public class EntityTests {
                 testFunctions.add(new TestFunction(
                         "defaultBatch",
                         testName,
-                        new ResourceLocation(BucketLib.MOD_ID, "entitytests.waterpit").toString(),
+                        BucketLib.id("entitytests.waterpit").toString(),
                         Rotation.NONE,
                         100,
                         0,
@@ -247,7 +247,7 @@ public class EntityTests {
                 testFunctions.add(new TestFunction(
                         "defaultBatch",
                         testName,
-                        new ResourceLocation(BucketLib.MOD_ID, "entitytests.waterpit").toString(),
+                        BucketLib.id("entitytests.waterpit").toString(),
                         Rotation.NONE,
                         100,
                         0,

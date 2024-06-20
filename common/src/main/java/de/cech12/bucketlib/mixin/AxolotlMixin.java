@@ -3,6 +3,7 @@ package de.cech12.bucketlib.mixin;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
@@ -39,7 +40,8 @@ public abstract class AxolotlMixin extends Animal {
 	@Inject(at = @At("HEAD"), method = "usePlayerItem", cancellable = true)
 	private void usePlayerItemProxy(Player player, InteractionHand hand, ItemStack stack, CallbackInfo ci) {
 		if (this.isFood(stack) && stack.getItem() instanceof UniversalBucketItem) {
-			player.setItemInHand(hand, BucketLibUtil.removeEntityType(stack, true));
+			ServerLevel serverLevel = (player.level() instanceof ServerLevel) ? (ServerLevel) player.level() : null;
+			player.setItemInHand(hand, BucketLibUtil.removeEntityType(stack, serverLevel, player, true));
 			ci.cancel();
 		}
 	}

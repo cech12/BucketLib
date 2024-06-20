@@ -26,11 +26,10 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.DistExecutor;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
@@ -122,17 +121,19 @@ public class BucketLibMod {
         //register dispense behaviour
         DispenserBlock.registerBehavior(bucket, UniversalBucketDispenseBehaviour.getInstance());
         //register color
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> Minecraft.getInstance().getItemColors().register((stack, layer) -> {
-            if (layer == 0 && bucket.isDyeable()) {
-                return DyedItemColor.getOrDefault(stack, bucket.getDefaultColor());
-            }
-            if (layer == 1) {
-                return FluidUtil.getFluidContained(stack)
-                        .map(fluidStack -> IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack))
-                        .orElse(-1);
-            }
-            return -1;
-        }, bucket));
+        if (FMLEnvironment.dist.isClient()) {
+            Minecraft.getInstance().getItemColors().register((stack, layer) -> {
+                if (layer == 0 && bucket.isDyeable()) {
+                    return DyedItemColor.getOrDefault(stack, bucket.getDefaultColor());
+                }
+                if (layer == 1) {
+                    return FluidUtil.getFluidContained(stack)
+                            .map(fluidStack -> IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack))
+                            .orElse(-1);
+                }
+                return -1;
+            }, bucket);
+        }
     }
 
     private void addItemsToTabs(BuildCreativeModeTabContentsEvent event) {

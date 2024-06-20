@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,9 +15,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.common.EffectCures;
 import net.neoforged.neoforge.common.NeoForgeMod;
-import net.neoforged.neoforge.fluids.*;
+import net.neoforged.neoforge.fluids.DispenseFluidContainer;
+import net.neoforged.neoforge.fluids.FluidActionResult;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
+import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -67,7 +73,7 @@ public class NeoforgeFluidHelper implements IFluidHelper {
     }
 
     @Override
-    public ItemStack removeFluid(ItemStack stack) {
+    public ItemStack removeFluid(ItemStack stack, ServerLevel level, @Nullable Player player) {
         AtomicReference<ItemStack> resultItemStack = new AtomicReference<>(stack.copy());
         FluidUtil.getFluidHandler(resultItemStack.get()).ifPresent(fluidHandler -> {
             fluidHandler.drain(new FluidStack(fluidHandler.getFluidInTank(0).getFluid(), FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);

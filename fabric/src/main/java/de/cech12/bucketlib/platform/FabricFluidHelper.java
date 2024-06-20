@@ -22,6 +22,7 @@ import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
@@ -77,7 +78,7 @@ public class FabricFluidHelper implements IFluidHelper {
                 if (stack.getCount() == 1) {
                     return result.getB();
                 }
-                if ((source.blockEntity()).addItem(result.getB()) < 0) {
+                if (!(source.blockEntity()).insertItem(result.getB()).isEmpty()) {
                     new DefaultDispenseItemBehavior().dispense(source, result.getB());
                 }
                 ItemStack stackCopy = stack.copy();
@@ -125,7 +126,7 @@ public class FabricFluidHelper implements IFluidHelper {
     }
 
     @Override
-    public ItemStack removeFluid(ItemStack stack) {
+    public ItemStack removeFluid(ItemStack stack, ServerLevel level, @Nullable Player player) {
         ContainerItemContext context = new StackItemContext(stack);
         Storage<FluidVariant> storage = context.find(FluidStorage.ITEM);
         if (storage instanceof UniversalBucketFluidStorage bucketFluidStorage) {
@@ -176,6 +177,7 @@ public class FabricFluidHelper implements IFluidHelper {
             return new Tuple<>(true, player.getItemInHand(interactionHand));
         }
         Fluid fluid = BucketLibUtil.getFluid(stack);
+        ServerLevel serverLevel = (level instanceof ServerLevel) ? (ServerLevel) level : null;
         //vaporize
         if (level.dimensionType().ultraWarm() && fluid.is(FluidTags.WATER)) {
             int x = pos.getX();
@@ -185,7 +187,7 @@ public class FabricFluidHelper implements IFluidHelper {
             for (int i = 0; i < 8; ++i) {
                 level.addParticle(ParticleTypes.LARGE_SMOKE, (double) x + Math.random(), (double) y + Math.random(), (double) z + Math.random(), 0.0, 0.0, 0.0);
             }
-            return new Tuple<>(true, BucketLibUtil.removeFluid(stack));
+            return new Tuple<>(true, BucketLibUtil.removeFluid(stack, serverLevel, player));
         }
         //waterlogged Block interaction
         BlockState state = level.getBlockState(pos);
@@ -193,14 +195,14 @@ public class FabricFluidHelper implements IFluidHelper {
         if (block instanceof LiquidBlockContainer liquidBlockContainer && liquidBlockContainer.canPlaceLiquid(player, level, pos, state, fluid)) {
             if (liquidBlockContainer.placeLiquid(level, pos, state, fluid.defaultFluidState())) {
                 level.playSound(player, pos, FluidVariantAttributes.getEmptySound(FluidVariant.of(fluid)), SoundSource.BLOCKS, 1.0F, 1.0F);
-                return new Tuple<>(true, BucketLibUtil.removeFluid(stack));
+                return new Tuple<>(true, BucketLibUtil.removeFluid(stack, serverLevel, player));
             }
         }
         //air / replaceable block interaction
         if (state.isAir() || state.canBeReplaced(fluid) || !state.getFluidState().isEmpty()) {
             if (level.setBlock(pos, fluid.defaultFluidState().createLegacyBlock(), 11) || state.getFluidState().isSource()) {
                 level.playSound(player, pos, FluidVariantAttributes.getEmptySound(FluidVariant.of(fluid)), SoundSource.BLOCKS, 1.0F, 1.0F);
-                return new Tuple<>(true, BucketLibUtil.removeFluid(stack));
+                return new Tuple<>(true, BucketLibUtil.removeFluid(stack, serverLevel, player));
             }
         }
         return new Tuple<>(false, stack);

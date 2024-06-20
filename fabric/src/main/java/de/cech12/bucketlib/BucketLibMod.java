@@ -21,7 +21,6 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
@@ -41,8 +40,8 @@ public class BucketLibMod implements ModInitializer {
     static {
         Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, BucketLibComponents.BUCKET_CONTENT_LOCATION, BucketLibComponents.BUCKET_CONTENT);
 
-        Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, new ResourceLocation(BucketLib.MOD_ID, "bucket_filling_shaped"), BucketFillingShapedRecipe.Serializer.INSTANCE);
-        Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, new ResourceLocation(BucketLib.MOD_ID, "bucket_filling_shapeless"), BucketFillingShapelessRecipe.Serializer.INSTANCE);
+        Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, BucketLib.id("bucket_filling_shaped"), BucketFillingShapedRecipe.Serializer.INSTANCE);
+        Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, BucketLib.id("bucket_filling_shapeless"), BucketFillingShapelessRecipe.Serializer.INSTANCE);
         CustomIngredientSerializer.register(BlockIngredient.Serializer.INSTANCE);
         CustomIngredientSerializer.register(EmptyIngredient.Serializer.INSTANCE);
         CustomIngredientSerializer.register(EntityIngredient.Serializer.INSTANCE);

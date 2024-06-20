@@ -21,7 +21,7 @@ public class WorldInteractionTests {
                 testFunctions.add(new TestFunction(
                         "defaultBatch",
                         testName,
-                        new ResourceLocation(BucketLib.MOD_ID, "worldinteractiontests.powder_snow").toString(),
+                        BucketLib.id("worldinteractiontests.powder_snow").toString(),
                         Rotation.NONE,
                         100,
                         0,

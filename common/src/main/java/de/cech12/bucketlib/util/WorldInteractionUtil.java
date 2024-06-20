@@ -4,6 +4,7 @@ import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.platform.Services;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -92,6 +93,7 @@ public class WorldInteractionUtil {
             //fake vanilla bucket using on cauldron
             Fluid bucketFluid = BucketLibUtil.getFluid(itemstack);
             Block bucketBlock = BucketLibUtil.getBlock(itemstack);
+            ServerLevel serverLevel = (level instanceof ServerLevel) ? (ServerLevel) level : null;
             if (bucketFluid == Fluids.LAVA || bucketFluid == Fluids.WATER) {
                 ItemStack stack = new ItemStack(bucketFluid.getBucket());
                 player.setItemInHand(interactionHand, stack);
@@ -102,7 +104,7 @@ public class WorldInteractionUtil {
                 player.getAbilities().instabuild = previousInstabuildValue;
                 player.setItemInHand(interactionHand, itemstack);
                 if (interactionResult.consumesAction()) {
-                    return new InteractionResultHolder<>(interactionResult.result(), BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeFluid(itemstack), interactionHand, true));
+                    return new InteractionResultHolder<>(interactionResult.result(), BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeFluid(itemstack, serverLevel, player), interactionHand, true));
                 }
             } else if (bucketBlock == Blocks.POWDER_SNOW) {
                 ItemStack stack = new ItemStack(Items.POWDER_SNOW_BUCKET);
@@ -114,7 +116,7 @@ public class WorldInteractionUtil {
                 player.getAbilities().instabuild = previousInstabuildValue;
                 player.setItemInHand(interactionHand, itemstack);
                 if (interactionResult.consumesAction()) {
-                    return new InteractionResultHolder<>(interactionResult.result(), BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack, true), interactionHand, true));
+                    return new InteractionResultHolder<>(interactionResult.result(), BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack, serverLevel, player, true), interactionHand, true));
                 }
             }
         }

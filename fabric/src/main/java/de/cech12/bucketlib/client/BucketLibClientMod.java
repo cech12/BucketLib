@@ -24,7 +24,7 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class BucketLibClientMod implements ClientModInitializer, ModelLoadingPlugin {
 
-    public static final ResourceLocation UNIVERSAL_BUCKET_MODEL = new ResourceLocation(BucketLib.MOD_ID, "item/universal_bucket");
+    public static final ResourceLocation UNIVERSAL_BUCKET_MODEL = BucketLib.id("item/universal_bucket");
 
     private static final Map<ResourceLocation, UniversalBucketUnbakedModel> MODELS = new HashMap<>();
 
@@ -53,7 +53,7 @@ public class BucketLibClientMod implements ClientModInitializer, ModelLoadingPlu
     @Override
     public void onInitializeModelLoader(ModelLoadingPlugin.Context pluginContext) {
         pluginContext.modifyModelOnLoad().register((original, context) -> {
-            ResourceLocation location = context.id();
+            ResourceLocation location = context.resourceId();
             if (original instanceof BlockModel blockModel) {
                 while (location != null) {
                     if (location.equals(UNIVERSAL_BUCKET_MODEL)) {

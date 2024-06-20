@@ -2,7 +2,6 @@ package de.cech12.bucketlib.client;
 
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.client.model.UniversalBucketModel;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -16,7 +15,7 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void clientSetup(ModelEvent.RegisterGeometryLoaders event) {
-        event.register(new ResourceLocation(BucketLib.MOD_ID, "universal_bucket"), UniversalBucketModel.Loader.INSTANCE);
+        event.register(BucketLib.id("universal_bucket"), UniversalBucketModel.Loader.INSTANCE);
     }
 
 }

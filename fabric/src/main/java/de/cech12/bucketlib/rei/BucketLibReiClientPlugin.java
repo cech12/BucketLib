@@ -8,6 +8,8 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.displays.anvil.DefaultAnvilDisplay;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
@@ -26,7 +28,7 @@ public class BucketLibReiClientPlugin implements REIClientPlugin {
         //ItemStack sensitive fuel is not supported by Fabrics FuelRegistry
         //register infinity enchanting
         if (Services.CONFIG.isInfinityEnchantmentEnabled()) {
-            EnchantmentInstance data = new EnchantmentInstance(Enchantments.INFINITY, Enchantments.INFINITY.getMaxLevel());
+            EnchantmentInstance data = new EnchantmentInstance(VanillaRegistries.createLookup().lookup(Registries.ENCHANTMENT).get().getOrThrow(Enchantments.INFINITY), 1);
             for (UniversalBucketItem bucketItem : Services.REGISTRY.getRegisteredBuckets()) {
                 for (Fluid fluid : Services.REGISTRY.getAllFluids()) {
                     if (fluid != Fluids.EMPTY && bucketItem.canHoldFluid(fluid) && fluid.defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {

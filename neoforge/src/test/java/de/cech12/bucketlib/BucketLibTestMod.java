@@ -28,9 +28,9 @@ public class BucketLibTestMod {
     public static final String MOD_ID = "bucketlibtest";
     public static final boolean MILK_ENABLED = Boolean.parseBoolean(System.getProperty("bucketlibtest.milkEnabled", "false"));
 
-    public static final TagKey<Fluid> WATER_TAG = TagKey.create(BuiltInRegistries.FLUID.key(), new ResourceLocation(MOD_ID, "water"));
+    public static final TagKey<Fluid> WATER_TAG = TagKey.create(BuiltInRegistries.FLUID.key(), ResourceLocation.fromNamespaceAndPath(MOD_ID, "water"));
 
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, BucketLibTestMod.MOD_ID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, MOD_ID);
 
     public static final DeferredHolder<Item, ?> TEST_BUCKET = ITEMS.register("test_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties()));
     public static final DeferredHolder<Item, ?> TEMPERATURE_BUCKET = ITEMS.register("temperature_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().maxTemperature(1000)));

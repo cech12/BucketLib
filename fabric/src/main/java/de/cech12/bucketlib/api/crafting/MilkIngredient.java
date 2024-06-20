@@ -63,7 +63,7 @@ public class MilkIngredient implements CustomIngredient {
     public static final class Serializer implements CustomIngredientSerializer<MilkIngredient> {
 
         public static final Serializer INSTANCE = new Serializer();
-        public static final ResourceLocation NAME = new ResourceLocation(BucketLib.MOD_ID, "milk");
+        public static final ResourceLocation NAME = BucketLib.id("milk");
 
         public static final MapCodec<MilkIngredient> CODEC = MapCodec.of(Encoder.empty(), Decoder.unit(new MilkIngredient()));
 

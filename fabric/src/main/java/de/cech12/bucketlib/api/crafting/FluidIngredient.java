@@ -127,7 +127,7 @@ public class FluidIngredient implements CustomIngredient {
     public static final class Serializer implements CustomIngredientSerializer<FluidIngredient> {
 
         public static final Serializer INSTANCE = new Serializer();
-        public static final ResourceLocation NAME = new ResourceLocation(BucketLib.MOD_ID, "fluid");
+        public static final ResourceLocation NAME = BucketLib.id("fluid");
 
         private static final MapCodec<FluidIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
                 builder.group(
@@ -162,13 +162,13 @@ public class FluidIngredient implements CustomIngredient {
             String fluid = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
-                TagKey<Fluid> tag = TagKey.create(Registries.FLUID, new ResourceLocation(tagId));
+                TagKey<Fluid> tag = TagKey.create(Registries.FLUID, ResourceLocation.parse(tagId));
                 return new FluidIngredient(tag);
             }
             if (fluid.isEmpty()) {
                 throw new IllegalArgumentException("Cannot create a fluid ingredient with no fluid or tag.");
             }
-            return new FluidIngredient(BuiltInRegistries.FLUID.get(new ResourceLocation(fluid)));
+            return new FluidIngredient(BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluid)));
         }
 
         private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull FluidIngredient ingredient) {

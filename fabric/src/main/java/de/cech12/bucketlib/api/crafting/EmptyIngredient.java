@@ -99,7 +99,7 @@ public class EmptyIngredient implements CustomIngredient {
     public static final class Serializer implements CustomIngredientSerializer<EmptyIngredient> {
 
         public static final Serializer INSTANCE = new Serializer();
-        public static final ResourceLocation NAME = new ResourceLocation(BucketLib.MOD_ID, "empty");
+        public static final ResourceLocation NAME = BucketLib.id("empty");
 
         private static final MapCodec<EmptyIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
                 builder.group(
@@ -134,10 +134,10 @@ public class EmptyIngredient implements CustomIngredient {
             String item = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!item.isEmpty()) {
-                return new EmptyIngredient(BuiltInRegistries.ITEM.get(new ResourceLocation(item)));
+                return new EmptyIngredient(BuiltInRegistries.ITEM.get(ResourceLocation.parse(item)));
             }
             if (!tagId.isEmpty()) {
-                TagKey<Item> tag = TagKey.create(Registries.ITEM, new ResourceLocation(tagId));
+                TagKey<Item> tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(tagId));
                 return new EmptyIngredient(tag);
             }
             return new EmptyIngredient();

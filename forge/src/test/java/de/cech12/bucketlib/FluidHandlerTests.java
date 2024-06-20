@@ -29,7 +29,7 @@ public class FluidHandlerTests {
             testFunctions.add(new TestFunction(
                     "defaultBatch",
                     testName,
-                    new ResourceLocation(BucketLib.MOD_ID, "cauldrontests.empty").toString(),
+                    BucketLib.id("cauldrontests.empty").toString(),
                     Rotation.NONE,
                     100,
                     0,
@@ -71,7 +71,7 @@ public class FluidHandlerTests {
                 testFunctions.add(new TestFunction(
                         "defaultBatch",
                         testName,
-                        new ResourceLocation(BucketLib.MOD_ID, "cauldrontests.empty").toString(),
+                        BucketLib.id("cauldrontests.empty").toString(),
                         Rotation.NONE,
                         100,
                         0,
@@ -113,7 +113,7 @@ public class FluidHandlerTests {
             testFunctions.add(new TestFunction(
                     "defaultBatch",
                     testName,
-                    new ResourceLocation(BucketLib.MOD_ID, "cauldrontests.empty").toString(),
+                    BucketLib.id("cauldrontests.empty").toString(),
                     Rotation.NONE,
                     100,
                     0,
@@ -163,7 +163,7 @@ public class FluidHandlerTests {
             testFunctions.add(new TestFunction(
                     "defaultBatch",
                     testName,
-                    new ResourceLocation(BucketLib.MOD_ID, "cauldrontests.empty").toString(),
+                    BucketLib.id("cauldrontests.empty").toString(),
                     Rotation.NONE,
                     100,
                     0,

@@ -56,7 +56,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
     // Transformer to set quads to max brightness
     private static final IQuadTransformer MAX_LIGHTMAP_TRANSFORMER = QuadTransformers.applyingLightmap(0x00F000F0);
 
-    private static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(new ResourceLocation(BucketLib.MOD_ID, "missing_lower_content")));
+    private static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(BucketLib.id("missing_lower_content")));
 
     @Nonnull
     private final Fluid fluid;
@@ -209,7 +209,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
 
     private static final class ContainedFluidOverrideHandler extends ItemOverrides
     {
-        private static final ResourceLocation REBAKE_LOCATION = new ResourceLocation(BucketLib.MOD_ID, "bucket_override");
+        private static final ResourceLocation REBAKE_LOCATION = BucketLib.id("bucket_override");
 
         private final Map<ResourceLocation, BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
         private final ItemOverrides nested;

@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.21-4.0.0.0] - 2024-06-20
+### Changed
+- Updated to Minecraft 1.21 (Fabric 0.100.3+1.21, Neoforge 21.0.20-beta)
+- (Forge support is still not available until the capability system is re-added)
+- Updated Cloth Config support (15.0.127) (Fabric/Quilt)
+- Updated ModMenu support (11.0.0) (Fabric/Quilt)
+- Updated JEI support (19.0.0.9) (all loaders)
+- Updated REI support (16.0.729) (Neoforge, Fabric/Quilt)
+- Changed bucket registration for Neoforge: must be called during RegisterCapabilitiesEvent (already done in 1.20.6)
+
 ## [1.20.6-3.3.0.3] - 2024-06-19
 ### Fixed
 - Entity buckets were missing in creative menu (Neoforge)

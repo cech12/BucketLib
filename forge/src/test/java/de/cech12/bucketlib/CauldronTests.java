@@ -42,7 +42,7 @@ public class CauldronTests {
                     testFunctions.add(new TestFunction(
                             "defaultBatch",
                             testName,
-                            new ResourceLocation(BucketLib.MOD_ID, "cauldrontests.water_full").toString(),
+                            BucketLib.id("cauldrontests.water_full").toString(),
                             Rotation.NONE,
                             100,
                             0,

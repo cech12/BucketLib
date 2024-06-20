@@ -65,7 +65,7 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
                     if (stack.getCount() == 1) {
                         return resultStack;
                     }
-                    if ((source.blockEntity()).addItem(resultStack) < 0) {
+                    if (!(source.blockEntity()).insertItem(resultStack).isEmpty()) {
                         this.dispenseBehavior.dispense(source, resultStack);
                     }
                     ItemStack stackCopy = stack.copy();
@@ -86,7 +86,7 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
             Block placeBlock = BucketLibUtil.getBlock(stack);
             if (placeBlock != null && placeBlock.asItem() instanceof DispensibleContainerItem dispensibleContainerItem) {
                 if (dispensibleContainerItem.emptyContents(null, level, placePosition, null)) {
-                    return BucketLibUtil.removeBlock(stack, true);
+                    return BucketLibUtil.removeBlock(stack, level, null, true);
                 }
             }
         } else if (BucketLibUtil.containsEntityType(stack)) {
@@ -94,7 +94,7 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
             if (stack.getItem() instanceof UniversalBucketItem bucketItem) {
                 if (BucketLibUtil.containsFluid(stack)) {
                     //fluid can only be placed correctly if the entity is not inside
-                    ItemStack stackWithoutEntity = BucketLibUtil.removeEntityType(stack.copy(), false);
+                    ItemStack stackWithoutEntity = BucketLibUtil.removeEntityType(stack.copy(), level, null, false);
                     ItemStack fluidResult = Services.FLUID.dispenseFluidContainer(source, stackWithoutEntity);
                     bucketItem.spawnEntityFromBucket(null, source.level(), stack, placePosition, false);
                     return fluidResult;

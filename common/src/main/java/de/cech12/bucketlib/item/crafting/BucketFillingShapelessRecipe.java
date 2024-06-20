@@ -13,9 +13,9 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
@@ -83,13 +83,13 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
      * Used to check if a recipe matches current crafting inventory
      */
     @Override
-    public boolean matches(@Nonnull CraftingContainer inv, @Nonnull Level level) {
-        ItemStack bucket = getAffectedBucket(inv.getItems());
+    public boolean matches(@Nonnull CraftingInput input, @Nonnull Level level) {
+        ItemStack bucket = getAffectedBucket(input.items());
         if (bucket == ItemStack.EMPTY) {
             return false;
         }
         UniversalBucketItem universalBucketItem = ((UniversalBucketItem)bucket.getItem());
-        return super.matches(inv, level)
+        return super.matches(input, level)
                 && (this.fillingType != BucketFillingType.BLOCK || universalBucketItem.canHoldBlock(this.block))
                 && (this.fillingType != BucketFillingType.ENTITY || (universalBucketItem.canHoldEntity(this.entityType) && (this.fluid == null || universalBucketItem.canHoldFluid(this.fluid))))
                 && (this.fillingType != BucketFillingType.FLUID || universalBucketItem.canHoldFluid(this.fluid))
@@ -101,8 +101,8 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
      */
     @Override
     @Nonnull
-    public ItemStack assemble(CraftingContainer inv, @Nonnull HolderLookup.Provider provider) {
-        return getAssembledBucket(this.fillingType, this.fluid, this.block, this.entityType, inv.getItems());
+    public ItemStack assemble(CraftingInput input, @Nonnull HolderLookup.Provider provider) {
+        return getAssembledBucket(this.fillingType, this.fluid, this.block, this.entityType, input.items());
     }
 
     @Override

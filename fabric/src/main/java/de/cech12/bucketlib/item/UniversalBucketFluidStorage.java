@@ -75,9 +75,9 @@ public class UniversalBucketFluidStorage extends SingleFluidStorage {
                 stack.shrink(1);
             } else {
                 if (BucketLibUtil.containsContent(stack)) { //remove milk content tag
-                    BucketLibUtil.removeContentNoCopy(stack, false);
+                    BucketLibUtil.removeContentNoCopy(stack, null, null, false);
                 }
-                BucketLibUtil.damageByOne(stack);
+                BucketLibUtil.damageByOne(stack, null); //TODO get ServerLevel!
             }
             if (!exchangeOrRemove(ItemVariant.of(stack), transaction)) {
                 return 0;

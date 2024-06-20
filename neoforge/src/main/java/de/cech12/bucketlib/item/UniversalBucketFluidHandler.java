@@ -37,7 +37,7 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
     }
 
     @Override
-    public int fill(FluidStack resource, IFluidHandler.FluidAction doFill) {
+    public int fill(@Nonnull FluidStack resource, @Nonnull IFluidHandler.FluidAction doFill) {
         //only fill the bucket, if there is no milk inside it.
         if (BucketLibUtil.containsMilk(getContainer())) {
             return 0;
@@ -51,7 +51,7 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
 
     @Nonnull
     @Override
-    public FluidStack drain(int maxDrain, FluidAction action) {
+    public FluidStack drain(int maxDrain, @Nonnull FluidAction action) {
         //only drain the bucket, if there is no entity in the bucket
         if (BucketLibUtil.containsEntityType(getContainer())) {
             return FluidStack.EMPTY;
@@ -84,14 +84,14 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
             container.shrink(1);
         } else {
             if (BucketLibUtil.containsContent(container)) { //remove milk content tag
-                BucketLibUtil.removeContentNoCopy(container, false);
+                BucketLibUtil.removeContentNoCopy(container, null, null, false);
             }
-            BucketLibUtil.damageByOne(container);
+            BucketLibUtil.damageByOne(container, null); //TODO get ServerLevel!
         }
     }
 
     @Override
-    public boolean canFillFluidType(FluidStack fluid) {
+    public boolean canFillFluidType(@Nonnull FluidStack fluid) {
         Item item = container.getItem();
         if (item instanceof UniversalBucketItem bucketItem) {
             return fluid.getFluid() != Fluids.EMPTY && bucketItem.canHoldFluid(fluid.getFluid());

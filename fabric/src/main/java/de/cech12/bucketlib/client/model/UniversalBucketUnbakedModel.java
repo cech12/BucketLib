@@ -45,7 +45,7 @@ import java.util.function.Function;
 public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedModel {
 
     private static final Map<ResourceLocation, ResourceLocation> TEXTURE_MAP = Maps.newHashMap();
-    private static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(new ResourceLocation(BucketLib.MOD_ID, "missing_lower_content")));
+    private static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(BucketLib.id("missing_lower_content")));
 
     @Nonnull
     private Fluid fluid = Fluids.EMPTY;
@@ -93,7 +93,7 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
         ResourceLocation texture = TEXTURE_MAP.get(otherContentLocation);
         if (texture == null) {
             String textureLocation = String.format("item/bucket_content/%s", otherContentLocation.getPath());
-            texture = new ResourceLocation(otherContentLocation.getNamespace(), textureLocation);
+            texture = otherContentLocation.withPath(textureLocation);
             TEXTURE_MAP.put(otherContentLocation, texture);
         }
         return texture;
@@ -119,7 +119,7 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
 
     @Nullable
     @Override
-    public BakedModel bake(@Nonnull ModelBaker modelBaker, @Nonnull Function<Material, TextureAtlasSprite> spriteGetter, @Nonnull ModelState modelState, @Nonnull ResourceLocation resourceLocation) {
+    public BakedModel bake(@Nonnull ModelBaker modelBaker, @Nonnull BlockModel blockModel, @Nonnull Function<Material, TextureAtlasSprite> spriteGetter, @Nonnull ModelState modelState, boolean bl) {
         //resolve parents to use their defined materials, too
         resolveParents(BucketLibClientMod::getModel);
 
@@ -197,18 +197,18 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
         if (baseSprite != null) {
             quads.addAll(GeometryUtils.bakeElements(this, itemOverrides,
                     GeometryUtils.createUnbakedItemElements(0, "base", baseSprite.contents()),
-                    baseSprite, modelState, resourceLocation));
+                    baseSprite, modelState));
         }
         if (isValid(otherContentLocation)) {
             assert otherContentSprite != null;
             quads.addAll(GeometryUtils.bakeElements(this, itemOverrides,
                     GeometryUtils.createUnbakedItemElements(-1, "content", otherContentSprite.contents()),
-                    otherContentSprite, modelState, resourceLocation));
+                    otherContentSprite, modelState));
         } else if (isValid(fluidMaskLocation) && fluid != Fluids.EMPTY) {
             TextureAtlasSprite templateSprite = spriteGetter.apply(fluidMaskLocation);
             quads.addAll(GeometryUtils.bakeElements(this, itemOverrides,
                     GeometryUtils.createUnbakedItemMaskElements(1, "fluid", templateSprite.contents()),
-                    fluidSprite, modelState, resourceLocation));
+                    fluidSprite, modelState));
         }
 
         return new UniversalBucketBakedModel(quads, getTransforms(), itemOverrides, particleSprite);
@@ -219,8 +219,6 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
     }
 
     private static final class ContainedFluidOverrideHandler extends ItemOverrides {
-
-        private static final ResourceLocation REBAKE_LOCATION = new ResourceLocation(BucketLib.MOD_ID, "bucket_override");
 
         private final Map<ResourceLocation, BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
         private final ItemOverrides nested;
@@ -263,7 +261,7 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
                 }
                 if (!cache.containsKey(content)) {
                     UniversalBucketUnbakedModel unbaked = (entityType != null || fluid == null) ? this.parent.withOtherContent(content, isCracked, entityType != null) : this.parent.withFluid(fluid, isCracked);
-                    BakedModel bakedModel = unbaked.bake(baker, Material::sprite, BlockModelRotation.X0_Y0, REBAKE_LOCATION);
+                    BakedModel bakedModel = unbaked.bake(baker, Material::sprite, BlockModelRotation.X0_Y0);
                     cache.put(content, bakedModel);
                     return bakedModel;
                 }
