@@ -48,4 +48,13 @@ public class NeoforgeUniversalBucketItemMixin extends Item {
         return super.isPrimaryItemFor(stack, enchantment);
     }
 
+    @Override
+    public boolean isDamageable(@NotNull ItemStack stack) {
+        return stack.isDamageableItem(); //handled by mixin
+    }
+
+    @Override
+    public int getMaxDamage(@NotNull ItemStack stack) {
+        return stack.getMaxDamage(); //handled by mixin
+    }
 }
