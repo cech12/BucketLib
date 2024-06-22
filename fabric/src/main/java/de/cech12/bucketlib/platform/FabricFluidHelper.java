@@ -22,6 +22,7 @@ import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
@@ -158,7 +159,8 @@ public class FabricFluidHelper implements IFluidHelper {
             ItemStack fullVanillaBucket = bucketPickup.pickupBlock(player, level, pos, state);
             if (!fullVanillaBucket.isEmpty() && fullVanillaBucket.getItem() instanceof BucketItem bucketItem) {
                 Fluid fluid = Services.BUCKET.getFluidOfBucketItem(bucketItem);
-                level.playSound(player, pos, FluidVariantAttributes.getFillSound(FluidVariant.of(fluid)), SoundSource.BLOCKS, 1.0F, 1.0F);
+                SoundEvent sound = bucketPickup.getPickupSound().orElse(FluidVariantAttributes.getFillSound(FluidVariant.of(fluid)));
+                level.playSound(player, pos, sound, SoundSource.BLOCKS, 1.0F, 1.0F);
                 ItemStack usedStack = stack.copy();
                 usedStack.setCount(1);
                 usedStack = BucketLibUtil.addFluid(usedStack, fluid);
@@ -191,13 +193,12 @@ public class FabricFluidHelper implements IFluidHelper {
         BlockState state = level.getBlockState(pos);
         Block block = state.getBlock();
         if (block instanceof LiquidBlockContainer liquidBlockContainer && liquidBlockContainer.canPlaceLiquid(player, level, pos, state, fluid)) {
-            if (liquidBlockContainer.placeLiquid(level, pos, state, fluid.defaultFluidState())) {
-                level.playSound(player, pos, FluidVariantAttributes.getEmptySound(FluidVariant.of(fluid)), SoundSource.BLOCKS, 1.0F, 1.0F);
-                return new Tuple<>(true, BucketLibUtil.removeFluid(stack));
-            }
+            liquidBlockContainer.placeLiquid(level, pos, state, fluid.defaultFluidState());
+            level.playSound(player, pos, FluidVariantAttributes.getEmptySound(FluidVariant.of(fluid)), SoundSource.BLOCKS, 1.0F, 1.0F);
+            return new Tuple<>(true, BucketLibUtil.removeFluid(stack));
         }
         //air / replaceable block interaction
-        if (state.isAir() || state.canBeReplaced(fluid) || !state.getFluidState().isEmpty()) {
+        if (state.isAir() || state.canBeReplaced(fluid) || (!state.getFluidState().isEmpty() && !(block instanceof LiquidBlockContainer))) {
             if (level.setBlock(pos, fluid.defaultFluidState().createLegacyBlock(), 11) || state.getFluidState().isSource()) {
                 level.playSound(player, pos, FluidVariantAttributes.getEmptySound(FluidVariant.of(fluid)), SoundSource.BLOCKS, 1.0F, 1.0F);
                 return new Tuple<>(true, BucketLibUtil.removeFluid(stack));
