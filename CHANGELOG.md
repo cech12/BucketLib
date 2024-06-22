@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.4-3.2.1.1] - 2024-06-22
+### Fixed
+- Water logged blocks were replaced when right-clicked with a custom water bucket (Fabric/Quilt) (thanks to Janbsh for the report) #41
+
 ## [1.20.4-3.2.1.0] - 2024-06-04
 ### Added
 - added Roughly Enough Items (REI) support (version 14.1.727) (all loaders)
