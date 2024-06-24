@@ -13,6 +13,7 @@ import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.item.UniversalBucketDispenseBehaviour;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapedRecipe;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapelessRecipe;
+import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
 import net.minecraft.client.Minecraft;
@@ -33,7 +34,6 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.crafting.ingredients.IIngredientSerializer;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -134,9 +134,10 @@ public class BucketLibMod {
                 return DyedItemColor.getOrDefault(stack, bucket.getDefaultColor());
             }
             if (layer == 1) {
-                return FluidUtil.getFluidContained(stack)
-                        .map(fluidStack -> IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack))
-                        .orElse(-1);
+                Fluid fluid = Services.FLUID.getContainedFluid(stack);
+                if (fluid != Fluids.EMPTY) {
+                    return IClientFluidTypeExtensions.of(fluid).getTintColor();
+                }
             }
             return -1;
         }, bucket));

@@ -13,6 +13,7 @@ import de.cech12.bucketlib.item.UniversalBucketDispenseBehaviour;
 import de.cech12.bucketlib.item.UniversalBucketFluidHandler;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapedRecipe;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapelessRecipe;
+import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
 import net.minecraft.client.Minecraft;
@@ -36,7 +37,6 @@ import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtension
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.SimpleFluidContent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -127,9 +127,10 @@ public class BucketLibMod {
                     return DyedItemColor.getOrDefault(stack, bucket.getDefaultColor());
                 }
                 if (layer == 1) {
-                    return FluidUtil.getFluidContained(stack)
-                            .map(fluidStack -> IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack))
-                            .orElse(-1);
+                    Fluid fluid = Services.FLUID.getContainedFluid(stack);
+                    if (fluid != Fluids.EMPTY) {
+                        return IClientFluidTypeExtensions.of(fluid).getTintColor();
+                    }
                 }
                 return -1;
             }, bucket);
