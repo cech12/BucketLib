@@ -8,6 +8,7 @@ import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.ColorUtil;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.client.renderer.block.model.BlockModel;
@@ -37,8 +38,9 @@ public class BucketLibClientMod implements ClientModInitializer, ModelLoadingPlu
                 }
                 if (layer == 1) {
                     Fluid fluid = Services.FLUID.getContainedFluid(stack);
-                    if (fluid != Fluids.EMPTY && FluidRenderHandlerRegistry.INSTANCE.get(fluid) != null) {
-                        return FluidRenderHandlerRegistry.INSTANCE.get(fluid).getFluidColor(null, null, fluid.defaultFluidState());
+                    FluidRenderHandler fluidRenderHandler;
+                    if (fluid != Fluids.EMPTY && (fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid)) != null) {
+                        return fluidRenderHandler.getFluidColor(null, null, fluid.defaultFluidState());
                     }
                 }
                 return -1;

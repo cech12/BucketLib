@@ -114,10 +114,14 @@ public class BucketLibUtil {
 
     private static String getTagContent(ItemStack itemStack, String tagName) {
         CompoundTag nbt = itemStack.getTag();
-        if (nbt != null && nbt.contains(tagName)) {
-            return nbt.getString(tagName);
+        if (nbt == null) {
+            return null;
         }
-        return null;
+        String content = nbt.getString(tagName);
+        if (content.isEmpty()) {
+            return null;
+        }
+        return content;
     }
 
     private static ItemStack setTagContent(ItemStack itemStack, String tagName, String tagContent) {
@@ -150,11 +154,15 @@ public class BucketLibUtil {
     }
 
     public static ResourceLocation getContent(ItemStack itemStack) {
-        String content = getTagContent(itemStack, "BucketContent");
+        String content = getContentString(itemStack);
         if (content != null) {
             return new ResourceLocation(content);
         }
         return null;
+    }
+
+    public static String getContentString(ItemStack itemStack) {
+        return getTagContent(itemStack, "BucketContent");
     }
 
     public static ItemStack addContent(ItemStack itemStack, ResourceLocation content) {
@@ -225,11 +233,15 @@ public class BucketLibUtil {
     }
 
     public static EntityType<?> getEntityType(ItemStack itemStack) {
-        String content = getTagContent(itemStack, "EntityType");
+        String content = getEntityTypeString(itemStack);
         if (content != null) {
             return Services.REGISTRY.getEntityType(new ResourceLocation(content));
         }
         return null;
+    }
+
+    public static String getEntityTypeString(ItemStack itemStack) {
+        return getTagContent(itemStack, "EntityType");
     }
 
     public static ItemStack addEntityType(ItemStack itemStack, EntityType<?> entityType) {
