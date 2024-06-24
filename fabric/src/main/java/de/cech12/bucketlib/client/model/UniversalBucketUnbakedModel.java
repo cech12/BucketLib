@@ -23,7 +23,6 @@ import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
@@ -222,12 +221,13 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
 
         private static final ResourceLocation REBAKE_LOCATION = new ResourceLocation(BucketLib.MOD_ID, "bucket_override");
 
-        private final Map<ResourceLocation, BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
+        private final Map<String, BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
         private final ItemOverrides nested;
         private final ModelBaker baker;
         private final UniversalBucketUnbakedModel parent;
 
-        private boolean isCracked;
+        private Integer upperBreakTemperature = null;
+        private Integer lowerBreakTemperature = null;
 
         private ContainedFluidOverrideHandler(ModelBaker baker, UniversalBucketUnbakedModel parent) {
             super();
@@ -242,32 +242,33 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
             BakedModel overridden = nested.resolve(originalModel, stack, world, entity, number);
             if (overridden != originalModel) return overridden;
             if (stack.getItem() instanceof UniversalBucketItem bucket) {
-                ResourceLocation content = null;
-                EntityType<?> entityType = BucketLibUtil.getEntityType(stack);
-                if (entityType != null) {
-                    content = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
-                }
-                if (content == null) {
-                    content = BucketLibUtil.getContent(stack);
+                boolean containsEntityType = false;
+                String content = BucketLibUtil.getEntityTypeString(stack);
+                if (content != null) {
+                    containsEntityType = true;
+                } else {
+                    content = BucketLibUtil.getContentString(stack);
                 }
                 Fluid fluid = null;
                 if (content == null) {
                     fluid = BucketLibUtil.getFluid(stack);
-                    content = BuiltInRegistries.FLUID.getKey(fluid);
+                    ResourceLocation location = BuiltInRegistries.FLUID.getKey(fluid);
+                    content = (location != BuiltInRegistries.FLUID.getDefaultKey()) ? location.toString() : null;
                 }
                 //reset cache if temperature config changed
-                boolean isCracked = bucket.isCracked(stack);
-                if (this.isCracked != isCracked) {
-                    this.isCracked = isCracked;
+                if (!Objects.equals(upperBreakTemperature, bucket.getUpperBreakTemperature()) || !Objects.equals(lowerBreakTemperature, bucket.getLowerBreakTemperature())) {
+                    upperBreakTemperature = bucket.getUpperBreakTemperature();
+                    lowerBreakTemperature = bucket.getLowerBreakTemperature();
                     cache.clear();
                 }
-                if (!cache.containsKey(content)) {
-                    UniversalBucketUnbakedModel unbaked = (entityType != null || fluid == null) ? this.parent.withOtherContent(content, isCracked, entityType != null) : this.parent.withFluid(fluid, isCracked);
-                    BakedModel bakedModel = unbaked.bake(baker, Material::sprite, BlockModelRotation.X0_Y0, REBAKE_LOCATION);
+                BakedModel bakedModel = cache.get(content);
+                if (bakedModel == null && content != null) {
+                    boolean isCracked = bucket.isCracked(stack);
+                    UniversalBucketUnbakedModel unbaked = (fluid == null) ? this.parent.withOtherContent(new ResourceLocation(content), isCracked, containsEntityType) : this.parent.withFluid(fluid, isCracked);
+                    bakedModel = unbaked.bake(baker, Material::sprite, BlockModelRotation.X0_Y0, REBAKE_LOCATION);
                     cache.put(content, bakedModel);
-                    return bakedModel;
                 }
-                return cache.get(content);
+                return bakedModel;
             }
             return originalModel;
         }

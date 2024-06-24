@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.6-3.3.0.6] - 2024-06-24
+### Fixed
+- optimized bucket item model rendering to avoid lags in screens like JEI or EMI (thanks to truskawex for the report) https://github.com/cech12/WoodenBucket/issues/19
+
 ## [1.20.6-3.3.0.5] - 2024-06-22
 ### Fixed
 - Water logged blocks were replaced when right-clicked with a custom water bucket (Fabric/Quilt) (thanks to Janbsh for the report) #41
