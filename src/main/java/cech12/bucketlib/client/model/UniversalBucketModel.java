@@ -22,7 +22,6 @@ import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
@@ -32,10 +31,10 @@ import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.client.model.CompositeModel;
 import net.minecraftforge.client.model.DynamicFluidContainerModel;
-import net.minecraftforge.client.model.IQuadTransformer;
+import net.minecraftforge.client.model.QuadTransformers;
+import net.minecraftforge.client.model.SimpleModelState;
 import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
 import net.minecraftforge.client.model.geometry.IGeometryLoader;
-import net.minecraftforge.client.model.SimpleModelState;
 import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
 import net.minecraftforge.client.model.geometry.StandaloneGeometryBakingContext;
 import net.minecraftforge.client.model.geometry.UnbakedGeometryHelper;
@@ -45,6 +44,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -59,8 +59,6 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
     private static final Map<ResourceLocation, ResourceLocation> TEXTURE_MAP = Maps.newHashMap();
     // Depth offsets to prevent Z-fighting
     private static final Transformation DEPTH_OFFSET_TRANSFORM = new Transformation(Vector3f.ZERO, Quaternion.ONE, new Vector3f(1, 1, 1.002f), Quaternion.ONE);
-    // Transformer to set quads to max brightness
-    private static final IQuadTransformer MAX_LIGHTMAP_TRANSFORMER = IQuadTransformer.applyingLightmap(0x00F000F0);
 
     public static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(MISSING_LOWER_CONTENT));
 
@@ -187,9 +185,9 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
                 var unbaked = UnbakedGeometryHelper.createUnbakedItemMaskElements(1, templateSprite); // Use template as mask
                 var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> fluidSprite, transformedState, modelLocation); // Bake with fluid texture
 
-                var unlit = fluid.getFluidType().getLightLevel() > 0;
-                var renderTypes = DynamicFluidContainerModel.getLayerRenderTypes(unlit);
-                if (unlit) MAX_LIGHTMAP_TRANSFORMER.processInPlace(quads);
+                var emissive = fluid.getFluidType().getLightLevel() > 0;
+                var renderTypes = DynamicFluidContainerModel.getLayerRenderTypes(emissive);
+                if (emissive) QuadTransformers.settingEmissivity(fluid.getFluidType().getLightLevel()).processInPlace(quads);
 
                 modelBuilder.addQuads(renderTypes, quads);
             }
@@ -233,13 +231,14 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
     {
         private static final ResourceLocation REBAKE_LOCATION = new ResourceLocation(BucketLibApi.MOD_ID, "bucket_override");
 
-        private final Map<ResourceLocation, BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
+        private final Map<String, BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
         private final ItemOverrides nested;
         private final ModelBakery bakery;
         private final IGeometryBakingContext owner;
         private final UniversalBucketModel parent;
 
-        private boolean isCracked;
+        private Integer upperBreakTemperature = null;
+        private Integer lowerBreakTemperature = null;
 
         private ContainedFluidOverrideHandler(ItemOverrides nested, ModelBakery bakery, IGeometryBakingContext owner, UniversalBucketModel parent)
         {
@@ -256,32 +255,33 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
             BakedModel overridden = nested.resolve(originalModel, stack, world, entity, number);
             if (overridden != originalModel) return overridden;
             if (stack.getItem() instanceof UniversalBucketItem bucket) {
-                ResourceLocation content = null;
-                EntityType<?> entityType = BucketLibUtil.getEntityType(stack);
-                if (entityType != null) {
-                    content = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
-                }
-                if (content == null) {
-                    content = BucketLibUtil.getContent(stack);
+                boolean containsEntityType = false;
+                String content = BucketLibUtil.getEntityTypeString(stack);
+                if (content != null) {
+                    containsEntityType = true;
+                } else {
+                    content = BucketLibUtil.getContentString(stack);
                 }
                 Fluid fluid = null;
                 if (content == null) {
                     fluid = BucketLibUtil.getFluid(stack);
-                    content = ForgeRegistries.FLUIDS.getKey(fluid);
+                    ResourceLocation location = ForgeRegistries.FLUIDS.getKey(fluid);
+                    content = (location != null) ? location.toString() : null;
                 }
                 //reset cache if temperature config changed
-                boolean isCracked = bucket.isCracked(stack);
-                if (this.isCracked != isCracked) {
-                    this.isCracked = isCracked;
+                if (!Objects.equals(upperBreakTemperature, bucket.getUpperBreakTemperature()) || !Objects.equals(lowerBreakTemperature, bucket.getLowerBreakTemperature())) {
+                    upperBreakTemperature = bucket.getUpperBreakTemperature();
+                    lowerBreakTemperature = bucket.getLowerBreakTemperature();
                     cache.clear();
                 }
-                if (!cache.containsKey(content)) {
-                    UniversalBucketModel unbaked = (entityType != null || fluid == null) ? this.parent.withOtherContent(content, isCracked, entityType != null) : this.parent.withFluid(fluid, isCracked);
-                    BakedModel bakedModel = unbaked.bake(owner, bakery, Material::sprite, BlockModelRotation.X0_Y0, this, REBAKE_LOCATION);
+                BakedModel bakedModel = cache.get(content);
+                if (bakedModel == null && content != null) {
+                    boolean isCracked = bucket.isCracked(stack);
+                    UniversalBucketModel unbaked = (fluid == null) ? this.parent.withOtherContent(new ResourceLocation(content), isCracked, containsEntityType) : this.parent.withFluid(fluid, isCracked);
+                    bakedModel = unbaked.bake(owner, bakery, Material::sprite, BlockModelRotation.X0_Y0, this, REBAKE_LOCATION);
                     cache.put(content, bakedModel);
-                    return bakedModel;
                 }
-                return cache.get(content);
+                return bakedModel;
             }
             return originalModel;
         }
