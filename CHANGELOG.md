@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.21-4.0.0.6] - 2024-07-06
+### Fixed
+- fixed some issues with the FluidStorage interaction to be more compatible with other mods (Fabric/Quilt)
+
 ## [1.21-4.0.0.5] - 2024-07-02
 ### Fixed
 - empty buckets disappeared after right-clicking a filled cauldron (Fabric) (thanks to ColinBashful for the report) #42

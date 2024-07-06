@@ -155,7 +155,7 @@ public class FabricFluidHelper implements IFluidHelper {
         //Fluid Storage interaction
         Storage<FluidVariant> storage = FluidStorage.SIDED.find(level, pos, direction.getOpposite());
         if (storage != null && player != null && FluidStorageUtil.interactWithFluidStorage(storage, player, interactionHand)) {
-            return new Tuple<>(true, player.getItemInHand(interactionHand));
+            return new Tuple<>(true, player.getItemInHand(interactionHand).copy());
         }
         //Fluid Source / Waterlogged Block interaction
         BlockState state = level.getBlockState(pos);
@@ -196,7 +196,7 @@ public class FabricFluidHelper implements IFluidHelper {
         //Fluid Storage interaction
         Storage<FluidVariant> storage = FluidStorage.SIDED.find(level, pos, null);
         if (storage != null && player != null && FluidStorageUtil.interactWithFluidStorage(storage, player, interactionHand)) {
-            return new Tuple<>(true, player.getItemInHand(interactionHand));
+            return new Tuple<>(true, player.getItemInHand(interactionHand).copy());
         }
         Fluid fluid = BucketLibUtil.getFluid(stack);
         ServerLevel serverLevel = (level instanceof ServerLevel) ? (ServerLevel) level : null;
