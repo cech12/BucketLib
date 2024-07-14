@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.21-4.1.0.0] - 2024-07-14
+### Changed
+- updated NeoForge to 21.0.94-beta
+- the `config` directory is used for the default configuration (NeoForge)
+
+### Fixed
+- crashed on startup with NeoForge (caused by a breaking change in 21.0.82-beta)
+
 ## [1.21-4.0.0.6] - 2024-07-06
 ### Fixed
 - fixed some issues with the FluidStorage interaction to be more compatible with other mods (Fabric/Quilt)
