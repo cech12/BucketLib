@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.6-3.3.0.7] - 2024-08-03
+### Fixed
+- fixed some issues with the FluidStorage interaction to be more compatible with other mods (Fabric/Quilt)
+- empty buckets disappeared after right-clicking a filled cauldron (Fabric) (thanks to ColinBashful for the report) #42
+- modded fluids (Dehydration) disappeared when right-clicked with an empty BucketLib bucket (Fabric) (thanks to ColinBashful for the report) https://github.com/cech12/WoodenBucket/issues/20
+
 ## [1.20.6-3.3.0.6] - 2024-06-24
 ### Fixed
 - optimized bucket item model rendering to avoid lags in screens like JEI or EMI (thanks to truskawex for the report) https://github.com/cech12/WoodenBucket/issues/19
