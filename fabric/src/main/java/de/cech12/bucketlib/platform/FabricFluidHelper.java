@@ -1,5 +1,7 @@
 package de.cech12.bucketlib.platform;
 
+import de.cech12.bucketlib.api.BucketLib;
+import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.item.StackItemContext;
 import de.cech12.bucketlib.item.UniversalBucketFluidStorage;
 import de.cech12.bucketlib.platform.services.IFluidHelper;
@@ -18,8 +20,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -86,9 +89,10 @@ public class FabricFluidHelper implements IFluidHelper {
 
     @Override
     public Fluid getContainedFluid(ItemStack stack) {
-        Storage<FluidVariant> storage = ContainerItemContext.withConstant(stack).find(FluidStorage.ITEM);
-        if (storage != null) {
-            for (StorageView<FluidVariant> view : storage.nonEmptyViews()) {
+        ContainerItemContext context = new StackItemContext(stack);
+        Storage<FluidVariant> storage = context.find(FluidStorage.ITEM);
+        if (storage instanceof UniversalBucketFluidStorage bucketFluidStorage) {
+            for (StorageView<FluidVariant> view : bucketFluidStorage.nonEmptyViews()) {
                 return view.getResource().getFluid();
             }
         }
@@ -105,13 +109,7 @@ public class FabricFluidHelper implements IFluidHelper {
                     transaction.commit();
                 }
             }
-            ItemStack resultStack = context.getItemVariant().toStack();
-            if (!resultStack.isEmpty()) {
-                CompoundTag tag = resultStack.getOrCreateTag();
-                bucketFluidStorage.writeNbt(tag);
-                resultStack.setTag(tag);
-            }
-            return resultStack;
+            return context.getItemVariant().toStack();
         }
         return stack.copy();
     }
@@ -127,13 +125,7 @@ public class FabricFluidHelper implements IFluidHelper {
                 }
                 transaction.commit();
             }
-            ItemStack resultStack = context.getItemVariant().toStack();
-            if (!resultStack.isEmpty()) {
-                CompoundTag tag = resultStack.getOrCreateTag();
-                bucketFluidStorage.writeNbt(tag);
-                resultStack.setTag(tag);
-            }
-            return resultStack;
+            return context.getItemVariant().toStack();
         }
         return stack.copy();
     }
@@ -143,18 +135,37 @@ public class FabricFluidHelper implements IFluidHelper {
         //Fluid Storage interaction
         Storage<FluidVariant> storage = FluidStorage.SIDED.find(level, pos, direction.getOpposite());
         if (storage != null && player != null && FluidStorageUtil.interactWithFluidStorage(storage, player, interactionHand)) {
-            return new Tuple<>(true, player.getItemInHand(interactionHand));
+            return new Tuple<>(true, player.getItemInHand(interactionHand).copy());
         }
         //Fluid Source / Waterlogged Block interaction
         BlockState state = level.getBlockState(pos);
         Block block = state.getBlock();
         if (block instanceof BucketPickup bucketPickup && RegistryUtil.getBucketBlock(block) == null) {
             ItemStack fullVanillaBucket = bucketPickup.pickupBlock(player, level, pos, state);
-            if (!fullVanillaBucket.isEmpty() && fullVanillaBucket.getItem() instanceof BucketItem bucketItem) {
+            if (fullVanillaBucket.getItem() instanceof BucketItem bucketItem) {
                 Fluid fluid = Services.BUCKET.getFluidOfBucketItem(bucketItem);
-                SoundEvent sound = bucketPickup.getPickupSound().orElse(FluidVariantAttributes.getFillSound(FluidVariant.of(fluid)));
-                level.playSound(player, pos, sound, SoundSource.BLOCKS, 1.0F, 1.0F);
-                return new Tuple<>(true, BucketLibUtil.addFluid(stack, fluid));
+                if (stack.getItem() instanceof UniversalBucketItem universalBucketItem && universalBucketItem.canHoldFluid(fluid)) {
+                    SoundEvent sound = bucketPickup.getPickupSound().orElse(FluidVariantAttributes.getFillSound(FluidVariant.of(fluid)));
+                    level.playSound(player, pos, sound, SoundSource.BLOCKS, 1.0F, 1.0F);
+                    ItemStack usedStack = stack.copy();
+                    usedStack.setCount(1);
+                    usedStack = BucketLibUtil.addFluid(usedStack, fluid);
+                    return new Tuple<>(true, usedStack);
+                }
+                if (!level.isClientSide() && player != null) {
+                    ((ServerPlayer) player).connection.send(new ClientboundSetActionBarTextPacket(Component.literal("This fluid cannot be hold by the used fluid container.")));
+                }
+                level.setBlock(pos, state, 3);
+                return new Tuple<>(false, stack);
+            }
+            //show incompatibility message and reset the block state
+            if (!fullVanillaBucket.isEmpty()) {
+                if (!level.isClientSide() && player != null) {
+                    ((ServerPlayer) player).connection.send(new ClientboundSetActionBarTextPacket(Component.literal(fullVanillaBucket.getItem() + " is not compatible with BucketLib.")));
+                    BucketLib.LOG.warn("{} is not an instance of BucketItem and is incompatible with BucketLib.", fullVanillaBucket.getItem());
+                }
+                level.setBlock(pos, state, 3);
+                return new Tuple<>(false, stack);
             }
         }
         return new Tuple<>(false, stack);
@@ -165,7 +176,7 @@ public class FabricFluidHelper implements IFluidHelper {
         //Fluid Storage interaction
         Storage<FluidVariant> storage = FluidStorage.SIDED.find(level, pos, null);
         if (storage != null && player != null && FluidStorageUtil.interactWithFluidStorage(storage, player, interactionHand)) {
-            return new Tuple<>(true, player.getItemInHand(interactionHand));
+            return new Tuple<>(true, player.getItemInHand(interactionHand).copy());
         }
         Fluid fluid = BucketLibUtil.getFluid(stack);
         //vaporize

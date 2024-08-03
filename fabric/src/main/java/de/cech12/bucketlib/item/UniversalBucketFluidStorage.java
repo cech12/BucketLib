@@ -7,12 +7,14 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
 public class UniversalBucketFluidStorage extends SingleFluidStorage {
 
-    ContainerItemContext context;
+    private final ContainerItemContext context;
 
     public UniversalBucketFluidStorage(ContainerItemContext context) {
         this.context = context;
@@ -29,7 +31,7 @@ public class UniversalBucketFluidStorage extends SingleFluidStorage {
     @Override
     protected boolean canInsert(FluidVariant variant) {
         ItemStack stack = context.getItemVariant().toStack();
-        return this.variant.isBlank() && !BucketLibUtil.containsMilk(stack) && !BucketLibUtil.containsEntityType(stack) && !BucketLibUtil.containsBlock(stack)
+        return this.variant.isBlank() && BucketLibUtil.isEmpty(stack)
                 && (context.getItemVariant().getItem() instanceof UniversalBucketItem universalBucketItem
                 && universalBucketItem.canHoldFluid(variant.getFluid()));
     }
@@ -42,39 +44,44 @@ public class UniversalBucketFluidStorage extends SingleFluidStorage {
 
     @Override
     public long insert(FluidVariant insertedVariant, long maxAmount, TransactionContext transaction) {
-        if (maxAmount < getCapacity()) {
-            return 0;
+        StoragePreconditions.notBlankNotNegative(insertedVariant, maxAmount);
+        if (maxAmount >= getCapacity() && (insertedVariant.equals(variant) || variant.isBlank()) && canInsert(insertedVariant)) {
+            ItemStack stack = context.getItemVariant().toStack();
+            CompoundTag tag = stack.getOrCreateTag();
+            tag.put("variant", insertedVariant.toNbt());
+            tag.putLong("amount", getCapacity());
+            stack.setTag(tag);
+            if (exchangeOrRemove(ItemVariant.of(stack), transaction)) {
+                return getCapacity();
+            }
         }
-        return super.insert(insertedVariant, maxAmount, transaction);
+        return 0;
     }
 
     @Override
     public long extract(FluidVariant extractedVariant, long maxAmount, TransactionContext transaction) {
-        if (maxAmount < getCapacity()) {
-            return 0;
-        }
-        ItemStack stackBefore = context.getItemVariant().toStack();
-        long result = super.extract(extractedVariant, maxAmount, transaction);
-        updateSnapshots(transaction);
-        ItemStack stack = context.getItemVariant().toStack();
-        if (result > 0) {
-            boolean wasCracked = false;
-            if (stackBefore.getItem() instanceof UniversalBucketItem bucketItem) {
-                wasCracked = bucketItem.isCracked(stackBefore);
-            }
-            if (wasCracked) {
-                stack.shrink(1);
-            } else {
-                if (BucketLibUtil.containsContent(stack)) { //remove milk content tag
-                    BucketLibUtil.removeContentNoCopy(stack, false);
+        StoragePreconditions.notBlankNotNegative(extractedVariant, maxAmount);
+        if (maxAmount >= amount && (extractedVariant.equals(variant)) && canExtract(extractedVariant)) {
+            ItemStack stack = context.getItemVariant().toStack();
+            if (stack.getItem() instanceof UniversalBucketItem bucketItem) {
+                if (!bucketItem.isCracked(stack)) {
+                    if (BucketLibUtil.containsContent(stack)) { //remove milk content tag
+                        BucketLibUtil.removeContentNoCopy(stack, false);
+                    }
+                    CompoundTag tag = stack.getOrCreateTag();
+                    tag.remove("variant");
+                    tag.remove("amount");
+                    stack.setTag(tag);
+                    BucketLibUtil.damageByOne(stack);
+                } else {
+                    stack.shrink(1);
                 }
-                BucketLibUtil.damageByOne(stack);
-            }
-            if (!exchangeOrRemove(ItemVariant.of(stack), transaction)) {
-                return 0;
+                if (exchangeOrRemove(ItemVariant.of(stack), transaction)) {
+                    return amount;
+                }
             }
         }
-        return result;
+        return 0;
     }
 
     private boolean exchangeOrRemove(ItemVariant newVariant, TransactionContext transaction) {
