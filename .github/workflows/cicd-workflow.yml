@@ -59,6 +59,7 @@ jobs:
 #      curseforge-id: 560156
 #      game-versions: |
 #        1.21
+#        1.21.1
 #      release-type: release
 #      loaders: |
 #        forge
@@ -77,6 +78,7 @@ jobs:
 #      modrinth-id: DItE655o
 #      game-versions: |
 #        1.21
+#        1.21.1
 #      release-type: release
 #      loaders: |
 #        forge
@@ -95,6 +97,7 @@ jobs:
       curseforge-id: 560156
       game-versions: |
         1.21
+        1.21.1
       release-type: release
       loaders: |
         neoforge
@@ -113,6 +116,7 @@ jobs:
       modrinth-id: DItE655o
       game-versions: |
         1.21
+        1.21.1
       release-type: release
       loaders: |
         neoforge
@@ -131,6 +135,7 @@ jobs:
       curseforge-id: 560156
       game-versions: |
         1.21
+        1.21.1
       release-type: release
       loaders: |
         fabric
@@ -150,6 +155,7 @@ jobs:
       modrinth-id: DItE655o
       game-versions: |
         1.21
+        1.21.1
       release-type: release
       loaders: |
         fabric
