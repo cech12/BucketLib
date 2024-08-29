@@ -57,7 +57,7 @@ public class BucketLib {
     public static RegistryObject<RecipeSerializer<?>> BUCKET_FILLING_SHAPED_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("bucket_filling_shaped", () -> BucketFillingShapedRecipe.Serializer.INSTANCE);
     public static RegistryObject<RecipeSerializer<?>> BUCKET_FILLING_SHAPELESS_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("bucket_filling_shapeless", () -> BucketFillingShapelessRecipe.Serializer.INSTANCE);
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger();
 
     private static final List<UniversalBucketItem> buckets = new ArrayList<>();
 
