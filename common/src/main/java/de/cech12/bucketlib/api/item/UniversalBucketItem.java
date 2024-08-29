@@ -1,7 +1,12 @@
 package de.cech12.bucketlib.api.item;
 
+import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.platform.Services;
-import de.cech12.bucketlib.util.*;
+import de.cech12.bucketlib.util.BucketLibUtil;
+import de.cech12.bucketlib.util.ColorUtil;
+import de.cech12.bucketlib.util.ItemStackUtil;
+import de.cech12.bucketlib.util.RegistryUtil;
+import de.cech12.bucketlib.util.WorldInteractionUtil;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -105,7 +110,14 @@ public class UniversalBucketItem extends Item {
         if (fluid == Fluids.EMPTY) {
             return true;
         }
-        Item bucket = fluid.getBucket();
+        Item bucket;
+        try {
+            bucket = fluid.getBucket();
+        } catch (IllegalArgumentException ex) {
+            //workaround to avoid game crash caused by getBucket() method of "noBucket" fluids of Registrate (tterrag1098) mod: https://github.com/tterrag1098/Registrate/issues/69
+            BucketLib.LOG.error("IllegalArgumentException occurred while trying to get the bucket item of fluid '" + Services.FLUID.getFluidDescription(fluid) + "' [fluid.getBucket()]. BucketLib is not compatible with this fluid. Please contact the mod developer of the mod which adds this fluid!", ex);
+            return false;
+        }
         if (bucket instanceof MilkBucketItem && fluid != Services.FLUID.getMilkFluid()) {
             return false;
         }

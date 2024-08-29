@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.4-3.2.1.4] - 2024-08-29
+### Fixed
+- workaround to avoid game crash caused by "noBucket()" fluids of Registrate mod (thanks to PhilTheGreatLOL for the report) #45
+
 ## [1.20.4-3.2.1.3] - 2024-08-03
 ### Fixed
 - fixed some issues with the FluidStorage interaction to be more compatible with other mods (Fabric/Quilt)
