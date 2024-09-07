@@ -276,11 +276,13 @@ public class UniversalBucketItem extends Item {
                         //remove entity to be able to use tryPlaceFluid method
                         FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, pos, BucketLibUtil.removeEntityType(itemstack, false), fluidStack);
                         if (fluidActionResult.isSuccess()) {
+                            ItemStack result = fluidActionResult.getResult();
                             if (BucketLibUtil.containsEntityType(itemstack)) {
                                 //place entity if exists
-                                spawnEntityFromBucket(player, level, itemstack, pos, false);
+                                result = spawnEntityFromBucket(player, level, itemstack, pos, false);
+                                result = BucketLibUtil.removeFluid(result);
                             }
-                            return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, fluidActionResult.getResult(), interactionHand), level.isClientSide());
+                            return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, result, interactionHand), level.isClientSide());
                         }
                     }
                 } else if (BucketLibUtil.containsEntityType(itemstack)) {
@@ -318,6 +320,14 @@ public class UniversalBucketItem extends Item {
                 if (entity instanceof Bucketable bucketable) {
                     bucketable.loadFromBucketTag(itemStack.getOrCreateTag());
                     bucketable.setFromBucket(true);
+                    //remove entity data
+                    ItemStack tempStack = new ItemStack(itemStack.getItem(), 1);
+                    bucketable.saveToBucketTag(tempStack);
+                    if (tempStack.getTag() != null && itemStack.getTag() != null) {
+                        CompoundTag nbt = itemStack.getTag();
+                        tempStack.getTag().getAllKeys().forEach(nbt::remove);
+                        itemStack.setTag(nbt);
+                    }
                 }
                 if (player != null) {
                     serverLevel.gameEvent(player, GameEvent.ENTITY_PLACE, pos);
