@@ -10,6 +10,7 @@ import de.cech12.bucketlib.util.WorldInteractionUtil;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -249,11 +250,13 @@ public class UniversalBucketItem extends Item {
                         //remove entity to be able to use tryPlaceFluid method
                         Tuple<Boolean, ItemStack> result = Services.FLUID.tryPlaceFluid(BucketLibUtil.removeEntityType(itemstack, false), player, level, interactionHand, pos);
                         if (result.getA()) {
+                            ItemStack resultStack = result.getB();
                             if (BucketLibUtil.containsEntityType(itemstack)) {
                                 //place entity if exists
-                                spawnEntityFromBucket(player, level, itemstack, pos, false);
+                                resultStack = spawnEntityFromBucket(player, level, itemstack, pos, false);
+                                resultStack = BucketLibUtil.removeFluid(resultStack);
                             }
-                            return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, result.getB(), interactionHand), level.isClientSide());
+                            return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, resultStack, interactionHand), level.isClientSide());
                         }
                     }
                 } else if (BucketLibUtil.containsEntityType(itemstack)) {
@@ -291,6 +294,14 @@ public class UniversalBucketItem extends Item {
                 if (entity instanceof Bucketable bucketable) {
                     bucketable.loadFromBucketTag(itemStack.getOrCreateTag());
                     bucketable.setFromBucket(true);
+                    //remove entity data
+                    ItemStack tempStack = new ItemStack(itemStack.getItem(), 1);
+                    bucketable.saveToBucketTag(tempStack);
+                    if (tempStack.getTag() != null && itemStack.getTag() != null) {
+                        CompoundTag nbt = itemStack.getTag();
+                        tempStack.getTag().getAllKeys().forEach(nbt::remove);
+                        itemStack.setTag(nbt);
+                    }
                 }
                 if (player != null) {
                     serverLevel.gameEvent(player, GameEvent.ENTITY_PLACE, pos);
