@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.21-4.1.0.4] - 2024-09-29
+### Fixed
+- crashed when trying to add an empty bucket as fuel slot in furnace (only NeoForge) #49 https://github.com/cech12/CeramicBucket/issues/83
+
 ## [1.21-4.1.0.3] - 2024-09-29
 ### Fixed
 - lava bucket did not serve as fuel in furnace (only Fabric) (thanks to memoharos and AvaAsUsual for the report) #49 https://github.com/cech12/CeramicBucket/issues/83
