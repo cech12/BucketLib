@@ -38,6 +38,7 @@ import net.minecraft.world.item.MilkBucketItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -164,6 +165,18 @@ public class UniversalBucketItem extends Item {
     //@Override //overrides the neoforge implementation //used by mixin
     public int getMaxStackSize(ItemStack stack) {
         return BucketLibUtil.isEmpty(stack) ? this.properties.maxStackSize : 1;
+    }
+
+    //used by mixins
+    public int getBucketBurnTime(ItemStack stack, RecipeType<?> recipeType) {
+        //entity buckets should not use the burn time of its fluid
+        if (stack.getItem() instanceof UniversalBucketItem && !BucketLibUtil.containsEntityType(stack)) {
+            Fluid fluid = Services.FLUID.getContainedFluid(stack);
+            if (fluid != Fluids.EMPTY) {
+                return Services.PLATFORM.getBurnTime(new ItemStack(fluid.getBucket()), recipeType);
+            }
+        }
+        return Services.PLATFORM.getBurnTime(stack, recipeType);
     }
 
     @Override

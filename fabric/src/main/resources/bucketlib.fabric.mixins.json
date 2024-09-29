@@ -6,6 +6,7 @@
   "mixins": [
   ],
   "client": [
+    "AbstractFurnaceBlockEntityMixin",
     "BlockModelAccessor",
     "FabricRecipeMixin",
     "ItemModelGeneratorAccessor"
