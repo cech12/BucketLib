@@ -4,7 +4,10 @@ import de.cech12.bucketlib.platform.services.IPlatformHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModList;
@@ -47,6 +50,11 @@ public class ForgePlatformHelper implements IPlatformHelper {
     @Override
     public String getMilkTranslationKey() {
         return "fluid_type.minecraft.milk";
+    }
+
+    @Override
+    public int getBurnTime(ItemStack stack, RecipeType<?> recipeType) {
+        return ForgeHooks.getBurnTime(stack, recipeType);
     }
 
 }
