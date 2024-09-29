@@ -176,7 +176,7 @@ public class UniversalBucketItem extends Item {
                 return Services.PLATFORM.getBurnTime(new ItemStack(fluid.getBucket()), recipeType);
             }
         }
-        return Services.PLATFORM.getBurnTime(stack, recipeType);
+        return 0; //don't call Services.PLATFORM.getBurnTime() to avoid recursive calls
     }
 
     @Override
