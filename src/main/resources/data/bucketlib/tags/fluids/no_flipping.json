@@ -1,0 +1,6 @@
+{
+  "replace": false,
+  "_comment" : "This tag lists all fluids that should be displayed in a normal bucket instead of a 180° flipped bucket.",
+  "values": [
+  ]
+}

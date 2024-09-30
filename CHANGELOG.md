@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.1-2.3.5.0] - 2024-09-30
+### Added
+- new fluid tag "bucketlib:no_flipping" to list all fluids that should be displayed in a normal bucket instead of a 180° flipped bucket. (thanks to Konhaiii for the idea) #50
+
 ## [1.20.1-2.3.4.3] - 2024-09-07
 ### Fixed
 - buckets could not be stacked after holding fish or axolotl (thanks to Sinhika & Blazified for the report) #46

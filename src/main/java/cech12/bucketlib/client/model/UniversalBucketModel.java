@@ -1,6 +1,7 @@
 package cech12.bucketlib.client.model;
 
 import cech12.bucketlib.api.BucketLibApi;
+import cech12.bucketlib.api.BucketLibTags;
 import cech12.bucketlib.api.item.UniversalBucketItem;
 import cech12.bucketlib.util.BucketLibUtil;
 import com.google.common.collect.Maps;
@@ -144,7 +145,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         if (particleSprite == null) particleSprite = fluidSprite;
 
         // if the fluid is lighter than air, will manipulate the initial state to be rotated 180deg to turn it upside down
-        if (fluid != Fluids.EMPTY && fluid.getFluidType().isLighterThanAir()) {
+        if (fluid != Fluids.EMPTY && !fluid.defaultFluidState().is(BucketLibTags.Fluids.NO_FLIPPING) && fluid.getFluidType().isLighterThanAir()) {
             modelState = new SimpleModelState(
                     modelState.getRotation().compose(
                             new Transformation(null, new Quaternionf(0, 0, 1, 0), null, null)));

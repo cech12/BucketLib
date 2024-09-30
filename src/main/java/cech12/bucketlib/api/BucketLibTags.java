@@ -34,6 +34,7 @@ public class BucketLibTags {
     public static class Fluids {
 
         public static final TagKey<Fluid> INFINITY_ENCHANTABLE = tag("infinity_enchantable");
+        public static final TagKey<Fluid> NO_FLIPPING = tag("no_flipping");
 
         private static void init() {
         }
