@@ -5,6 +5,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.mojang.math.Transformation;
 import de.cech12.bucketlib.api.BucketLib;
+import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -144,7 +145,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         if (particleSprite == null) particleSprite = fluidSprite;
 
         // if the fluid is lighter than air, will manipulate the initial state to be rotated 180deg to turn it upside down
-        if (fluid != Fluids.EMPTY && fluid.getFluidType().isLighterThanAir()) {
+        if (fluid != Fluids.EMPTY && !fluid.defaultFluidState().is(BucketLibTags.Fluids.NO_FLIPPING) && fluid.getFluidType().isLighterThanAir()) {
             modelState = new SimpleModelState(
                     modelState.getRotation().compose(
                             new Transformation(null, new Quaternionf(0, 0, 1, 0), null, null)));
