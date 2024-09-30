@@ -2,6 +2,7 @@ package de.cech12.bucketlib.client.model;
 
 import com.google.common.collect.Maps;
 import de.cech12.bucketlib.api.BucketLib;
+import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.client.BucketLibClientMod;
 import de.cech12.bucketlib.mixin.BlockModelAccessor;
@@ -187,7 +188,7 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
         ItemOverrides itemOverrides = new ContainedFluidOverrideHandler(modelBaker, this);
 
         // if the fluid is lighter than air, will manipulate the initial state to be rotated 180deg to turn it upside down
-        if (fluid != Fluids.EMPTY && FluidVariantAttributes.isLighterThanAir(FluidVariant.of(fluid))) {
+        if (fluid != Fluids.EMPTY && !fluid.defaultFluidState().is(BucketLibTags.Fluids.NO_FLIPPING) && FluidVariantAttributes.isLighterThanAir(FluidVariant.of(fluid))) {
             modelState = BlockModelRotation.X180_Y0;
         }
 
