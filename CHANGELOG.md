@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.1-2.3.5.1] - 2024-10-10
+### Fixed
+- There was an incompatibility with the powder snow bucket of the Forbidden Arcanus mod. (thanks to SirTwsted for the report) #52
+
 ## [1.20.1-2.3.5.0] - 2024-09-30
 ### Added
 - new fluid tag "bucketlib:no_flipping" to list all fluids that should be displayed in a normal bucket instead of a 180° flipped bucket. (thanks to Konhaiii for the idea) #50

@@ -35,7 +35,9 @@ public class RegistryUtil {
         Level level = getCurrentLevel();
         for (Item item : ForgeRegistries.ITEMS) {
             if (item instanceof SolidBucketItem bucket) {
-                bucketBlocks.add(new BucketBlock(bucket.getBlock(), bucket));
+                if (bucketBlocks.stream().noneMatch(bucketBlock -> bucketBlock.block == bucket.getBlock())) {
+                    bucketBlocks.add(new BucketBlock(bucket.getBlock(), bucket));
+                }
             }
             if (item instanceof MobBucketItem bucket) {
                 try {
@@ -43,7 +45,9 @@ public class RegistryUtil {
                     method.setAccessible(true);
                     EntityType<?> entityType = (EntityType<?>) method.invoke(bucket);
                     if (entityType != null && level != null && entityType.create(level) instanceof Bucketable) {
-                        bucketEntities.add(new BucketEntity(entityType, bucket.getFluid(), bucket));
+                        if (bucketEntities.stream().noneMatch(bucketEntity -> bucketEntity.entityType == entityType)) {
+                            bucketEntities.add(new BucketEntity(entityType, bucket.getFluid(), bucket));
+                        }
                     }
                 } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
                     LOGGER.error("Failed to load MobBucketItem of " + bucket, ex);
