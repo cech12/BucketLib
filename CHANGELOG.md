@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.21-4.1.2.0] - 2024-10-10
+### Added
+- texture for bucketed TofuFish entity of TofuCraftReload mod
+- texture for bucketed Man O' War entity of Oh The Biomes We've Gone mod
+
 ## [1.21-4.1.1.1] - 2024-10-10
 ### Fixed
 - There was an incompatibility with the powder snow bucket of the Forbidden Arcanus mod. (thanks to SirTwsted for the report) #52
