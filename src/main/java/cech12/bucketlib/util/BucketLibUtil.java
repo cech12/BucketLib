@@ -28,7 +28,6 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -302,12 +301,7 @@ public class BucketLibUtil {
     }
 
     public static EntityType<?> getEntityTypeOfMobBucketItem(MobBucketItem mobBucketItem) {
-        try {
-            Method getFishType = mobBucketItem.getClass().getDeclaredMethod("getFishType");
-            getFishType.setAccessible(true);
-            return (EntityType<?>) getFishType.invoke(mobBucketItem);
-        } catch (ReflectiveOperationException ignored) {}
-        return null;
+        return mobBucketItem.getFishType();
     }
 
 }
