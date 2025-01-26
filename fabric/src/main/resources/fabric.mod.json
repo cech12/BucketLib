@@ -29,7 +29,6 @@
       "de.cech12.bucketlib.rei.BucketLibReiClientPlugin"
     ]
   },
-  "accessWidener" : "${mod_id}.accesswidener",
   "mixins": [
     "${mod_id}.mixins.json",
     "${mod_id}.fabric.mixins.json"
