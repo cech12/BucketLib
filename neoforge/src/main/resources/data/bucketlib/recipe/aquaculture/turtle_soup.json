@@ -1,5 +1,5 @@
 {
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "aquaculture"
@@ -8,16 +8,12 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
+    "#aquaculture:turtle",
     {
-      "tag": "aquaculture:turtle"
-    },
-    {
-      "type": "bucketlib:fluid",
+      "neoforge:ingredient_type": "bucketlib:fluid",
       "fluid": "minecraft:water"
     },
-    {
-      "item": "minecraft:bowl"
-    }
+    "minecraft:bowl"
   ],
   "result": {
     "id": "aquaculture:turtle_soup"

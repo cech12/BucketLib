@@ -8,13 +8,14 @@ import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
-import net.minecraft.core.HolderSet;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
@@ -28,7 +29,7 @@ public class BlockIngredient implements CustomIngredient {
 
     protected final Block block;
     protected final TagKey<Block> tag;
-    private List<ItemStack> matchingStacks;
+    private List<Holder<Item>> matchingStacks;
 
     private BlockIngredient(Block block, TagKey<Block> tag) {
         this.block = block;
@@ -36,7 +37,7 @@ public class BlockIngredient implements CustomIngredient {
     }
 
     public BlockIngredient(Optional<ResourceLocation> blockOptional, Optional<TagKey<Block>> tagOptional) {
-        this(blockOptional.map(BuiltInRegistries.BLOCK::get).orElse(null), tagOptional.orElse(null));
+        this(blockOptional.map(BuiltInRegistries.BLOCK::get).filter(Optional::isPresent).map(reference -> reference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
     public BlockIngredient(Block block) {
@@ -72,29 +73,26 @@ public class BlockIngredient implements CustomIngredient {
     }
 
     @Override
-    public List<ItemStack> getMatchingStacks() {
+    public List<Holder<Item>> getMatchingItems() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
             List<Block> blocks = new ArrayList<>();
-            Optional<HolderSet.Named<Block>> blockTag = Optional.empty();
             if (this.tag != null) {
-                blockTag = BuiltInRegistries.BLOCK.getTag(this.tag);
-            }
-            if (blockTag.isPresent()) {
-                blockTag.get().forEach(block -> blocks.add(block.value()));
+                BuiltInRegistries.BLOCK.getTagOrEmpty(this.tag).forEach(block -> blocks.add(block.value()));
             } else if (this.block != null) {
                 blocks.add(this.block);
             }
             List<RegistryUtil.BucketBlock> bucketBlocks = RegistryUtil.getBucketBlocks().stream().filter(bucketBlock -> blocks.contains(bucketBlock.block())).toList();
             //vanilla buckets
             for (RegistryUtil.BucketBlock bucketBlock : bucketBlocks) {
-                this.matchingStacks.add(new ItemStack(bucketBlock.bucketItem()));
+                this.matchingStacks.add(Holder.direct(bucketBlock.bucketItem()));
             }
             //bucket lib buckets
             for (RegistryUtil.BucketBlock bucketBlock : bucketBlocks) {
                 BucketLibMod.getRegisteredBuckets().forEach(bucket -> {
                     if (bucket.canHoldBlock(bucketBlock.block())) {
-                        this.matchingStacks.add(BucketLibUtil.addBlock(new ItemStack(bucket), bucketBlock.block()));
+                        //this.matchingStacks.add(BucketLibUtil.addBlock(new ItemStack(bucket), bucketBlock.block()));
+                        this.matchingStacks.add(Holder.direct(bucket));
                     }
                 });
             }
@@ -136,7 +134,7 @@ public class BlockIngredient implements CustomIngredient {
         }
 
         @Override
-        public MapCodec<BlockIngredient> getCodec(boolean allowEmpty) {
+        public MapCodec<BlockIngredient> getCodec() {
             return CODEC;
         }
 
@@ -155,7 +153,11 @@ public class BlockIngredient implements CustomIngredient {
             if (block.isEmpty()) {
                 throw new IllegalArgumentException("Cannot create a block ingredient with no block or tag.");
             }
-            return new BlockIngredient(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(block)));
+            Optional<Holder.Reference<Block>> blockOptional = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(block));
+            if (blockOptional.isEmpty()) {
+                throw new IllegalArgumentException("Block resource location \"" + block + " \" could not be found.");
+            }
+            return new BlockIngredient(blockOptional.get().value());
         }
 
         private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull BlockIngredient ingredient) {

@@ -9,11 +9,13 @@ import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.BakedOverrides;
+import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
+import net.minecraft.client.resources.model.ItemModel;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
@@ -40,6 +42,7 @@ import org.joml.Vector3f;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -97,7 +100,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
 
     @Override
     @Nonnull
-    public BakedModel bake(IGeometryBakingContext owner, @Nonnull ModelBaker baker, @Nonnull Function<Material, TextureAtlasSprite> spriteGetter, @Nonnull ModelState modelState, @Nonnull ItemOverrides overrides) {
+    public BakedModel bake(IGeometryBakingContext owner, @Nonnull ModelBaker baker, @Nonnull Function<Material, TextureAtlasSprite> spriteGetter, @Nonnull ModelState modelState, @Nonnull List<ItemOverride> overrides) {
         Material particleLocation = owner.hasMaterial("particle") ? owner.getMaterial("particle") : null;
 
         Material baseLocation = null;
@@ -154,7 +157,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
 
         // We need to disable GUI 3D and block lighting for this to render properly
         var itemContext = StandaloneGeometryBakingContext.builder(owner).withGui3d(false).withUseBlockLight(false).build(BucketLib.id("universal_bucket"));
-        var modelBuilder = CompositeModel.Baked.builder(itemContext, particleSprite, new ContainedFluidOverrideHandler(overrides, baker, itemContext, this), owner.getTransforms());
+        var modelBuilder = CompositeModel.Baked.builder(itemContext, particleSprite, owner.getTransforms());
 
         var normalRenderTypes = DynamicFluidContainerModel.getLayerRenderTypes(false);
 
@@ -190,7 +193,9 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
 
         modelBuilder.setParticle(particleSprite);
 
-        return modelBuilder.build();
+        BakedModel bakedModel = modelBuilder.build();
+        ContainedFluidOverrideHandler bakedOverrides = new ContainedFluidOverrideHandler(new BakedOverrides(baker, overrides, spriteGetter), bakedModel, baker, itemContext, this);
+        return new ItemModel.BakedModelWithOverrides(bakedModel, bakedOverrides);
     }
 
     public static final class Loader implements IGeometryLoader<UniversalBucketModel>
@@ -206,10 +211,11 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         }
     }
 
-    private static final class ContainedFluidOverrideHandler extends ItemOverrides {
+    private static final class ContainedFluidOverrideHandler extends BakedOverrides {
 
         private final Map<String, BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
-        private final ItemOverrides nested;
+        private final BakedOverrides nested;
+        private final BakedModel baseModel;
         private final ModelBaker baker;
         private final IGeometryBakingContext owner;
         private final UniversalBucketModel parent;
@@ -217,9 +223,10 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         private Integer upperBreakTemperature = null;
         private Integer lowerBreakTemperature = null;
 
-        private ContainedFluidOverrideHandler(ItemOverrides nested, ModelBaker baker, IGeometryBakingContext owner, UniversalBucketModel parent)
+        private ContainedFluidOverrideHandler(BakedOverrides nested, BakedModel baseModel, ModelBaker baker, IGeometryBakingContext owner, UniversalBucketModel parent)
         {
             this.nested = nested;
+            this.baseModel = baseModel;
             this.baker = baker;
             this.owner = owner;
             this.parent = parent;
@@ -227,10 +234,10 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
 
         @Nullable
         @Override
-        public BakedModel resolve(@Nonnull BakedModel originalModel, @Nonnull ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int number)
+        public BakedModel findOverride(@Nonnull ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed)
         {
-            BakedModel overridden = nested.resolve(originalModel, stack, world, entity, number);
-            if (overridden != originalModel) return overridden;
+            BakedModel overridden = nested.findOverride(stack, level, entity, seed);
+            if (overridden != null) return overridden;
             if (stack.getItem() instanceof UniversalBucketItem bucket) {
                 boolean containsEntityType = false;
                 String content = BucketLibUtil.getEntityTypeString(stack);
@@ -255,12 +262,12 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
                 if (bakedModel == null && content != null) {
                     boolean isCracked = bucket.isCracked(stack);
                     UniversalBucketModel unbaked = (fluid == null) ? this.parent.withOtherContent(ResourceLocation.parse(content), isCracked, containsEntityType) : this.parent.withFluid(fluid, isCracked);
-                    bakedModel = unbaked.bake(owner, baker, Material::sprite, BlockModelRotation.X0_Y0, this);
+                    bakedModel = unbaked.bake(owner, baker, Material::sprite, BlockModelRotation.X0_Y0, List.of());
                     cache.put(content, bakedModel);
                 }
                 return bakedModel;
             }
-            return originalModel;
+            return baseModel;
         }
     }
 

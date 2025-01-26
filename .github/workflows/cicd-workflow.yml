@@ -58,8 +58,7 @@ jobs:
 #      title-prefix: forge-
 #      curseforge-id: 560156
 #      game-versions: |
-#        1.21
-#        1.21.1
+#        1.21.3
 #      release-type: release
 #      loaders: |
 #        forge
@@ -77,8 +76,7 @@ jobs:
 #      title-prefix: forge-
 #      modrinth-id: DItE655o
 #      game-versions: |
-#        1.21
-#        1.21.1
+#        1.21.3
 #      release-type: release
 #      loaders: |
 #        forge
@@ -96,8 +94,7 @@ jobs:
       title-prefix: neoforge-
       curseforge-id: 560156
       game-versions: |
-        1.21
-        1.21.1
+        1.21.3
       release-type: release
       loaders: |
         neoforge
@@ -115,8 +112,7 @@ jobs:
       title-prefix: neoforge-
       modrinth-id: DItE655o
       game-versions: |
-        1.21
-        1.21.1
+        1.21.3
       release-type: release
       loaders: |
         neoforge
@@ -134,8 +130,7 @@ jobs:
       title-prefix: fabric-
       curseforge-id: 560156
       game-versions: |
-        1.21
-        1.21.1
+        1.21.3
       release-type: release
       loaders: |
         fabric
@@ -154,8 +149,7 @@ jobs:
       title-prefix: fabric-
       modrinth-id: DItE655o
       game-versions: |
-        1.21
-        1.21.1
+        1.21.3
       release-type: release
       loaders: |
         fabric

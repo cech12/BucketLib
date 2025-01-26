@@ -8,9 +8,11 @@ import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
+import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -20,7 +22,7 @@ import java.util.List;
 
 public class MilkIngredient implements CustomIngredient {
 
-    private List<ItemStack> matchingStacks;
+    private List<Holder<Item>> matchingStacks;
 
     public MilkIngredient() {
     }
@@ -37,13 +39,14 @@ public class MilkIngredient implements CustomIngredient {
     }
 
     @Override
-    public List<ItemStack> getMatchingStacks() {
+    public List<Holder<Item>> getMatchingItems() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
-            this.matchingStacks.add(new ItemStack(Items.MILK_BUCKET));
+            this.matchingStacks.add(Holder.direct(Items.MILK_BUCKET));
             BucketLibMod.getRegisteredBuckets().forEach(universalBucketItem -> {
                 if (universalBucketItem.canMilkEntities()) {
-                    this.matchingStacks.add(BucketLibUtil.addMilk(new ItemStack(universalBucketItem)));
+                    //this.matchingStacks.add(BucketLibUtil.addMilk(new ItemStack(universalBucketItem)));
+                    this.matchingStacks.add(Holder.direct(universalBucketItem));
                 }
             });
         }
@@ -79,7 +82,7 @@ public class MilkIngredient implements CustomIngredient {
         }
 
         @Override
-        public MapCodec<MilkIngredient> getCodec(boolean allowEmpty) {
+        public MapCodec<MilkIngredient> getCodec() {
             return CODEC;
         }
 

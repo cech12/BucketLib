@@ -5,13 +5,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 
@@ -25,7 +26,7 @@ public class EntityIngredient implements ICustomIngredient {
 
     protected final EntityType<?> entityType;
     protected final TagKey<EntityType<?>> tag;
-    private ItemStack[] matchingStacks;
+    private Holder<Item>[] matchingStacks;
 
     private EntityIngredient(EntityType<?> entityType, TagKey<EntityType<?>> tag) {
         this.entityType = entityType;
@@ -33,7 +34,7 @@ public class EntityIngredient implements ICustomIngredient {
     }
 
     public EntityIngredient(Optional<ResourceLocation> blockOptional, Optional<TagKey<EntityType<?>>> tagOptional) {
-        this(blockOptional.map(BuiltInRegistries.ENTITY_TYPE::get).orElse(null), tagOptional.orElse(null));
+        this(blockOptional.map(BuiltInRegistries.ENTITY_TYPE::get).filter(Optional::isPresent).map(itemReference -> itemReference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
     public EntityIngredient(EntityType<?> entityType) {
@@ -70,38 +71,37 @@ public class EntityIngredient implements ICustomIngredient {
 
     @Override
     @Nonnull
-    public Stream<ItemStack> getItems() {
+    public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
-            ArrayList<ItemStack> stacks = new ArrayList<>();
+            ArrayList<Holder<Item>> stacks = new ArrayList<>();
             List<EntityType<?>> entityTypes = new ArrayList<>();
             Optional<HolderSet.Named<EntityType<?>>> entityTag = Optional.empty();
             if (this.tag != null) {
-                entityTag = BuiltInRegistries.ENTITY_TYPE.getTag(this.tag);
-            }
-            if (entityTag.isPresent()) {
-                entityTag.get().forEach(fluid -> entityTypes.add(fluid.value()));
+                BuiltInRegistries.ENTITY_TYPE.getTagOrEmpty(this.tag).forEach(fluid -> entityTypes.add(fluid.value()));
             } else if (this.entityType != null) {
                 entityTypes.add(this.entityType);
             }
             List<RegistryUtil.BucketEntity> bucketEntities = RegistryUtil.getBucketEntities().stream().filter(bucketEntity -> entityTypes.contains(bucketEntity.entityType())).toList();
             //vanilla buckets
             for (RegistryUtil.BucketEntity bucketEntity : bucketEntities) {
-                stacks.add(new ItemStack(bucketEntity.bucketItem()));
+                stacks.add(Holder.direct(bucketEntity.bucketItem()));
             }
             //bucket lib buckets
             for (RegistryUtil.BucketEntity bucketEntity : bucketEntities) {
                 BucketLibMod.getRegisteredBuckets().forEach(bucket -> {
                     if (bucket.canHoldFluid(bucketEntity.fluid()) && bucket.canHoldEntity(bucketEntity.entityType())) {
+                        /*
                         ItemStack filledBucket = new ItemStack(bucket);
                         if (bucketEntity.fluid() != Fluids.EMPTY) {
                             filledBucket = BucketLibUtil.addFluid(filledBucket, bucketEntity.fluid());
                         }
                         filledBucket = BucketLibUtil.addEntityType(filledBucket, bucketEntity.entityType());
-                        stacks.add(filledBucket);
+                         */
+                        stacks.add(Holder.direct(bucket));
                     }
                 });
             }
-            this.matchingStacks = stacks.toArray(new ItemStack[0]);
+            this.matchingStacks = stacks.toArray(new Holder[0]);
         }
         return Stream.of(this.matchingStacks);
     }

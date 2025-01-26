@@ -11,9 +11,10 @@ import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.block.model.BakedOverrides;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -106,7 +107,7 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
     @Nonnull
     @Override
     public BlockModel getRootModel() {
-        resolveParents(BucketLibClientMod::getModel);
+        //resolveDependencies(BucketLibClientMod::getModel);
         if (this.parent == null) {
             return this;
         }
@@ -117,11 +118,11 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
         return this.parent.getRootModel();
     }
 
-    @Nullable
+    @Nonnull
     @Override
-    public BakedModel bake(@Nonnull ModelBaker modelBaker, @Nonnull BlockModel blockModel, @Nonnull Function<Material, TextureAtlasSprite> spriteGetter, @Nonnull ModelState modelState, boolean bl) {
+    public BakedModel bake(@Nonnull ModelBaker modelBaker, @Nonnull Function<Material, TextureAtlasSprite> spriteGetter, @Nonnull ModelState modelState) {
         //resolve parents to use their defined materials, too
-        resolveParents(BucketLibClientMod::getModel);
+        resolveDependencies(BucketLibClientMod::getModel);
 
         Material particleLocation = this.getMaterial("particle");
         TextureAtlasSprite particleSprite = null;
@@ -185,8 +186,6 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
             }
         }
 
-        ItemOverrides itemOverrides = new ContainedFluidOverrideHandler(modelBaker, this);
-
         // if the fluid is lighter than air, will manipulate the initial state to be rotated 180deg to turn it upside down
         if (fluid != Fluids.EMPTY && !fluid.defaultFluidState().is(BucketLibTags.Fluids.NO_FLIPPING) && FluidVariantAttributes.isLighterThanAir(FluidVariant.of(fluid))) {
             modelState = BlockModelRotation.X180_Y0;
@@ -195,51 +194,60 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
         List<BakedQuad> quads = new ArrayList<>();
 
         if (baseSprite != null) {
-            quads.addAll(GeometryUtils.bakeElements(this, itemOverrides,
+            quads.addAll(GeometryUtils.bakeElements(this,
                     GeometryUtils.createUnbakedItemElements(0, "base", baseSprite.contents()),
                     baseSprite, modelState));
         }
         if (isValid(otherContentLocation)) {
             assert otherContentSprite != null;
-            quads.addAll(GeometryUtils.bakeElements(this, itemOverrides,
+            quads.addAll(GeometryUtils.bakeElements(this,
                     GeometryUtils.createUnbakedItemElements(-1, "content", otherContentSprite.contents()),
                     otherContentSprite, modelState));
         } else if (isValid(fluidMaskLocation) && fluid != Fluids.EMPTY) {
             TextureAtlasSprite templateSprite = spriteGetter.apply(fluidMaskLocation);
-            quads.addAll(GeometryUtils.bakeElements(this, itemOverrides,
+            quads.addAll(GeometryUtils.bakeElements(this,
                     GeometryUtils.createUnbakedItemMaskElements(1, "fluid", templateSprite.contents()),
                     fluidSprite, modelState));
         }
 
-        return new UniversalBucketBakedModel(quads, getTransforms(), itemOverrides, particleSprite);
+        ContainedFluidOverrideHandler bakedOverrides = new ContainedFluidOverrideHandler(new BakedOverrides(modelBaker, List.of()), modelBaker, List.of(), this);
+        BakedModel bakedModel = new UniversalBucketBakedModel(quads, getTransforms(), bakedOverrides, particleSprite);
+        bakedOverrides.setBaseModel(bakedModel);
+
+        return bakedModel;
     }
 
     private boolean isValid(Material material) {
         return material != null && !material.texture().equals(MissingTextureAtlasSprite.getLocation());
     }
 
-    private static final class ContainedFluidOverrideHandler extends ItemOverrides {
+    private static final class ContainedFluidOverrideHandler extends BakedOverrides {
 
         private final Map<String, BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
-        private final ItemOverrides nested;
+        private final BakedOverrides nested;
+        private BakedModel baseModel = null;
         private final ModelBaker baker;
         private final UniversalBucketUnbakedModel parent;
 
         private Integer upperBreakTemperature = null;
         private Integer lowerBreakTemperature = null;
 
-        private ContainedFluidOverrideHandler(ModelBaker baker, UniversalBucketUnbakedModel parent) {
-            super();
-            this.nested = ItemOverrides.EMPTY;
+        private ContainedFluidOverrideHandler(BakedOverrides nested, ModelBaker baker, List<ItemOverride> itemOverrides, UniversalBucketUnbakedModel parent) {
+            super(baker, itemOverrides);
+            this.nested = nested;
             this.baker = baker;
             this.parent = parent;
         }
 
+        private void setBaseModel(BakedModel baseModel) {
+            this.baseModel = baseModel;
+        }
+
         @Nullable
         @Override
-        public BakedModel resolve(@Nonnull BakedModel originalModel, @Nonnull ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int number) {
-            BakedModel overridden = nested.resolve(originalModel, stack, world, entity, number);
-            if (overridden != originalModel) return overridden;
+        public BakedModel findOverride(@Nonnull ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+            BakedModel overridden = nested.findOverride(stack, level, entity, seed);
+            if (overridden != null) return overridden;
             if (stack.getItem() instanceof UniversalBucketItem bucket) {
                 boolean containsEntityType = false;
                 String content = BucketLibUtil.getEntityTypeString(stack);
@@ -269,7 +277,7 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
                 }
                 return bakedModel;
             }
-            return originalModel;
+            return baseModel;
         }
     }
 

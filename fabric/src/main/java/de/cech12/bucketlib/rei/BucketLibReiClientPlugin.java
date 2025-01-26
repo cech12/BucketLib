@@ -10,8 +10,8 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.displays.anvil.DefaultAnvilDisplay;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.registries.VanillaRegistries;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.material.Fluid;
@@ -36,7 +36,7 @@ public class BucketLibReiClientPlugin implements REIClientPlugin {
                         ItemStack enchantedBucket = bucket.copy();
                         enchantedBucket.enchant(data.enchantment, data.level);
                         registry.add(new DefaultAnvilDisplay(
-                                List.of(EntryIngredients.of(bucket), EntryIngredients.of(EnchantedBookItem.createForEnchantment(data))),
+                                List.of(EntryIngredients.of(bucket), EntryIngredients.of(EnchantmentHelper.createBook(data))),
                                 List.of(EntryIngredients.of(enchantedBucket)),
                                 Optional.empty()));
                     }

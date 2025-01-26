@@ -17,25 +17,23 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.MilkBucketItem;
-import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -67,7 +65,7 @@ public class UniversalBucketItem extends Item {
     @Override
     @Nonnull
     public Component getName(@Nonnull ItemStack stack) {
-        String descriptionId = this.getDescriptionId(stack);
+        String descriptionId = this.getDescriptionId();
         Component argument;
         if (BucketLibUtil.containsEntityType(stack)) {
             descriptionId += ".entity";
@@ -117,10 +115,10 @@ public class UniversalBucketItem extends Item {
             BucketLib.LOG.error("IllegalArgumentException occurred while trying to get the bucket item of fluid '" + Services.FLUID.getFluidDescription(fluid) + "' [fluid.getBucket()]. BucketLib is not compatible with this fluid. Please contact the mod developer of the mod which adds this fluid!", ex);
             return false;
         }
-        if (bucket instanceof MilkBucketItem && fluid != Services.FLUID.getMilkFluid()) {
+        if (bucket == Items.MILK_BUCKET && fluid != Services.FLUID.getMilkFluid()) {
             return false;
         }
-        if (!(bucket instanceof MilkBucketItem) && (!(bucket instanceof BucketItem) || Services.BUCKET.getFluidOfBucketItem((BucketItem) bucket) != fluid)) {
+        if (bucket != Items.MILK_BUCKET && (!(bucket instanceof BucketItem) || Services.BUCKET.getFluidOfBucketItem((BucketItem) bucket) != fluid)) {
             return false;
         }
         if (this.properties.allowedFluidsTag != null || this.properties.allowedFluids != null) {
@@ -216,7 +214,7 @@ public class UniversalBucketItem extends Item {
 
     @Override
     @Nonnull
-    public InteractionResultHolder<ItemStack> use(@Nonnull Level level, @Nonnull Player player, @Nonnull InteractionHand interactionHand) {
+    public InteractionResult use(@Nonnull Level level, @Nonnull Player player, @Nonnull InteractionHand interactionHand) {
         ItemStack itemstack = player.getItemInHand(interactionHand);
         boolean isEmpty = BucketLibUtil.isEmpty(itemstack);
         //check hit block
@@ -229,13 +227,13 @@ public class UniversalBucketItem extends Item {
             ServerLevel serverLevel = (level instanceof ServerLevel) ? (ServerLevel) level : null;
             if (isEmpty) {
                 //pickup from cauldron interaction
-                InteractionResultHolder<ItemStack> caldronInteractionResult = WorldInteractionUtil.tryPickupFromCauldron(level, player, interactionHand, blockHitResult);
-                if (caldronInteractionResult.getResult().consumesAction()) {
+                InteractionResult caldronInteractionResult = WorldInteractionUtil.tryPickupFromCauldron(level, player, interactionHand, blockHitResult);
+                if (caldronInteractionResult.consumesAction()) {
                     return caldronInteractionResult;
                 }
                 Tuple<Boolean, ItemStack> result = Services.FLUID.tryPickUpFluid(BucketLibUtil.removeEntityType(itemstack, serverLevel, player, false), player, level, interactionHand, hitBlockPos, hitDirection);
                 if (result.getA()) {
-                    return InteractionResultHolder.sidedSuccess(ItemUtils.createFilledResult(itemstack, player, result.getB()), level.isClientSide());
+                    return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(itemstack, player, result.getB()));
                 }
                 //pickup block interaction
                 RegistryUtil.BucketBlock bucketBlock = RegistryUtil.getBucketBlock(hitBlockState.getBlock());
@@ -243,16 +241,16 @@ public class UniversalBucketItem extends Item {
                     //fake vanilla bucket use
                     ItemStack fakeStack = new ItemStack(Items.BUCKET);
                     player.setItemInHand(interactionHand, fakeStack);
-                    InteractionResultHolder<ItemStack> interactionResult = fakeStack.use(level, player, interactionHand);
+                    InteractionResult interactionResult = fakeStack.use(level, player, interactionHand);
                     player.setItemInHand(interactionHand, itemstack);
-                    if (interactionResult.getResult().consumesAction()) {
-                        return new InteractionResultHolder<>(interactionResult.getResult(), ItemUtils.createFilledResult(itemstack.copy(), player, BucketLibUtil.addBlock(ItemStackUtil.copyStackWithSize(itemstack, 1), bucketBlock.block())));
+                    if (interactionResult.consumesAction()) {
+                        return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(itemstack.copy(), player, BucketLibUtil.addBlock(ItemStackUtil.copyStackWithSize(itemstack, 1), bucketBlock.block())));
                     }
                 }
             } else {
                 //place into cauldron interaction
-                InteractionResultHolder<ItemStack> caldronInteractionResult = WorldInteractionUtil.tryPlaceIntoCauldron(level, player, interactionHand, blockHitResult);
-                if (caldronInteractionResult.getResult().consumesAction()) {
+                InteractionResult caldronInteractionResult = WorldInteractionUtil.tryPlaceIntoCauldron(level, player, interactionHand, blockHitResult);
+                if (caldronInteractionResult.consumesAction()) {
                     return caldronInteractionResult;
                 }
                 if (BucketLibUtil.containsFluid(itemstack)) {
@@ -265,13 +263,13 @@ public class UniversalBucketItem extends Item {
                                 //place entity if exists
                                 spawnEntityFromBucket(player, level, itemstack, pos, false);
                             }
-                            return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, result.getB(), interactionHand), level.isClientSide());
+                            return InteractionResult.SUCCESS.heldItemTransformedTo(BucketLibUtil.createEmptyResult(itemstack, player, result.getB(), interactionHand));
                         }
                     }
                 } else if (BucketLibUtil.containsEntityType(itemstack)) {
                     //place entity interaction
                     ItemStack emptyBucket = spawnEntityFromBucket(player, level, itemstack, relativeBlockPos, true);
-                    return InteractionResultHolder.sidedSuccess(BucketLibUtil.createEmptyResult(itemstack, player, emptyBucket, interactionHand), level.isClientSide());
+                    return InteractionResult.SUCCESS.heldItemTransformedTo(BucketLibUtil.createEmptyResult(itemstack, player, emptyBucket, interactionHand));
                 } else if (BucketLibUtil.containsBlock(itemstack)) {
                     //place block interaction
                     Block block = BucketLibUtil.getBlock(itemstack);
@@ -283,7 +281,7 @@ public class UniversalBucketItem extends Item {
                         InteractionResult interactionResult = fakeStack.useOn(new UseOnContext(player, interactionHand, blockHitResult));
                         player.setItemInHand(interactionHand, itemstack);
                         if (interactionResult.consumesAction()) {
-                            return new InteractionResultHolder<>(interactionResult, BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack, serverLevel, player, true), interactionHand));
+                            return InteractionResult.SUCCESS.heldItemTransformedTo(BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack, serverLevel, player, true), interactionHand));
                         }
                     }
                 }
@@ -292,14 +290,14 @@ public class UniversalBucketItem extends Item {
         if (BucketLibUtil.containsMilk(itemstack)) {
             return ItemUtils.startUsingInstantly(level, player, interactionHand);
         }
-        return InteractionResultHolder.pass(itemstack);
+        return InteractionResult.PASS;
     }
 
     public ItemStack spawnEntityFromBucket(@Nullable Player player, Level level, ItemStack itemStack, BlockPos pos, boolean damage) {
         if (level instanceof ServerLevel serverLevel) {
             EntityType<?> entityType = BucketLibUtil.getEntityType(itemStack);
             if (entityType != null) {
-                Entity entity = entityType.spawn(serverLevel, itemStack, null, pos, MobSpawnType.BUCKET, true, false);
+                Entity entity = entityType.spawn(serverLevel, itemStack, null, pos, EntitySpawnReason.BUCKET, true, false);
                 if (entity instanceof Bucketable bucketable) {
                     CustomData customdata = itemStack.getOrDefault(DataComponents.BUCKET_ENTITY_DATA, CustomData.EMPTY);
                     bucketable.loadFromBucketTag(customdata.copyTag());
@@ -347,7 +345,7 @@ public class UniversalBucketItem extends Item {
                 CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, new ItemStack(entity.getBucketItemStack().getItem()));
             }
             entity.discard();
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
     }
@@ -378,9 +376,9 @@ public class UniversalBucketItem extends Item {
 
     @Override
     @Nonnull
-    public UseAnim getUseAnimation(@Nonnull ItemStack itemStack) {
+    public ItemUseAnimation getUseAnimation(@Nonnull ItemStack itemStack) {
         if (BucketLibUtil.containsMilk(itemStack)) {
-            return UseAnim.DRINK;
+            return ItemUseAnimation.DRINK;
         }
         return super.getUseAnimation(itemStack);
     }
@@ -649,7 +647,7 @@ public class UniversalBucketItem extends Item {
          * Sets a default color of the bucket and enables colored rendering.
          * Don't forget to add your bucket to the item tag "minecraft:dyeable" to enable the dye recipe.
          *
-         * @param defaultColor color value {@link FastColor.ARGB32}
+         * @param defaultColor color value {@link ARGB}
          * @return Properties object
          */
         public Properties dyeable(int defaultColor) {
@@ -669,7 +667,7 @@ public class UniversalBucketItem extends Item {
          */
         public Properties dyeable(int red, int green, int blue) {
             this.dyeable = true;
-            this.defaultColor = FastColor.ARGB32.color(red, green, blue);
+            this.defaultColor = ARGB.color(red, green, blue);
             return this;
         }
 

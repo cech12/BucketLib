@@ -8,6 +8,7 @@ import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -28,7 +29,7 @@ public class EmptyIngredient implements CustomIngredient {
 
     protected Item item;
     protected TagKey<Item> tag;
-    private List<ItemStack> matchingStacks;
+    private List<Holder<Item>> matchingStacks;
 
     public EmptyIngredient(Item item, TagKey<Item> tag) {
         this.item = item;
@@ -48,7 +49,7 @@ public class EmptyIngredient implements CustomIngredient {
     }
 
     public EmptyIngredient(Optional<ResourceLocation> itemOptional, Optional<TagKey<Item>> tagOptional) {
-        this(itemOptional.map(BuiltInRegistries.ITEM::get).orElse(null), tagOptional.orElse(null));
+        this(itemOptional.map(BuiltInRegistries.ITEM::get).filter(Optional::isPresent).map(reference -> reference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
     @Override
@@ -68,18 +69,19 @@ public class EmptyIngredient implements CustomIngredient {
     }
 
     @Override
-    public List<ItemStack> getMatchingStacks() {
+    public List<Holder<Item>> getMatchingItems() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
             if (this.item == null && this.tag == null) {
-                this.matchingStacks.add(new ItemStack(Items.BUCKET));
+                this.matchingStacks.add(Holder.direct(Items.BUCKET));
             }
             BucketLibMod.getRegisteredBuckets().forEach(universalBucketItem -> {
                 ItemStack universalBucketItemStack = new ItemStack(universalBucketItem);
                 if (this.item != null && universalBucketItem == this.item
                         || this.tag != null && universalBucketItemStack.is(this.tag)
                         || this.item == null && this.tag == null) {
-                    this.matchingStacks.add(universalBucketItemStack);
+                    this.matchingStacks.add(Holder.direct(universalBucketItem));
+
                 }
             });
         }
@@ -120,7 +122,7 @@ public class EmptyIngredient implements CustomIngredient {
         }
 
         @Override
-        public MapCodec<EmptyIngredient> getCodec(boolean allowEmpty) {
+        public MapCodec<EmptyIngredient> getCodec() {
             return CODEC;
         }
 
@@ -134,7 +136,10 @@ public class EmptyIngredient implements CustomIngredient {
             String item = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!item.isEmpty()) {
-                return new EmptyIngredient(BuiltInRegistries.ITEM.get(ResourceLocation.parse(item)));
+                Optional<Holder.Reference<Item>> itemOptional = BuiltInRegistries.ITEM.get(ResourceLocation.parse(item));
+                if (itemOptional.isPresent()) {
+                    return new EmptyIngredient(itemOptional.get().value());
+                }
             }
             if (!tagId.isEmpty()) {
                 TagKey<Item> tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(tagId));

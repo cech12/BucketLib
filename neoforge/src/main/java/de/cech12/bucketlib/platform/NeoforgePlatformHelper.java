@@ -1,6 +1,7 @@
 package de.cech12.bucketlib.platform;
 
 import de.cech12.bucketlib.platform.services.IPlatformHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -12,6 +13,8 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
+
+import java.util.Objects;
 
 /**
  * The platform service implementation for NeoForge.
@@ -53,7 +56,7 @@ public class NeoforgePlatformHelper implements IPlatformHelper {
 
     @Override
     public int getBurnTime(ItemStack stack, RecipeType<?> recipeType) {
-        return stack.getBurnTime(recipeType);
+        return stack.getBurnTime(recipeType, Objects.requireNonNull(Minecraft.getInstance().getSingleplayerServer()).fuelValues());
     }
 
 }

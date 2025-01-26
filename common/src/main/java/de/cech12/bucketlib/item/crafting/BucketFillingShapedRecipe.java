@@ -23,7 +23,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,7 +37,7 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
     private final EntityType<?> entityType;
 
     public BucketFillingShapedRecipe(String group, CraftingBookCategory category, ShapedRecipePattern pattern, BucketFillingType fillingType, Optional<Fluid> fluid, Optional<Block> block, Optional<EntityType<?>> entityType) {
-        super(group, category, pattern, getAssembledBucket(fillingType, fluid.orElse(null), block.orElse(null), entityType.orElse(null), pattern.ingredients().stream().map(ingredient -> Arrays.stream(ingredient.getItems()).toList()).flatMap(List::stream).toList()));
+        super(group, category, pattern, getAssembledBucket(fillingType, fluid.orElse(null), block.orElse(null), entityType.orElse(null), pattern.ingredients().stream().filter(Optional::isPresent).map(ingredient -> ingredient.get().items().stream().map(itemHolder -> new ItemStack(itemHolder.value())).toList()).flatMap(List::stream).toList()));
         this.category = category;
         this.pattern = pattern;
         this.fillingType = fillingType;
@@ -106,7 +105,7 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
 
     @Override
     @Nonnull
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends ShapedRecipe> getSerializer() {
         return Serializer.INSTANCE;
     }
 
@@ -116,7 +115,7 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
 
         private static final MapCodec<BucketFillingShapedRecipe> CODEC = RecordCodecBuilder.mapCodec((record) ->
                 record.group(
-                        Codec.STRING.optionalFieldOf("group", "").forGetter(ShapedRecipe::getGroup),
+                        Codec.STRING.optionalFieldOf("group", "").forGetter(ShapedRecipe::group),
                         CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter((recipe) -> recipe.category),
                         ShapedRecipePattern.MAP_CODEC.forGetter((recipe) -> recipe.pattern),
                         BucketFillingType.CODEC.fieldOf("filling_type").forGetter((recipe) -> recipe.fillingType),
@@ -168,7 +167,7 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
         }
 
         private static void toNetwork(RegistryFriendlyByteBuf buf, BucketFillingShapedRecipe recipe) {
-            buf.writeUtf(recipe.getGroup());
+            buf.writeUtf(recipe.group());
             buf.writeEnum(recipe.category);
             ShapedRecipePattern.STREAM_CODEC.encode(buf, recipe.pattern);
             buf.writeEnum(recipe.fillingType);

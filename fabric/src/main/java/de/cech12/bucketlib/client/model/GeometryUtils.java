@@ -1,7 +1,6 @@
 package de.cech12.bucketlib.client.model;
 
 import de.cech12.bucketlib.mixin.ItemModelGeneratorAccessor;
-import net.minecraft.Util;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockElement;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
@@ -9,7 +8,6 @@ import net.minecraft.client.renderer.block.model.BlockFaceUV;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.FaceBakery;
 import net.minecraft.client.renderer.block.model.ItemModelGenerator;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelState;
@@ -18,9 +16,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import org.joml.Vector3f;
 
+import java.util.Arrays;
 import java.util.BitSet;
-import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GeometryUtils {
 
@@ -77,11 +76,12 @@ public class GeometryUtils {
                             }
                         }
 
-                        elements.add(new BlockElement(new Vector3f((float)(16 * xStart) / (float)width, 16.0F - (float)(16 * yEnd) / (float)height, 7.5F - MASK_OFFSET), new Vector3f((float)(16 * x) / (float)width, 16.0F - (float)(16 * y) / (float)height, 8.5F + MASK_OFFSET), Util.make(new HashMap<>(), (map) -> {
-                            for(Direction direction : Direction.values()) {
-                                map.put(direction, new BlockElementFace(null, tintIndex, name, new BlockFaceUV(null, 0)));
-                            }
-                        }), null, true));
+                        elements.add(new BlockElement(new Vector3f((float)(16 * xStart) / (float)width, 16.0F - (float)(16 * yEnd) / (float)height, 7.5F - MASK_OFFSET), new Vector3f((float)(16 * x) / (float)width, 16.0F - (float)(16 * y) / (float)height, 8.5F + MASK_OFFSET),
+                                Arrays.stream(Direction.values()).collect(Collectors.toMap(
+                                        direction -> direction,
+                                        direction -> new BlockElementFace(null, tintIndex, name, new BlockFaceUV(null, 0))
+                                ))
+                        ));
 
                         xStart = -1;
                     }
@@ -92,11 +92,11 @@ public class GeometryUtils {
         return elements;
     }
 
-    public static List<BakedQuad> bakeElements(BlockModel blockModel, ItemOverrides itemOverrides, List<BlockElement> elements, TextureAtlasSprite sprite, ModelState modelState) {
+    public static List<BakedQuad> bakeElements(BlockModel blockModel, List<BlockElement> elements, TextureAtlasSprite sprite, ModelState modelState) {
         if (elements.isEmpty()) {
             return List.of();
         } else {
-            SimpleBakedModel.Builder simplebakedmodel$builder = (new SimpleBakedModel.Builder(blockModel, itemOverrides, false)).particle(sprite);
+            SimpleBakedModel.Builder simplebakedmodel$builder = (new SimpleBakedModel.Builder(blockModel, false)).particle(sprite);
             bakeElements(simplebakedmodel$builder, elements, sprite, modelState);
             return simplebakedmodel$builder.build().getQuads(null, null, RandomSource.create());
         }
@@ -116,7 +116,7 @@ public class GeometryUtils {
     }
 
     private static BakedQuad bakeElementFace(BlockElement element, BlockElementFace face, TextureAtlasSprite sprite, Direction direction, ModelState state) {
-        return FACE_BAKERY.bakeQuad(element.from, element.to, face, sprite, direction, state, element.rotation, element.shade);
+        return FACE_BAKERY.bakeQuad(element.from, element.to, face, sprite, direction, state, element.rotation, element.shade, element.lightEmission);
     }
 
 }

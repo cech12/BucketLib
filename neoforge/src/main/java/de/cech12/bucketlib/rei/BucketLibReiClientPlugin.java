@@ -10,16 +10,18 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.forge.REIPluginClient;
 import me.shedaniel.rei.plugin.common.displays.DefaultFuelDisplay;
 import me.shedaniel.rei.plugin.common.displays.anvil.DefaultAnvilDisplay;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.registries.VanillaRegistries;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @SuppressWarnings("unused")
@@ -33,7 +35,7 @@ public class BucketLibReiClientPlugin implements REIClientPlugin {
             for (Fluid fluid : Services.REGISTRY.getAllFluids()) {
                 if (fluid != Fluids.EMPTY && bucketItem.canHoldFluid(fluid)) {
                     ItemStack bucket = BucketLibUtil.addFluid(new ItemStack(bucketItem), fluid);
-                    int burnTime = bucketItem.getBurnTime(bucket, null);
+                    int burnTime = bucketItem.getBurnTime(bucket, null, Objects.requireNonNull(Minecraft.getInstance().getSingleplayerServer()).fuelValues());
                     if (burnTime > 0) {
                         registry.add(new DefaultFuelDisplay(
                                 List.of(EntryIngredients.of(bucket)),
@@ -53,7 +55,7 @@ public class BucketLibReiClientPlugin implements REIClientPlugin {
                         ItemStack enchantedBucket = bucket.copy();
                         enchantedBucket.enchant(data.enchantment, data.level);
                         registry.add(new DefaultAnvilDisplay(
-                                List.of(EntryIngredients.of(bucket), EntryIngredients.of(EnchantedBookItem.createForEnchantment(data))),
+                                List.of(EntryIngredients.of(bucket), EntryIngredients.of(EnchantmentHelper.createBook(data))),
                                 List.of(EntryIngredients.of(enchantedBucket)),
                                 Optional.empty()));
                     }

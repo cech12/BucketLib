@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.block.entity.FuelValues;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,11 +24,11 @@ public class NeoforgeUniversalBucketItemMixin extends Item {
     }
 
     @Override
-    public int getBurnTime(@NotNull ItemStack itemStack, @Nullable RecipeType<?> recipeType) {
+    public int getBurnTime(@NotNull ItemStack itemStack, @Nullable RecipeType<?> recipeType, @NotNull FuelValues fuelValues) {
         if (itemStack.getItem() instanceof UniversalBucketItem universalBucketItem) {
             return universalBucketItem.getBucketBurnTime(itemStack, recipeType);
         }
-        return super.getBurnTime(itemStack, recipeType);
+        return super.getBurnTime(itemStack, recipeType, fuelValues);
     }
 
     @Override

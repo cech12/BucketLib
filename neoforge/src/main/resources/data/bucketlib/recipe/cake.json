@@ -8,17 +8,11 @@
   ],
   "key": {
     "F": {
-      "type": "bucketlib:milk"
+      "neoforge:ingredient_type": "bucketlib:milk"
     },
-    "B": {
-      "item": "minecraft:sugar"
-    },
-    "C": {
-      "item": "minecraft:wheat"
-    },
-    "E": {
-      "item": "minecraft:egg"
-    }
+    "B": "minecraft:sugar",
+    "C": "minecraft:wheat",
+    "E": "minecraft:egg"
   },
   "result": {
     "id": "minecraft:cake"

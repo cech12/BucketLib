@@ -13,7 +13,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -41,7 +41,7 @@ public class BucketLibClientMod implements ClientModInitializer, ModelLoadingPlu
                     Fluid fluid = Services.FLUID.getContainedFluid(stack);
                     FluidRenderHandler fluidRenderHandler;
                     if (fluid != Fluids.EMPTY && (fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid)) != null) {
-                        return FastColor.ARGB32.color(255, fluidRenderHandler.getFluidColor(null, null, fluid.defaultFluidState()));
+                        return ARGB.color(255, fluidRenderHandler.getFluidColor(null, null, fluid.defaultFluidState()));
                     }
                 }
                 return -1;
@@ -51,7 +51,7 @@ public class BucketLibClientMod implements ClientModInitializer, ModelLoadingPlu
     }
 
     @Override
-    public void onInitializeModelLoader(ModelLoadingPlugin.Context pluginContext) {
+    public void initialize(Context pluginContext) {
         pluginContext.modifyModelOnLoad().register((original, context) -> {
             ResourceLocation location = context.resourceId();
             if (original instanceof BlockModel blockModel) {

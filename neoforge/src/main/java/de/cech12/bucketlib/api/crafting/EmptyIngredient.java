@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.util.BucketLibUtil;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -23,7 +24,7 @@ public class EmptyIngredient implements ICustomIngredient {
 
     protected Item item;
     protected TagKey<Item> tag;
-    private ItemStack[] matchingStacks;
+    private Holder<Item>[] matchingStacks;
 
     public EmptyIngredient(Item item, TagKey<Item> tag) {
         this.item = item;
@@ -43,7 +44,7 @@ public class EmptyIngredient implements ICustomIngredient {
     }
 
     public EmptyIngredient(Optional<ResourceLocation> itemOptional, Optional<TagKey<Item>> tagOptional) {
-        this(itemOptional.map(BuiltInRegistries.ITEM::get).orElse(null), tagOptional.orElse(null));
+        this(itemOptional.map(BuiltInRegistries.ITEM::get).filter(Optional::isPresent).map(itemReference -> itemReference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
     @Override
@@ -64,21 +65,21 @@ public class EmptyIngredient implements ICustomIngredient {
 
     @Override
     @Nonnull
-    public Stream<ItemStack> getItems() {
+    public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
-            ArrayList<ItemStack> stacks = new ArrayList<>();
+            ArrayList<Holder<Item>> stacks = new ArrayList<>();
             if (this.item == null && this.tag == null) {
-                stacks.add(new ItemStack(Items.BUCKET));
+                stacks.add(Holder.direct(Items.BUCKET));
             }
             BucketLibMod.getRegisteredBuckets().forEach(universalBucketItem -> {
-                ItemStack universalBucketItemStack = new ItemStack(universalBucketItem);
+                Holder<Item> universalBucketItemStack = Holder.direct(universalBucketItem);
                 if (this.item != null && universalBucketItem == this.item
                         || this.tag != null && universalBucketItemStack.is(this.tag)
                         || this.item == null && this.tag == null) {
                     stacks.add(universalBucketItemStack);
                 }
             });
-            this.matchingStacks = stacks.toArray(new ItemStack[0]);
+            this.matchingStacks = stacks.toArray(new Holder[0]);
         }
         return Stream.of(this.matchingStacks);
     }

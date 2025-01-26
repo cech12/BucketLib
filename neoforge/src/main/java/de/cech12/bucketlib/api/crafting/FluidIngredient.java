@@ -4,8 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.platform.Services;
-import de.cech12.bucketlib.util.BucketLibUtil;
-import net.minecraft.core.HolderSet;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -30,7 +29,7 @@ public class FluidIngredient implements ICustomIngredient {
 
     protected final Fluid fluid;
     protected final TagKey<Fluid> tag;
-    private ItemStack[] matchingStacks;
+    private Holder<Item>[] matchingStacks;
 
     private FluidIngredient(Fluid fluid, TagKey<Fluid> tag) {
         this.fluid = fluid;
@@ -38,7 +37,7 @@ public class FluidIngredient implements ICustomIngredient {
     }
 
     public FluidIngredient(Optional<ResourceLocation> fluidOptional, Optional<TagKey<Fluid>> tagOptional) {
-        this(fluidOptional.map(BuiltInRegistries.FLUID::get).orElse(null), tagOptional.orElse(null));
+        this(fluidOptional.map(BuiltInRegistries.FLUID::get).filter(Optional::isPresent).map(itemReference -> itemReference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
     public FluidIngredient(Fluid fluid) {
@@ -73,16 +72,12 @@ public class FluidIngredient implements ICustomIngredient {
 
     @Override
     @Nonnull
-    public Stream<ItemStack> getItems() {
+    public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
-            ArrayList<ItemStack> stacks = new ArrayList<>();
+            ArrayList<Holder<Item>> stacks = new ArrayList<>();
             List<Fluid> fluids = new ArrayList<>();
-            Optional<HolderSet.Named<Fluid>> fluidTag = Optional.empty();
             if (this.tag != null) {
-                fluidTag = BuiltInRegistries.FLUID.getTag(this.tag);
-            }
-            if (fluidTag.isPresent()) {
-                fluidTag.get().forEach(fluid -> fluids.add(fluid.value()));
+                BuiltInRegistries.FLUID.getTagOrEmpty(this.tag).forEach(fluid -> fluids.add(fluid.value()));
             } else if (this.fluid != null) {
                 fluids.add(this.fluid);
             }
@@ -92,15 +87,16 @@ public class FluidIngredient implements ICustomIngredient {
                 if (!(bucketItem instanceof BucketItem) || Services.BUCKET.getFluidOfBucketItem((BucketItem) bucketItem) != fluid) {
                     continue; //skip fluids that have no vanilla bucket
                 }
-                stacks.add(new ItemStack(bucketItem));
+                stacks.add(Holder.direct(bucketItem));
                 //bucket lib buckets
                 BucketLibMod.getRegisteredBuckets().forEach(universalBucketItem -> {
                     if (universalBucketItem.canHoldFluid(fluid)) {
-                        stacks.add(BucketLibUtil.addFluid(new ItemStack(universalBucketItem), fluid));
+                        //stacks.add(BucketLibUtil.addFluid(new ItemStack(universalBucketItem), fluid));
+                        stacks.add(Holder.direct(universalBucketItem));
                     }
                 });
             }
-            this.matchingStacks = stacks.toArray(new ItemStack[0]);
+            this.matchingStacks = stacks.toArray(new Holder[0]);
         }
         return Stream.of(this.matchingStacks);
     }

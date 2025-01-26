@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.platform.Services;
-import de.cech12.bucketlib.util.BucketLibUtil;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
@@ -14,7 +13,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
-import net.minecraft.core.HolderSet;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -36,7 +35,7 @@ public class FluidIngredient implements CustomIngredient {
 
     protected final Fluid fluid;
     protected final TagKey<Fluid> tag;
-    private List<ItemStack> matchingStacks;
+    private List<Holder<Item>> matchingStacks;
 
     private FluidIngredient(Fluid fluid, TagKey<Fluid> tag) {
         this.fluid = fluid;
@@ -44,7 +43,7 @@ public class FluidIngredient implements CustomIngredient {
     }
 
     public FluidIngredient(Optional<ResourceLocation> fluidOptional, Optional<TagKey<Fluid>> tagOptional) {
-        this(fluidOptional.map(BuiltInRegistries.FLUID::get).orElse(null), tagOptional.orElse(null));
+        this(fluidOptional.map(BuiltInRegistries.FLUID::get).filter(Optional::isPresent).map(reference -> reference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
     public FluidIngredient(Fluid fluid) {
@@ -83,16 +82,12 @@ public class FluidIngredient implements CustomIngredient {
     }
 
     @Override
-    public List<ItemStack> getMatchingStacks() {
+    public List<Holder<Item>> getMatchingItems() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
             List<Fluid> fluids = new ArrayList<>();
-            Optional<HolderSet.Named<Fluid>> fluidTag = Optional.empty();
             if (this.tag != null) {
-                fluidTag = BuiltInRegistries.FLUID.getTag(this.tag);
-            }
-            if (fluidTag.isPresent()) {
-                fluidTag.get().forEach(fluid -> fluids.add(fluid.value()));
+                BuiltInRegistries.FLUID.getTagOrEmpty(this.tag).forEach(fluid -> fluids.add(fluid.value()));
             } else if (this.fluid != null) {
                 fluids.add(this.fluid);
             }
@@ -102,11 +97,12 @@ public class FluidIngredient implements CustomIngredient {
                 if (!(bucketItem instanceof BucketItem) || Services.BUCKET.getFluidOfBucketItem((BucketItem) bucketItem) != fluid) {
                     continue; //skip fluids that have no vanilla bucket
                 }
-                this.matchingStacks.add(new ItemStack(bucketItem));
+                this.matchingStacks.add(Holder.direct(bucketItem));
                 //bucket lib buckets
                 BucketLibMod.getRegisteredBuckets().forEach(universalBucketItem -> {
                     if (universalBucketItem.canHoldFluid(fluid)) {
-                        this.matchingStacks.add(BucketLibUtil.addFluid(new ItemStack(universalBucketItem), fluid));
+                        //this.matchingStacks.add(BucketLibUtil.addFluid(new ItemStack(universalBucketItem), fluid));
+                        this.matchingStacks.add(Holder.direct(universalBucketItem));
                     }
                 });
             }
@@ -148,7 +144,7 @@ public class FluidIngredient implements CustomIngredient {
         }
 
         @Override
-        public MapCodec<FluidIngredient> getCodec(boolean allowEmpty) {
+        public MapCodec<FluidIngredient> getCodec() {
             return CODEC;
         }
 
@@ -168,7 +164,11 @@ public class FluidIngredient implements CustomIngredient {
             if (fluid.isEmpty()) {
                 throw new IllegalArgumentException("Cannot create a fluid ingredient with no fluid or tag.");
             }
-            return new FluidIngredient(BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluid)));
+            Optional<Holder.Reference<Fluid>> fluidOptional = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluid));
+            if (fluidOptional.isEmpty()) {
+                throw new IllegalArgumentException("Fluid resource location \"" + fluid + " \" could not be found.");
+            }
+            return new FluidIngredient(fluidOptional.get().value());
         }
 
         private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull FluidIngredient ingredient) {

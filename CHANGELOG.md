@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.21.3-4.2.0.0] - 2025-01-26
+### Changed
+- Updated to Minecraft 1.21.3 (Fabric 0.107.0+1.21.3, Neoforge 21.3.56)
+- (Forge support is still not available until the capability system is re-added)
+- Updated Cloth Config support (16.0.141) (Fabric/Quilt)
+- Updated ModMenu support (12.0.0) (Fabric/Quilt)
+- temporary removed JEI support until it is ported to 1.21.3 (all loaders)
+- Updated REI support (17.0.789) (Neoforge, Fabric/Quilt)
+
 ## [1.21-4.1.2.0] - 2024-10-10
 ### Added
 - texture for bucketed TofuFish entity of TofuCraftReload mod

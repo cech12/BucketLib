@@ -5,6 +5,8 @@ import com.mojang.serialization.Encoder;
 import com.mojang.serialization.MapCodec;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.util.BucketLibUtil;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
@@ -16,7 +18,7 @@ import java.util.stream.Stream;
 
 public class MilkIngredient implements ICustomIngredient {
 
-    private ItemStack[] matchingStacks;
+    private Holder<Item>[] matchingStacks;
 
     public MilkIngredient() {
     }
@@ -34,16 +36,17 @@ public class MilkIngredient implements ICustomIngredient {
 
     @Override
     @Nonnull
-    public Stream<ItemStack> getItems() {
+    public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
-            ArrayList<ItemStack> stacks = new ArrayList<>();
-            stacks.add(new ItemStack(Items.MILK_BUCKET));
+            ArrayList<Holder<Item>> stacks = new ArrayList<>();
+            stacks.add(Holder.direct(Items.MILK_BUCKET));
             BucketLibMod.getRegisteredBuckets().forEach(universalBucketItem -> {
                 if (universalBucketItem.canMilkEntities()) {
-                    stacks.add(BucketLibUtil.addMilk(new ItemStack(universalBucketItem)));
+                    //stacks.add(BucketLibUtil.addMilk(new ItemStack(universalBucketItem)));
+                    stacks.add(Holder.direct(universalBucketItem));
                 }
             });
-            this.matchingStacks = stacks.toArray(new ItemStack[0]);
+            this.matchingStacks = stacks.toArray(new Holder[0]);
         }
         return Stream.of(this.matchingStacks);
     }

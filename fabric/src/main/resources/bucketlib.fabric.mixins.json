@@ -6,9 +6,8 @@
   "mixins": [
   ],
   "client": [
-    "AbstractFurnaceBlockEntityMixin",
     "BlockModelAccessor",
-    "FabricRecipeMixin",
+    "FuelValuesMixin",
     "ItemModelGeneratorAccessor"
   ],
   "server": [

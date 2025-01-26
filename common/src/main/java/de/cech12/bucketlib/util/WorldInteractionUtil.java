@@ -7,8 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -44,10 +42,10 @@ public class WorldInteractionUtil {
         return result;
     }
 
-    public static InteractionResultHolder<ItemStack> tryPickupFromCauldron(Level level, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public static InteractionResult tryPickupFromCauldron(Level level, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         ItemStack itemstack = player.getItemInHand(interactionHand);
         if (level.isClientSide()) {
-            return InteractionResultHolder.pass(itemstack);
+            return InteractionResult.PASS;
         }
         BlockPos hitBlockPos = blockHitResult.getBlockPos();
         BlockState hitBlockState = level.getBlockState(hitBlockPos);
@@ -65,23 +63,23 @@ public class WorldInteractionUtil {
                 //deactivate instabuild for the fake interaction to avoid side effects like adding additional filled vanilla buckets into inventory
                 boolean previousInstabuildValue = player.getAbilities().instabuild;
                 player.getAbilities().instabuild = false;
-                ItemInteractionResult interactionResult = hitBlockState.useItemOn(stack, level, player, interactionHand, blockHitResult);
+                InteractionResult interactionResult = hitBlockState.useItemOn(stack, level, player, interactionHand, blockHitResult);
                 player.getAbilities().instabuild = previousInstabuildValue;
                 ItemStack resultItemStack = player.getItemInHand(interactionHand);
                 player.setItemInHand(interactionHand, itemstack);
                 if (interactionResult.consumesAction()) {
                     if (resultItemStack.getItem() == Items.POWDER_SNOW_BUCKET) {
-                        return new InteractionResultHolder<>(interactionResult.result(), ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addBlock(ItemStackUtil.copyStackWithSize(itemstack, 1), Blocks.POWDER_SNOW)));
+                        return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addBlock(ItemStackUtil.copyStackWithSize(itemstack, 1), Blocks.POWDER_SNOW)));
                     } else {
-                        return new InteractionResultHolder<>(interactionResult.result(), ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addFluid(ItemStackUtil.copyStackWithSize(itemstack, 1), Services.FLUID.getContainedFluid(resultItemStack))));
+                        return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addFluid(ItemStackUtil.copyStackWithSize(itemstack, 1), Services.FLUID.getContainedFluid(resultItemStack))));
                     }
                 }
             }
         }
-        return InteractionResultHolder.pass(itemstack);
+        return InteractionResult.PASS;
     }
 
-    public static InteractionResultHolder<ItemStack> tryPlaceIntoCauldron(Level level, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public static InteractionResult tryPlaceIntoCauldron(Level level, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         ItemStack itemstack = player.getItemInHand(interactionHand);
         BlockPos hitBlockPos = blockHitResult.getBlockPos();
         BlockState hitBlockState = level.getBlockState(hitBlockPos);
@@ -100,11 +98,11 @@ public class WorldInteractionUtil {
                 //deactivate instabuild for the fake interaction to avoid side effects like adding additional empty vanilla buckets into inventory
                 boolean previousInstabuildValue = player.getAbilities().instabuild;
                 player.getAbilities().instabuild = false;
-                ItemInteractionResult interactionResult = hitBlockState.useItemOn(stack, level, player, interactionHand, blockHitResult);
+                InteractionResult interactionResult = hitBlockState.useItemOn(stack, level, player, interactionHand, blockHitResult);
                 player.getAbilities().instabuild = previousInstabuildValue;
                 player.setItemInHand(interactionHand, itemstack);
                 if (interactionResult.consumesAction()) {
-                    return new InteractionResultHolder<>(interactionResult.result(), BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeFluid(itemstack, serverLevel, player), interactionHand, true));
+                    return InteractionResult.SUCCESS.heldItemTransformedTo(BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeFluid(itemstack, serverLevel, player), interactionHand, true));
                 }
             } else if (bucketBlock == Blocks.POWDER_SNOW) {
                 ItemStack stack = new ItemStack(Items.POWDER_SNOW_BUCKET);
@@ -112,15 +110,15 @@ public class WorldInteractionUtil {
                 //deactivate instabuild for the fake interaction to avoid side effects like adding additional empty vanilla buckets into inventory
                 boolean previousInstabuildValue = player.getAbilities().instabuild;
                 player.getAbilities().instabuild = false;
-                ItemInteractionResult interactionResult = hitBlockState.useItemOn(stack, level, player, interactionHand, blockHitResult);
+                InteractionResult interactionResult = hitBlockState.useItemOn(stack, level, player, interactionHand, blockHitResult);
                 player.getAbilities().instabuild = previousInstabuildValue;
                 player.setItemInHand(interactionHand, itemstack);
                 if (interactionResult.consumesAction()) {
-                    return new InteractionResultHolder<>(interactionResult.result(), BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack, serverLevel, player, true), interactionHand, true));
+                    return InteractionResult.SUCCESS.heldItemTransformedTo(BucketLibUtil.createEmptyResult(itemstack, player, BucketLibUtil.removeBlock(itemstack, serverLevel, player, true), interactionHand, true));
                 }
             }
         }
-        return InteractionResultHolder.pass(itemstack);
+        return InteractionResult.PASS;
     }
 
 }

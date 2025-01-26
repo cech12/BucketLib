@@ -8,7 +8,7 @@ import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
-import net.minecraft.core.HolderSet;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -16,8 +16,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.material.Fluids;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class EntityIngredient implements CustomIngredient {
 
     protected final EntityType<?> entityType;
     protected final TagKey<EntityType<?>> tag;
-    private List<ItemStack> matchingStacks;
+    private List<Holder<Item>> matchingStacks;
 
     private EntityIngredient(EntityType<?> entityType, TagKey<EntityType<?>> tag) {
         this.entityType = entityType;
@@ -37,7 +37,7 @@ public class EntityIngredient implements CustomIngredient {
     }
 
     public EntityIngredient(Optional<ResourceLocation> blockOptional, Optional<TagKey<EntityType<?>>> tagOptional) {
-        this(blockOptional.map(BuiltInRegistries.ENTITY_TYPE::get).orElse(null), tagOptional.orElse(null));
+        this(blockOptional.map(BuiltInRegistries.ENTITY_TYPE::get).filter(Optional::isPresent).map(reference -> reference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
     public EntityIngredient(EntityType<?> entityType) {
@@ -73,34 +73,33 @@ public class EntityIngredient implements CustomIngredient {
     }
 
     @Override
-    public List<ItemStack> getMatchingStacks() {
+    public List<Holder<Item>> getMatchingItems() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
             List<EntityType<?>> entityTypes = new ArrayList<>();
-            Optional<HolderSet.Named<EntityType<?>>> entityTag = Optional.empty();
             if (this.tag != null) {
-                entityTag = BuiltInRegistries.ENTITY_TYPE.getTag(this.tag);
-            }
-            if (entityTag.isPresent()) {
-                entityTag.get().forEach(fluid -> entityTypes.add(fluid.value()));
+                BuiltInRegistries.ENTITY_TYPE.getTagOrEmpty(this.tag).forEach(fluid -> entityTypes.add(fluid.value()));
             } else if (this.entityType != null) {
                 entityTypes.add(this.entityType);
             }
             List<RegistryUtil.BucketEntity> bucketEntities = RegistryUtil.getBucketEntities().stream().filter(bucketEntity -> entityTypes.contains(bucketEntity.entityType())).toList();
             //vanilla buckets
             for (RegistryUtil.BucketEntity bucketEntity : bucketEntities) {
-                this.matchingStacks.add(new ItemStack(bucketEntity.bucketItem()));
+                this.matchingStacks.add(Holder.direct(bucketEntity.bucketItem()));
             }
             //bucket lib buckets
             for (RegistryUtil.BucketEntity bucketEntity : bucketEntities) {
                 BucketLibMod.getRegisteredBuckets().forEach(bucket -> {
                     if (bucket.canHoldFluid(bucketEntity.fluid()) && bucket.canHoldEntity(bucketEntity.entityType())) {
+                        /*
                         ItemStack filledBucket = new ItemStack(bucket);
                         if (bucketEntity.fluid() != Fluids.EMPTY) {
                             filledBucket = BucketLibUtil.addFluid(filledBucket, bucketEntity.fluid());
                         }
                         filledBucket = BucketLibUtil.addEntityType(filledBucket, bucketEntity.entityType());
                         this.matchingStacks.add(filledBucket);
+                         */
+                        this.matchingStacks.add(Holder.direct(bucket));
                     }
                 });
             }
@@ -142,7 +141,7 @@ public class EntityIngredient implements CustomIngredient {
         }
 
         @Override
-        public MapCodec<EntityIngredient> getCodec(boolean allowEmpty) {
+        public MapCodec<EntityIngredient> getCodec() {
             return CODEC;
         }
 
@@ -162,7 +161,11 @@ public class EntityIngredient implements CustomIngredient {
             if (entity.isEmpty()) {
                 throw new IllegalArgumentException("Cannot create a entity ingredient with no entity or tag.");
             }
-            return new EntityIngredient(BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(entity)));
+            Optional<Holder.Reference<EntityType<?>>> entityTypeOptional = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(entity));
+            if (entityTypeOptional.isEmpty()) {
+                throw new IllegalArgumentException("Entity type resource location \"" + entity + " \" could not be found.");
+            }
+            return new EntityIngredient(entityTypeOptional.get().value());
         }
 
         private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull EntityIngredient ingredient) {

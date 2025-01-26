@@ -1,7 +1,7 @@
 package de.cech12.bucketlib.client.model;
 
+import net.minecraft.client.renderer.block.model.BakedOverrides;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -17,13 +17,13 @@ public class UniversalBucketBakedModel implements BakedModel {
 
     private final List<BakedQuad> bakedQuads;
     private final ItemTransforms itemTransforms;
-    private final ItemOverrides itemOverrides;
+    private final BakedOverrides overrides;
     private final TextureAtlasSprite particleSprite;
 
-    public UniversalBucketBakedModel(List<BakedQuad> bakedQuads, ItemTransforms itemTransforms, ItemOverrides itemOverrides, TextureAtlasSprite particleSprite) {
+    public UniversalBucketBakedModel(List<BakedQuad> bakedQuads, ItemTransforms itemTransforms, BakedOverrides overrides, TextureAtlasSprite particleSprite) {
         this.bakedQuads = bakedQuads;
         this.itemTransforms = itemTransforms;
-        this.itemOverrides = itemOverrides;
+        this.overrides = overrides;
         this.particleSprite = particleSprite;
     }
 
@@ -67,8 +67,8 @@ public class UniversalBucketBakedModel implements BakedModel {
 
     @Nonnull
     @Override
-    public ItemOverrides getOverrides() {
-        return this.itemOverrides;
+    public BakedOverrides overrides() {
+        return overrides;
     }
 
 }

@@ -5,10 +5,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
-import net.minecraft.core.HolderSet;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
@@ -24,7 +25,7 @@ public class BlockIngredient implements ICustomIngredient {
 
     protected final Block block;
     protected final TagKey<Block> tag;
-    private ItemStack[] matchingStacks;
+    private Holder<Item>[] matchingStacks;
 
     private BlockIngredient(Block block, TagKey<Block> tag) {
         this.block = block;
@@ -32,7 +33,7 @@ public class BlockIngredient implements ICustomIngredient {
     }
 
     public BlockIngredient(Optional<ResourceLocation> blockOptional, Optional<TagKey<Block>> tagOptional) {
-        this(blockOptional.map(BuiltInRegistries.BLOCK::get).orElse(null), tagOptional.orElse(null));
+        this(blockOptional.map(BuiltInRegistries.BLOCK::get).filter(Optional::isPresent).map(itemReference -> itemReference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
     public BlockIngredient(Block block) {
@@ -69,33 +70,30 @@ public class BlockIngredient implements ICustomIngredient {
 
     @Override
     @Nonnull
-    public Stream<ItemStack> getItems() {
+    public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
-            ArrayList<ItemStack> stacks = new ArrayList<>();
+            ArrayList<Holder<Item>> stacks = new ArrayList<>();
             List<Block> blocks = new ArrayList<>();
-            Optional<HolderSet.Named<Block>> blockTag = Optional.empty();
             if (this.tag != null) {
-                blockTag = BuiltInRegistries.BLOCK.getTag(this.tag);
-            }
-            if (blockTag.isPresent()) {
-                blockTag.get().forEach(block -> blocks.add(block.value()));
+                BuiltInRegistries.BLOCK.getTagOrEmpty(this.tag).forEach(block -> blocks.add(block.value()));
             } else if (this.block != null) {
                 blocks.add(this.block);
             }
             List<RegistryUtil.BucketBlock> bucketBlocks = RegistryUtil.getBucketBlocks().stream().filter(bucketBlock -> blocks.contains(bucketBlock.block())).toList();
             //vanilla buckets
             for (RegistryUtil.BucketBlock bucketBlock : bucketBlocks) {
-                stacks.add(new ItemStack(bucketBlock.bucketItem()));
+                stacks.add(Holder.direct(bucketBlock.bucketItem()));
             }
             //bucket lib buckets
             for (RegistryUtil.BucketBlock bucketBlock : bucketBlocks) {
                 BucketLibMod.getRegisteredBuckets().forEach(bucket -> {
                     if (bucket.canHoldBlock(bucketBlock.block())) {
-                        stacks.add(BucketLibUtil.addBlock(new ItemStack(bucket), bucketBlock.block()));
+                        //stacks.add(BucketLibUtil.addBlock(new ItemStack(bucket), bucketBlock.block()));
+                        stacks.add(Holder.direct(bucket));
                     }
                 });
             }
-            this.matchingStacks = stacks.toArray(new ItemStack[0]);
+            this.matchingStacks = stacks.toArray(new Holder[0]);
         }
         return Stream.of(this.matchingStacks);
     }

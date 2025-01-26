@@ -25,7 +25,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -40,7 +39,7 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
     private final EntityType<?> entityType;
 
     public BucketFillingShapelessRecipe(String group, CraftingBookCategory category, NonNullList<Ingredient> ingredients, BucketFillingType fillingType, Optional<Fluid> fluid, Optional<Block> block, Optional<EntityType<?>> entityType) {
-        super(group, category, getAssembledBucket(fillingType, fluid.orElse(null), block.orElse(null), entityType.orElse(null), ingredients.stream().map(ingredient -> Arrays.stream(ingredient.getItems()).toList()).flatMap(List::stream).toList()), ingredients);
+        super(group, category, getAssembledBucket(fillingType, fluid.orElse(null), block.orElse(null), entityType.orElse(null), ingredients.stream().map(ingredient -> ingredient.items().stream().map(itemHolder -> new ItemStack(itemHolder.value())).toList()).flatMap(List::stream).toList()), ingredients);
         this.category = category;
         this.ingredients = ingredients;
         this.fillingType = fillingType;
@@ -107,8 +106,8 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
 
     @Override
     @Nonnull
-    public RecipeSerializer<?> getSerializer() {
-        return Serializer.INSTANCE;
+    public RecipeSerializer<ShapelessRecipe> getSerializer() {
+        return (RecipeSerializer<ShapelessRecipe>) (Object) Serializer.INSTANCE;
     }
 
     public static class Serializer implements RecipeSerializer<BucketFillingShapelessRecipe> {
@@ -117,15 +116,15 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
 
         private static final MapCodec<BucketFillingShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec((record) ->
                 record.group(
-                        Codec.STRING.optionalFieldOf("group", "").forGetter(ShapelessRecipe::getGroup),
+                        Codec.STRING.optionalFieldOf("group", "").forGetter(ShapelessRecipe::group),
                         CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter((recipe) -> recipe.category),
-                        Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients").flatXmap(
+                        Ingredient.CODEC.listOf().fieldOf("ingredients").flatXmap(
                                 ($$0x) -> {
-                                    Ingredient[] $$1 = $$0x.stream().filter(($$0xx) -> !$$0xx.isEmpty()).toArray(Ingredient[]::new);
+                                    Ingredient[] $$1 = $$0x.toArray(Ingredient[]::new);
                                     if ($$1.length == 0) {
                                         return DataResult.error(() -> "No ingredients for shapeless recipe");
                                     } else {
-                                        return $$1.length > 9 ? DataResult.error(() -> "Too many ingredients for shapeless recipe") : DataResult.success(NonNullList.of(Ingredient.EMPTY, $$1));
+                                        return $$1.length > 9 ? DataResult.error(() -> "Too many ingredients for shapeless recipe") : DataResult.success(NonNullList.of(Ingredient.of(), $$1));
                                     }}, DataResult::success).forGetter((recipe) -> recipe.ingredients),
                         BucketFillingType.CODEC.fieldOf("filling_type").forGetter((recipe) -> recipe.fillingType),
                         RegistryUtil.FLUID_CODEC.optionalFieldOf("fluid").forGetter(recipe -> Optional.of(recipe.fluid)),
@@ -157,7 +156,7 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
             String group = buf.readUtf();
             CraftingBookCategory category = buf.readEnum(CraftingBookCategory.class);
             int i = buf.readVarInt();
-            NonNullList<Ingredient> ingredients = NonNullList.withSize(i, Ingredient.EMPTY);
+            NonNullList<Ingredient> ingredients = NonNullList.withSize(i, Ingredient.of());
             ingredients.replaceAll(ignored -> Ingredient.CONTENTS_STREAM_CODEC.decode(buf));
             BucketFillingType fillingType = BucketFillingType.valueOf(buf.readUtf());
             Optional<Fluid> fluid = Optional.empty();
@@ -178,7 +177,7 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
         }
 
         private static void toNetwork(RegistryFriendlyByteBuf buf, BucketFillingShapelessRecipe recipe) {
-            buf.writeUtf(recipe.getGroup());
+            buf.writeUtf(recipe.group());
             buf.writeEnum(recipe.category);
             buf.writeVarInt(recipe.ingredients.size());
             for (Ingredient ingredient : recipe.ingredients) {

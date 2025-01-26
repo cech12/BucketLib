@@ -9,6 +9,7 @@ import com.mojang.serialization.Encoder;
 import de.cech12.bucketlib.mixin.MobBucketItemAccessor;
 import de.cech12.bucketlib.platform.Services;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.item.Item;
@@ -76,7 +77,7 @@ public class RegistryUtil {
             }
             if (item instanceof MobBucketItem bucket) {
                 EntityType<?> entityType = ((MobBucketItemAccessor) bucket).bucketlib_getEntityType();
-                if (entityType != null && level != null && entityType.create(level) instanceof Bucketable) {
+                if (entityType != null && level != null && entityType.create(level, EntitySpawnReason.LOAD) instanceof Bucketable) {
                     if (bucketEntities.stream().noneMatch(bucketEntity -> bucketEntity.entityType == entityType)) {
                         bucketEntities.add(new BucketEntity(entityType, Services.BUCKET.getFluidOfBucketItem(bucket), bucket));
                     }

@@ -3,6 +3,7 @@ package de.cech12.bucketlib.platform;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.platform.services.IRegistryHelper;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -24,7 +25,7 @@ public class FabricRegistryHelper implements IRegistryHelper {
 
     @Override
     public EntityType<?> getEntityType(ResourceLocation location) {
-        return BuiltInRegistries.ENTITY_TYPE.get(location);
+        return BuiltInRegistries.ENTITY_TYPE.get(location).map(Holder.Reference::value).orElse(null);
     }
 
     @Override
@@ -34,7 +35,7 @@ public class FabricRegistryHelper implements IRegistryHelper {
 
     @Override
     public Block getBlock(ResourceLocation location) {
-        return BuiltInRegistries.BLOCK.get(location);
+        return BuiltInRegistries.BLOCK.get(location).map(Holder.Reference::value).orElse(null);
     }
 
     @Override
@@ -54,7 +55,7 @@ public class FabricRegistryHelper implements IRegistryHelper {
 
     @Override
     public Fluid getFluid(ResourceLocation location) {
-        return BuiltInRegistries.FLUID.get(location);
+        return BuiltInRegistries.FLUID.get(location).map(Holder.Reference::value).orElse(null);
     }
 
     @Override
