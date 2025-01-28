@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.21.3-4.2.0.3] - 2025-01-28
+### Fixed
+- Minecraft did not load correctly with a registered bucket. (Fabric)
+- No bucket remained in crafting table after using a filled bucket in a crafting recipe. (NeoForge)
+- There was no sound while drinking a milk bucket.
+
 ## [1.21.3-4.2.0.2] - 2025-01-28
 ### Fixed
 - added ResourceKey parameter to constructor of UniversalBucketItem to be compatible with MC 1.21.3

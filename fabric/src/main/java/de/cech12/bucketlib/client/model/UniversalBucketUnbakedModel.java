@@ -107,7 +107,6 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
     @Nonnull
     @Override
     public BlockModel getRootModel() {
-        //resolveDependencies(BucketLibClientMod::getModel);
         if (this.parent == null) {
             return this;
         }
@@ -122,8 +121,9 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
     @Override
     public BakedModel bake(@Nonnull ModelBaker modelBaker, @Nonnull Function<Material, TextureAtlasSprite> spriteGetter, @Nonnull ModelState modelState) {
         //resolve parents to use their defined materials, too
-        resolveDependencies(BucketLibClientMod::getModel);
-
+        if (this.parent == null) {
+            resolveDependencies(BucketLibClientMod::getModel);
+        }
         Material particleLocation = this.getMaterial("particle");
         TextureAtlasSprite particleSprite = null;
         if (isValid(particleLocation)) {

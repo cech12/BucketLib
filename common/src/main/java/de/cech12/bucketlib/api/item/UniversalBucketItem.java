@@ -34,6 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -383,15 +384,22 @@ public class UniversalBucketItem extends Item {
         return super.getUseAnimation(itemStack);
     }
 
-    //@Override //overrides the (neo)forge implementation
-    public boolean hasCraftingRemainingItem(ItemStack stack) {
+    @Override
+    public void onUseTick(@Nonnull Level level, @Nonnull LivingEntity livingEntity, @Nonnull ItemStack itemStack, int useRemainingTicks) {
+        if (BucketLibUtil.containsMilk(itemStack) && Consumables.MILK_BUCKET.shouldEmitParticlesAndSounds(useRemainingTicks)) {
+            Consumables.MILK_BUCKET.emitParticlesAndSounds(level.getRandom(), livingEntity, itemStack, 5);
+        }
+        super.onUseTick(level, livingEntity, itemStack, useRemainingTicks);
+    }
+
+    public boolean hasCraftingRemainder(ItemStack stack) {
         //for using a filled bucket as fuel or in crafting recipes, an empty bucket should remain
         return !BucketLibUtil.isEmpty(stack) && !this.isCracked(stack);
     }
 
     //@Override //overrides the (neo)forge implementation
-    public ItemStack getCraftingRemainingItem(ItemStack itemStack) {
-        if (!hasCraftingRemainingItem(itemStack)) {
+    public ItemStack getCraftingRemainder(ItemStack itemStack) {
+        if (!hasCraftingRemainder(itemStack)) {
             return ItemStack.EMPTY;
         }
         if (BucketLibUtil.isAffectedByInfinityEnchantment(itemStack)) {
@@ -415,7 +423,7 @@ public class UniversalBucketItem extends Item {
 
     //@Override //overrides the fabric implementation
     public ItemStack getRecipeRemainder(ItemStack itemStack) {
-        return getCraftingRemainingItem(itemStack);
+        return getCraftingRemainder(itemStack);
     }
 
     private boolean getBooleanProperty(Supplier<Boolean> config, boolean defaultValue) {
