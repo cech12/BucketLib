@@ -3,6 +3,7 @@ package de.cech12.bucketlib;
 import de.cech12.bucketlib.api.BucketLibApi;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
@@ -32,22 +33,26 @@ public class BucketLibTestMod {
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, MOD_ID);
 
-    public static final DeferredHolder<Item, ?> TEST_BUCKET = ITEMS.register("test_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties()));
-    public static final DeferredHolder<Item, ?> TEMPERATURE_BUCKET = ITEMS.register("temperature_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().maxTemperature(1000)));
-    public static final DeferredHolder<Item, ?> WATER_ALLOWING_BUCKET = ITEMS.register("water_allowing_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().allowedFluids(Collections.singletonList(Fluids.WATER))));
-    public static final DeferredHolder<Item, ?> WATER_ALLOWING_TAG_BUCKET = ITEMS.register("water_allowing_tag_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().allowedFluids(WATER_TAG)));
-    public static final DeferredHolder<Item, ?> WATER_DENYING_BUCKET = ITEMS.register("water_denying_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().deniedFluids(Collections.singletonList(Fluids.WATER))));
-    public static final DeferredHolder<Item, ?> WATER_DENYING_TAG_BUCKET = ITEMS.register("water_denying_tag_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().deniedFluids(WATER_TAG)));
-    public static final DeferredHolder<Item, ?> CRACKING_BUCKET = ITEMS.register("cracking_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().upperCrackingTemperature(1000)));
-    public static final DeferredHolder<Item, ?> COLORED_BUCKET = ITEMS.register("colored_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().dyeable(255, 0 ,0)));
-    public static final DeferredHolder<Item, ?> ANTI_MILK_BUCKET = ITEMS.register("anti_milk_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().disableMilking()));
-    public static final DeferredHolder<Item, ?> NO_ENTITIES_BUCKET = ITEMS.register("no_entities_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().disableEntityObtaining()));
-    public static final DeferredHolder<Item, ?> ANTI_SALMON_BUCKET = ITEMS.register("anti_salmon_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().deniedEntities(Collections.singletonList(EntityType.SALMON))));
-    public static final DeferredHolder<Item, ?> ONLY_PUFFER_BUCKET = ITEMS.register("only_puffer_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().allowedEntities(Collections.singletonList(EntityType.PUFFERFISH))));
-    public static final DeferredHolder<Item, ?> NO_BLOCKS_BUCKET = ITEMS.register("no_blocks_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().disableBlockObtaining()));
-    public static final DeferredHolder<Item, ?> DURABILITY_BUCKET = ITEMS.register("durability_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().durability(5)));
-    public static final DeferredHolder<Item, ?> BURNING_BUCKET = ITEMS.register("burning_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().durability(20).burningTemperature(1000).burningBlocks(Collections.singletonList(Blocks.POWDER_SNOW))));
-    public static final DeferredHolder<Item, ?> FREEZING_BUCKET = ITEMS.register("freezing_bucket", () -> new UniversalBucketItem(new UniversalBucketItem.Properties().durability(20).freezingTemperature(500).freezingBlocks(Collections.singletonList(Blocks.POWDER_SNOW))));
+    public static final DeferredHolder<Item, ?> TEST_BUCKET = registerBucket("test_bucket", new UniversalBucketItem.Properties());
+    public static final DeferredHolder<Item, ?> TEMPERATURE_BUCKET = registerBucket("temperature_bucket", new UniversalBucketItem.Properties().maxTemperature(1000));
+    public static final DeferredHolder<Item, ?> WATER_ALLOWING_BUCKET = registerBucket("water_allowing_bucket", new UniversalBucketItem.Properties().allowedFluids(Collections.singletonList(Fluids.WATER)));
+    public static final DeferredHolder<Item, ?> WATER_ALLOWING_TAG_BUCKET = registerBucket("water_allowing_tag_bucket", new UniversalBucketItem.Properties().allowedFluids(WATER_TAG));
+    public static final DeferredHolder<Item, ?> WATER_DENYING_BUCKET = registerBucket("water_denying_bucket", new UniversalBucketItem.Properties().deniedFluids(Collections.singletonList(Fluids.WATER)));
+    public static final DeferredHolder<Item, ?> WATER_DENYING_TAG_BUCKET = registerBucket("water_denying_tag_bucket", new UniversalBucketItem.Properties().deniedFluids(WATER_TAG));
+    public static final DeferredHolder<Item, ?> CRACKING_BUCKET = registerBucket("cracking_bucket", new UniversalBucketItem.Properties().upperCrackingTemperature(1000));
+    public static final DeferredHolder<Item, ?> COLORED_BUCKET = registerBucket("colored_bucket", new UniversalBucketItem.Properties().dyeable(255, 0 ,0));
+    public static final DeferredHolder<Item, ?> ANTI_MILK_BUCKET = registerBucket("anti_milk_bucket", new UniversalBucketItem.Properties().disableMilking());
+    public static final DeferredHolder<Item, ?> NO_ENTITIES_BUCKET = registerBucket("no_entities_bucket", new UniversalBucketItem.Properties().disableEntityObtaining());
+    public static final DeferredHolder<Item, ?> ANTI_SALMON_BUCKET = registerBucket("anti_salmon_bucket", new UniversalBucketItem.Properties().deniedEntities(Collections.singletonList(EntityType.SALMON)));
+    public static final DeferredHolder<Item, ?> ONLY_PUFFER_BUCKET = registerBucket("only_puffer_bucket", new UniversalBucketItem.Properties().allowedEntities(Collections.singletonList(EntityType.PUFFERFISH)));
+    public static final DeferredHolder<Item, ?> NO_BLOCKS_BUCKET = registerBucket("no_blocks_bucket", new UniversalBucketItem.Properties().disableBlockObtaining());
+    public static final DeferredHolder<Item, ?> DURABILITY_BUCKET = registerBucket("durability_bucket", new UniversalBucketItem.Properties().durability(5));
+    public static final DeferredHolder<Item, ?> BURNING_BUCKET = registerBucket("burning_bucket", new UniversalBucketItem.Properties().durability(20).burningTemperature(1000).burningBlocks(Collections.singletonList(Blocks.POWDER_SNOW)));
+    public static final DeferredHolder<Item, ?> FREEZING_BUCKET = registerBucket("freezing_bucket", new UniversalBucketItem.Properties().durability(20).freezingTemperature(500).freezingBlocks(Collections.singletonList(Blocks.POWDER_SNOW)));
+
+    private static DeferredHolder<Item, ?> registerBucket(String name, UniversalBucketItem.Properties properties) {
+        return ITEMS.register(name, () -> new UniversalBucketItem(ResourceKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.fromNamespaceAndPath(MOD_ID, name)), properties));
+    }
 
     public BucketLibTestMod(IEventBus modEventBus) {
         ITEMS.register(modEventBus);

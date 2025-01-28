@@ -6,6 +6,7 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
@@ -46,22 +47,26 @@ public class BucketLibTestMod implements ModInitializer {
     );
 
     static {
-        Registry.register(BuiltInRegistries.ITEM, TEST_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties()));
-        Registry.register(BuiltInRegistries.ITEM, TEMPERATURE_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().maxTemperature(1000)));
-        Registry.register(BuiltInRegistries.ITEM, WATER_ALLOWING_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().allowedFluids(Collections.singletonList(Fluids.WATER))));
-        Registry.register(BuiltInRegistries.ITEM, WATER_ALLOWING_TAG_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().allowedFluids(WATER_TAG)));
-        Registry.register(BuiltInRegistries.ITEM, WATER_DENYING_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().deniedFluids(Collections.singletonList(Fluids.WATER))));
-        Registry.register(BuiltInRegistries.ITEM, WATER_DENYING_TAG_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().deniedFluids(WATER_TAG)));
-        Registry.register(BuiltInRegistries.ITEM, CRACKING_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().upperCrackingTemperature(1000)));
-        Registry.register(BuiltInRegistries.ITEM, COLORED_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().dyeable(255, 0 ,0)));
-        Registry.register(BuiltInRegistries.ITEM, ANTI_MILK_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().disableMilking()));
-        Registry.register(BuiltInRegistries.ITEM, NO_ENTITIES_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().disableEntityObtaining()));
-        Registry.register(BuiltInRegistries.ITEM, ANTI_SALMON_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().deniedEntities(Collections.singletonList(EntityType.SALMON))));
-        Registry.register(BuiltInRegistries.ITEM, ONLY_PUFFER_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().allowedEntities(Collections.singletonList(EntityType.PUFFERFISH))));
-        Registry.register(BuiltInRegistries.ITEM, NO_BLOCKS_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().disableBlockObtaining()));
-        Registry.register(BuiltInRegistries.ITEM, DURABILITY_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().durability(5)));
-        Registry.register(BuiltInRegistries.ITEM, BURNING_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().durability(20).burningTemperature(1000).burningBlocks(Collections.singletonList(Blocks.POWDER_SNOW))));
-        Registry.register(BuiltInRegistries.ITEM, FREEZING_BUCKET, new UniversalBucketItem(new UniversalBucketItem.Properties().durability(20).freezingTemperature(500).freezingBlocks(Collections.singletonList(Blocks.POWDER_SNOW))));
+        registerBucket(TEST_BUCKET, new UniversalBucketItem.Properties());
+        registerBucket(TEMPERATURE_BUCKET, new UniversalBucketItem.Properties().maxTemperature(1000));
+        registerBucket(WATER_ALLOWING_BUCKET, new UniversalBucketItem.Properties().allowedFluids(Collections.singletonList(Fluids.WATER)));
+        registerBucket(WATER_ALLOWING_TAG_BUCKET, new UniversalBucketItem.Properties().allowedFluids(WATER_TAG));
+        registerBucket(WATER_DENYING_BUCKET, new UniversalBucketItem.Properties().deniedFluids(Collections.singletonList(Fluids.WATER)));
+        registerBucket(WATER_DENYING_TAG_BUCKET, new UniversalBucketItem.Properties().deniedFluids(WATER_TAG));
+        registerBucket(CRACKING_BUCKET, new UniversalBucketItem.Properties().upperCrackingTemperature(1000));
+        registerBucket(COLORED_BUCKET, new UniversalBucketItem.Properties().dyeable(255, 0 ,0));
+        registerBucket(ANTI_MILK_BUCKET, new UniversalBucketItem.Properties().disableMilking());
+        registerBucket(NO_ENTITIES_BUCKET, new UniversalBucketItem.Properties().disableEntityObtaining());
+        registerBucket(ANTI_SALMON_BUCKET, new UniversalBucketItem.Properties().deniedEntities(Collections.singletonList(EntityType.SALMON)));
+        registerBucket(ONLY_PUFFER_BUCKET, new UniversalBucketItem.Properties().allowedEntities(Collections.singletonList(EntityType.PUFFERFISH)));
+        registerBucket(NO_BLOCKS_BUCKET, new UniversalBucketItem.Properties().disableBlockObtaining());
+        registerBucket(DURABILITY_BUCKET, new UniversalBucketItem.Properties().durability(5));
+        registerBucket(BURNING_BUCKET, new UniversalBucketItem.Properties().durability(20).burningTemperature(1000).burningBlocks(Collections.singletonList(Blocks.POWDER_SNOW)));
+        registerBucket(FREEZING_BUCKET, new UniversalBucketItem.Properties().durability(20).freezingTemperature(500).freezingBlocks(Collections.singletonList(Blocks.POWDER_SNOW)));
+    }
+
+    private static void registerBucket(ResourceLocation location, UniversalBucketItem.Properties properties) {
+        Registry.register(BuiltInRegistries.ITEM, location, new UniversalBucketItem(ResourceKey.create(BuiltInRegistries.ITEM.key(), location), properties));
     }
 
     @Override
