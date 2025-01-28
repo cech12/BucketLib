@@ -57,8 +57,8 @@ public class UniversalBucketItem extends Item {
 
     private final Properties properties;
 
-    public UniversalBucketItem(Properties properties) {
-        super((new Item.Properties().stacksTo(1)));
+    public UniversalBucketItem(ResourceKey<Item> id, Properties properties) {
+        super((new Item.Properties().setId(id).stacksTo(1)));
         this.properties = properties;
     }
 
