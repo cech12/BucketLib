@@ -24,6 +24,7 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
+
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +64,11 @@ public class FluidIngredient implements CustomIngredient {
     @Override
     public boolean test(ItemStack itemStack) {
         if (itemStack == null || itemStack.isEmpty()) {
+            return false;
+        }
+        ResourceLocation location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+        //Mekansim tanks are not compatible: https://github.com/cech12/BucketLib/issues/55 | https://github.com/mekanism/Mekanism/issues/8335
+        if ("mekanism".equals(location.getNamespace()) && itemStack.getRecipeRemainder().isEmpty()) {
             return false;
         }
         ItemStack container = itemStack.copyWithCount(1);

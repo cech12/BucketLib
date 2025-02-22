@@ -6,13 +6,22 @@ import com.mojang.serialization.Encoder;
 import com.mojang.serialization.MapCodec;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.util.BucketLibUtil;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.crafting.IngredientType;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class MilkIngredient extends Ingredient {
@@ -30,6 +39,20 @@ public class MilkIngredient extends Ingredient {
         }
         if (itemStack.getItem() == Items.MILK_BUCKET) {
             return true;
+        }
+        ResourceLocation location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+        //Mekansim tanks are not compatible: https://github.com/cech12/BucketLib/issues/55 | https://github.com/mekanism/Mekanism/issues/8335
+        if ("mekanism".equals(location.getNamespace()) && itemStack.getCraftingRemainingItem().isEmpty()) {
+            return false;
+        }
+        if (NeoForgeMod.MILK.isBound()) {
+            ItemStack container = ItemHandlerHelper.copyStackWithSize(itemStack, 1);
+            Optional<FluidStack> drainedFluidOptional = FluidUtil.getFluidHandler(container)
+                    .map(fluidHandler -> fluidHandler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE));
+            if (drainedFluidOptional.isPresent() && !drainedFluidOptional.get().isEmpty()) {
+                FluidStack drainedFluid = drainedFluidOptional.get();
+                return drainedFluid.getFluid() == NeoForgeMod.MILK.get() && drainedFluid.getAmount() == FluidType.BUCKET_VOLUME;
+            }
         }
         return BucketLibUtil.containsMilk(itemStack.copy());
     }

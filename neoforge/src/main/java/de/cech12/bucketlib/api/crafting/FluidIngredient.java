@@ -19,6 +19,7 @@ import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
+
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,11 @@ public class FluidIngredient extends Ingredient {
     @Override
     public boolean test(ItemStack itemStack) {
         if (itemStack == null || itemStack.isEmpty()) {
+            return false;
+        }
+        ResourceLocation location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+        //Mekansim tanks are not compatible: https://github.com/cech12/BucketLib/issues/55 | https://github.com/mekanism/Mekanism/issues/8335
+        if ("mekanism".equals(location.getNamespace()) && itemStack.getCraftingRemainingItem().isEmpty()) {
             return false;
         }
         ItemStack container = ItemHandlerHelper.copyStackWithSize(itemStack, 1);
