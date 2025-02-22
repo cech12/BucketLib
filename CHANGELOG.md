@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.20.1-2.3.5.3] - 2025-02-22
+### Fixed
+- Mekanism tanks were destroyed when used as bucketlib ingredient > they cannot be used as ingredient any longer (thanks to PiotrO15 for the report) #55
+
 ## [1.20.1-2.3.5.2] - 2025-01-21
 ### Fixed
 - Reflection errors when another mod messes around with the MobBucketItem class (thanks to vivagabe for the report) #53
