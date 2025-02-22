@@ -36,7 +36,7 @@ public class MilkIngredient implements CustomIngredient {
         }
         ResourceLocation location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
         //Mekansim tanks are not compatible: https://github.com/cech12/BucketLib/issues/55 | https://github.com/mekanism/Mekanism/issues/8335
-        if ("mekanism".equals(location.getNamespace()) && itemStack.getItem().getCraftingRemainingItem() != null) {
+        if ("mekanism".equals(location.getNamespace()) && itemStack.getRecipeRemainder().isEmpty()) {
             return false;
         }
         return BucketLibUtil.containsMilk(itemStack.copy());
