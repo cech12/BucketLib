@@ -8,6 +8,7 @@ import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -32,6 +33,11 @@ public class MilkIngredient implements CustomIngredient {
         }
         if (itemStack.getItem() == Items.MILK_BUCKET) {
             return true;
+        }
+        ResourceLocation location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+        //Mekansim tanks are not compatible: https://github.com/cech12/BucketLib/issues/55 | https://github.com/mekanism/Mekanism/issues/8335
+        if ("mekanism".equals(location.getNamespace()) && itemStack.getItem().getCraftingRemainingItem() != null) {
+            return false;
         }
         return BucketLibUtil.containsMilk(itemStack.copy());
     }

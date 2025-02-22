@@ -67,6 +67,11 @@ public class FluidIngredient implements CustomIngredient {
         if (itemStack == null || itemStack.isEmpty()) {
             return false;
         }
+        ResourceLocation location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+        //Mekansim tanks are not compatible: https://github.com/cech12/BucketLib/issues/55 | https://github.com/mekanism/Mekanism/issues/8335
+        if ("mekanism".equals(location.getNamespace()) && itemStack.getItem().getCraftingRemainingItem() != null) {
+            return false;
+        }
         ItemStack container = itemStack.copyWithCount(1);
         Storage<FluidVariant> storage = ContainerItemContext.withConstant(container).find(FluidStorage.ITEM);
         StorageView<FluidVariant> fluidView = null;
