@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.21.3-4.2.0.5] - 2025-02-22
+### Fixed
+- Mekanism tanks were destroyed when used as bucketlib ingredient > they cannot be used as ingredient any longer (thanks to PiotrO15 for the report) #55
+
 ## [1.21.3-4.2.0.4] - 2025-01-28
 ### Fixed
 - Dyeing a filled bucket duplicated it
