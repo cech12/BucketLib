@@ -148,7 +148,7 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
             String group = buf.readUtf();
             CraftingBookCategory category = buf.readEnum(CraftingBookCategory.class);
             ShapedRecipePattern pattern = ShapedRecipePattern.STREAM_CODEC.decode(buf);
-            BucketFillingType fillingType = BucketFillingType.valueOf(buf.readUtf());
+            BucketFillingType fillingType = buf.readEnum(BucketFillingType.class);
             Optional<Fluid> fluid = Optional.empty();
             Optional<Block> block = Optional.empty();
             Optional<EntityType<?>> entityType = Optional.empty();
