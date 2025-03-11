@@ -159,7 +159,7 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
             int i = buf.readVarInt();
             NonNullList<Ingredient> ingredients = NonNullList.withSize(i, Ingredient.EMPTY);
             ingredients.replaceAll(ignored -> Ingredient.CONTENTS_STREAM_CODEC.decode(buf));
-            BucketFillingType fillingType = BucketFillingType.valueOf(buf.readUtf());
+            BucketFillingType fillingType = buf.readEnum(BucketFillingType.class);
             Optional<Fluid> fluid = Optional.empty();
             Optional<Block> block = Optional.empty();
             Optional<EntityType<?>> entityType = Optional.empty();
