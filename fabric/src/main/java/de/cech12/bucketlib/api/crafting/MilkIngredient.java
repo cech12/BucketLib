@@ -94,7 +94,7 @@ public class MilkIngredient implements CustomIngredient {
 
         @Override
         public StreamCodec<RegistryFriendlyByteBuf, MilkIngredient> getPacketCodec() {
-            return null;
+            return PACKET_CODEC;
         }
 
         private static MilkIngredient read(RegistryFriendlyByteBuf buffer) {
