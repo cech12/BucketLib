@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Forge Recommended Versioning](https://mcforge.readthedocs.io/en/latest/conventions/versioning/).
 
+## [1.21-4.1.2.3] - 2025-04-05
+### Fixed
+- Milk ingredient was broken in Fabric (thanks to jshipley for the report) #58
+- corrected turtle_soup recipe conditions key (thanks to SiriosDev for the PR) #60
+
 ## [1.21-4.1.2.2] - 2025-03-11
 ### Fixed
 - reading recipe types "bucket_filling_shapeless" and "bucket_filling_shaped" was broken (thanks to FreeFull for the report) #57
