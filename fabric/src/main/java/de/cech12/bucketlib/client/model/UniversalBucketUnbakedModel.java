@@ -126,7 +126,7 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
         }
         Material particleLocation = this.getMaterial("particle");
         TextureAtlasSprite particleSprite = null;
-        if (isValid(particleLocation)) {
+        if (isValid(particleLocation, spriteGetter)) {
             particleSprite = spriteGetter.apply(particleLocation);
         }
 
@@ -135,39 +135,46 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
             if (this.isCracked) {
                 baseLocation = this.getMaterial("crackedLowerBase");
             }
-            if (!isValid(baseLocation)) {
+            if (!isValid(baseLocation, spriteGetter)) {
                 baseLocation = this.getMaterial("lowerBase");
             }
         } else {
             if (this.isCracked) {
                 baseLocation = this.getMaterial("crackedBase");
             }
-            if (!isValid(baseLocation)) {
+            if (!isValid(baseLocation, spriteGetter)) {
                 baseLocation = this.getMaterial("base");
             }
         }
 
         Material otherContentLocation = null;
+        Material fluidLocation = null;
         Material fluidMaskLocation = null;
         if (this.otherContent != null) {
             otherContentLocation = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(this.otherContent));
-        } else if (this.fluid != Fluids.EMPTY) {
+        }
+        if (this.fluid != Fluids.EMPTY) {
+            fluidLocation = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(BuiltInRegistries.FLUID.getKey(this.fluid)));
             if (this.isCracked) {
                 fluidMaskLocation = this.getMaterial("crackedFluidMask");
             }
-            if (!isValid(fluidMaskLocation)) {
+            if (!isValid(fluidMaskLocation, spriteGetter)) {
                 fluidMaskLocation = this.getMaterial("fluidMask");
             }
         }
+        //oversteer fluid texture if available
+        if (otherContent == null && isValid(fluidLocation, spriteGetter)) {
+            otherContentLocation = fluidLocation;
+        }
 
         TextureAtlasSprite baseSprite = null;
-        if (isValid(baseLocation)) {
+        if (isValid(baseLocation, spriteGetter)) {
             baseSprite = spriteGetter.apply(baseLocation);
             if (particleSprite == null)
                 particleSprite = baseSprite;
         }
         TextureAtlasSprite otherContentSprite;
-        if (isValid(otherContentLocation)) {
+        if (isValid(otherContentLocation, spriteGetter)) {
             otherContentSprite = spriteGetter.apply(otherContentLocation);
             if (particleSprite == null)
                 particleSprite = otherContentSprite;
@@ -198,12 +205,12 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
                     GeometryUtils.createUnbakedItemElements(0, "base", baseSprite.contents()),
                     baseSprite, modelState));
         }
-        if (isValid(otherContentLocation)) {
+        if (isValid(otherContentLocation, spriteGetter)) {
             assert otherContentSprite != null;
             quads.addAll(GeometryUtils.bakeElements(this,
                     GeometryUtils.createUnbakedItemElements(-1, "content", otherContentSprite.contents()),
                     otherContentSprite, modelState));
-        } else if (isValid(fluidMaskLocation) && fluid != Fluids.EMPTY) {
+        } else if (isValid(fluidMaskLocation, spriteGetter) && fluid != Fluids.EMPTY) {
             TextureAtlasSprite templateSprite = spriteGetter.apply(fluidMaskLocation);
             quads.addAll(GeometryUtils.bakeElements(this,
                     GeometryUtils.createUnbakedItemMaskElements(1, "fluid", templateSprite.contents()),
@@ -217,8 +224,8 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
         return bakedModel;
     }
 
-    private boolean isValid(Material material) {
-        return material != null && !material.texture().equals(MissingTextureAtlasSprite.getLocation());
+    private boolean isValid(Material material, Function<Material, TextureAtlasSprite> spriteGetter) {
+        return material != null && !MissingTextureAtlasSprite.getLocation().equals(spriteGetter.apply(material).contents().name());
     }
 
     private static final class ContainedFluidOverrideHandler extends BakedOverrides {
