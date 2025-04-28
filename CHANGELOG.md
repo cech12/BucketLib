@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [1.20.6-3.3.2.0] - 2025-04-28
+### Added
+- Possibility to oversteer fluid textures with resource packs (thanks to P1x3L_Cr4ft3R for the idea) #61
+
 ## [1.20.6-3.3.1.3] - 2025-03-11
 ### Fixed
 - reading recipe types "bucket_filling_shapeless" and "bucket_filling_shaped" was broken (thanks to FreeFull for the report) #57

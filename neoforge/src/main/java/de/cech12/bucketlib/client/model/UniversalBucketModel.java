@@ -117,16 +117,23 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         }
 
         Material otherContentLocation = null;
+        Material fluidLocation = null;
         Material fluidMaskLocation = null;
         if (this.otherContent != null) {
             otherContentLocation = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(this.otherContent));
-        } else if (this.fluid != Fluids.EMPTY) {
+        }
+        if (this.fluid != Fluids.EMPTY) {
+            fluidLocation = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(BuiltInRegistries.FLUID.getKey(this.fluid)));
             if (this.isCracked && owner.hasMaterial("crackedFluidMask")) {
                 fluidMaskLocation = owner.getMaterial("crackedFluidMask");
             }
             if (fluidMaskLocation == null && owner.hasMaterial("fluidMask")) {
                 fluidMaskLocation = owner.getMaterial("fluidMask");
             }
+        }
+        //oversteer fluid texture if available
+        if (otherContentLocation == null && fluidLocation != null && !MissingTextureAtlasSprite.getLocation().equals(spriteGetter.apply(fluidLocation).contents().name())) {
+            otherContentLocation = fluidLocation;
         }
 
         TextureAtlasSprite baseSprite = baseLocation != null ? spriteGetter.apply(baseLocation) : null;
