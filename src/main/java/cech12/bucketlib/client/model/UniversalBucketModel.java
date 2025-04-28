@@ -117,10 +117,13 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         }
 
         Material otherContentLocation = null;
+        Material fluidLocation = null;
         Material fluidMaskLocation = null;
         if (this.otherContent != null) {
             otherContentLocation = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(this.otherContent));
-        } else if (this.fluid != Fluids.EMPTY) {
+        }
+        if (this.fluid != Fluids.EMPTY) {
+            fluidLocation = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(ForgeRegistries.FLUIDS.getKey(this.fluid)));
             if (this.isCracked && owner.hasMaterial("crackedFluidMask")) {
                 fluidMaskLocation = owner.getMaterial("crackedFluidMask");
             }
@@ -136,6 +139,13 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
             //if content texture is missing - fallback to pink content texture
             if (MissingTextureAtlasSprite.getLocation().equals(otherContentSprite.contents().name())) {
                 otherContentSprite = spriteGetter.apply(MISSING_LOWER_CONTENT_MATERIAL);
+            }
+        }
+        //oversteer fluid texture if available
+        if (otherContentLocation == null && fluidLocation != null) {
+            TextureAtlasSprite tempFluidSprite = spriteGetter.apply(fluidLocation);
+            if (!MissingTextureAtlasSprite.getLocation().equals(tempFluidSprite.contents().name())) {
+                otherContentSprite = tempFluidSprite;
             }
         }
         TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? spriteGetter.apply(ForgeHooksClient.getBlockMaterial(IClientFluidTypeExtensions.of(fluid).getStillTexture())) : null;
