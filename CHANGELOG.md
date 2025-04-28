@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [1.21-4.1.3.0] - 2025-04-28
+### Added
+- Possibility to oversteer fluid textures with resource packs (thanks to P1x3L_Cr4ft3R for the idea) #61
+
 ## [1.21-4.1.2.3] - 2025-04-05
 ### Fixed
 - Milk ingredient was broken in Fabric (thanks to jshipley for the report) #58
