@@ -37,6 +37,8 @@ import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtension
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.SimpleFluidContent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -129,7 +131,7 @@ public class BucketLibMod {
                 if (layer == 1) {
                     Fluid fluid = Services.FLUID.getContainedFluid(stack);
                     if (fluid != Fluids.EMPTY) {
-                        return IClientFluidTypeExtensions.of(fluid).getTintColor();
+                        return IClientFluidTypeExtensions.of(fluid).getTintColor(new FluidStack(fluid, FluidType.BUCKET_VOLUME));
                     }
                 }
                 return -1;
