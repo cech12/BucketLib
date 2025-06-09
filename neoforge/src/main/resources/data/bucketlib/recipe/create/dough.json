@@ -8,11 +8,9 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
+    "create:wheat_flour",
     {
-      "item": "create:wheat_flour"
-    },
-    {
-      "type": "bucketlib:fluid",
+      "neoforge:ingredient_type": "bucketlib:fluid",
       "fluid": "minecraft:water"
     }
   ],

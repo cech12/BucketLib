@@ -10,21 +10,13 @@
   "group": "mud_ball",
   "ingredients": [
     {
-      "type": "bucketlib:fluid",
+      "neoforge:ingredient_type": "bucketlib:fluid",
       "fluid": "minecraft:water"
     },
-    {
-      "tag": "environmental:convertable_to_mud"
-    },
-    {
-      "tag": "environmental:convertable_to_mud"
-    },
-    {
-      "tag": "environmental:convertable_to_mud"
-    },
-    {
-      "tag": "environmental:convertable_to_mud"
-    }
+    "#environmental:convertable_to_mud",
+    "#environmental:convertable_to_mud",
+    "#environmental:convertable_to_mud",
+    "#environmental:convertable_to_mud"
   ],
   "result": {
     "count": 16,
