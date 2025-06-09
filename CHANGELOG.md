@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Fixed
 - could not craft dough (Create) from BucketLib buckets
 - could not craft Environmental mud balls from dirt with a BucketLib bucket (thanks to Timvh1 for the report)
+- liquid dyes added by Create Dragons Plus rendered as white in BucketLib buckets (thanks to TheJacksonOfGreen for the report) #64
 
 ## [1.21.3-4.2.2.0] - 2025-05-24
 ### Added
