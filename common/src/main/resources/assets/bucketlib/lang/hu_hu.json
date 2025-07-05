@@ -1,0 +1,15 @@
+{
+  "tag.fluid.c.milk": "Tej",
+
+  "tag.entity_type.bucketlib.milkable": "Fejhető entitások",
+  "tag.fluid.bucketlib.infinity_enchantable": "Folyadékok, amelyek lehetővé teszik a végtelen varázslatot",
+
+  "text.autoconfig.bucketlib.title": "BucketLib Settings",
+
+  "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED": "Végtelen varázslat engedélyezése",
+  "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED.@Tooltip[0]": "§6§lVégtelen varázslat engedélyezése",
+  "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED.@Tooltip[1]": "A végtelen varázslat engedélyezése a modolt",
+  "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED.@Tooltip[2]": "vödrök számára, amelyek folyadékokat tartalmaznak a címkével",
+  "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED.@Tooltip[3]": "\"bucketlib:infinity_enchantable\" engedélyeve kell, hogy legyen.",
+  "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED.@Tooltip[4]": "§7§oAlapérték: false"
+}
