@@ -4,7 +4,7 @@
   "tag.entity_type.bucketlib.milkable": "Fejhető entitások",
   "tag.fluid.bucketlib.infinity_enchantable": "Folyadékok, amelyek lehetővé teszik a végtelen varázslatot",
 
-  "text.autoconfig.bucketlib.title": "BucketLib Settings",
+  "text.autoconfig.bucketlib.title": "BucketLib beállítások",
 
   "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED": "Végtelen varázslat engedélyezése",
   "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED.@Tooltip[0]": "§6§lVégtelen varázslat engedélyezése",
