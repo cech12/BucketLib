@@ -22,7 +22,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.tags.ITagManager;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -81,7 +81,7 @@ public class FluidIngredient extends AbstractIngredient {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public ItemStack[] getItems() {
         if (this.matchingStacks == null) {
             ArrayList<ItemStack> stacks = new ArrayList<>();
@@ -127,7 +127,7 @@ public class FluidIngredient extends AbstractIngredient {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public IIngredientSerializer<? extends Ingredient> serializer() {
         return SERIALIZER;
     }
@@ -161,7 +161,7 @@ public class FluidIngredient extends AbstractIngredient {
         }
 
         @Override
-        public void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull FluidIngredient ingredient) {
+        public void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull FluidIngredient ingredient) {
             buffer.writeUtf(ingredient.fluid != null ? Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(ingredient.fluid)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }

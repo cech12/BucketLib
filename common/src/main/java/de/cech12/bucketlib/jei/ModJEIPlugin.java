@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,14 +36,14 @@ public class ModJEIPlugin implements IModPlugin {
 
     private static final ResourceLocation ID = BucketLib.id("jei_plugin");
 
-    @Nonnull
+    @NotNull
     @Override
     public ResourceLocation getPluginUid() {
         return ID;
     }
 
     @Override
-    public void registerItemSubtypes(@Nonnull ISubtypeRegistration registration) {
+    public void registerItemSubtypes(@NotNull ISubtypeRegistration registration) {
         for (Item bucket : Services.REGISTRY.getRegisteredBuckets()) {
             registration.registerSubtypeInterpreter(bucket, (stack, context) -> {
                 if (BucketLibUtil.containsMilk(stack)) {
@@ -67,7 +67,7 @@ public class ModJEIPlugin implements IModPlugin {
     }
 
     @Override
-    public void registerRecipes(@Nonnull IRecipeRegistration registration) {
+    public void registerRecipes(@NotNull IRecipeRegistration registration) {
         if (Services.CONFIG.isInfinityEnchantmentEnabled()) {
             IVanillaRecipeFactory factory = registration.getVanillaRecipeFactory();
             EnchantmentInstance data = new EnchantmentInstance(VanillaRegistries.createLookup().lookup(Registries.ENCHANTMENT).get().getOrThrow(Enchantments.INFINITY), 1);

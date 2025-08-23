@@ -18,8 +18,8 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -150,7 +150,7 @@ public class EntityIngredient implements CustomIngredient {
             return PACKET_CODEC;
         }
 
-        @Nonnull
+        @NotNull
         private static EntityIngredient read(RegistryFriendlyByteBuf buffer) {
             String entity = buffer.readUtf();
             String tagId = buffer.readUtf();
@@ -168,7 +168,7 @@ public class EntityIngredient implements CustomIngredient {
             return new EntityIngredient(entityTypeOptional.get().value());
         }
 
-        private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull EntityIngredient ingredient) {
+        private static void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull EntityIngredient ingredient) {
             buffer.writeUtf(ingredient.entityType != null ? Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.getKey(ingredient.entityType)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }

@@ -15,8 +15,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +46,7 @@ public class EntityIngredient implements ICustomIngredient {
     }
 
     @Override
-    public boolean test(@Nonnull ItemStack itemStack) {
+    public boolean test(@NotNull ItemStack itemStack) {
         if (itemStack.isEmpty()) {
             return false;
         }
@@ -70,7 +70,7 @@ public class EntityIngredient implements ICustomIngredient {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
             ArrayList<Holder<Item>> stacks = new ArrayList<>();
@@ -112,7 +112,7 @@ public class EntityIngredient implements ICustomIngredient {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public IngredientType<?> getType() {
         return TYPE;
     }

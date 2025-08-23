@@ -1,6 +1,7 @@
 package de.cech12.bucketlib;
 
 import de.cech12.bucketlib.api.BucketLib;
+import de.cech12.bucketlib.api.BucketLibApi;
 import de.cech12.bucketlib.api.BucketLibComponents;
 import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.crafting.BlockIngredient;
@@ -13,16 +14,14 @@ import de.cech12.bucketlib.item.UniversalBucketDispenseBehaviour;
 import de.cech12.bucketlib.item.UniversalBucketFluidHandler;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapedRecipe;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapelessRecipe;
-import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.material.Fluid;
@@ -30,15 +29,11 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.SimpleFluidContent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -59,6 +54,15 @@ public class BucketLibMod {
     public static DeferredRegister<IngredientType<?>> INGREDIENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.INGREDIENT_TYPES, BucketLib.MOD_ID);
 
     public static DeferredHolder<DataComponentType<?>, DataComponentType<SimpleFluidContent>> FLUID_COMPONENT = DATA_COMPONENT_TYPES.register(BucketLibComponents.FLUID_LOCATION.getPath(), () -> new DataComponentType.Builder<SimpleFluidContent>().persistent(SimpleFluidContent.CODEC).networkSynchronized(SimpleFluidContent.STREAM_CODEC).build());
+
+    //TODO remove test
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, BucketLib.MOD_ID);
+    public static final DeferredHolder<Item, ?> TEST_BUCKET = ITEMS.register("test_bucket", () -> new UniversalBucketItem(ResourceKey.create(BuiltInRegistries.ITEM.key(), BucketLib.id("test_bucket")), new UniversalBucketItem.Properties()));
+    public static final DeferredHolder<Item, ?> NEOFORGE_TEST = ITEMS.register("neoforgetest", () -> new UniversalBucketItem(ResourceKey.create(BuiltInRegistries.ITEM.key(), BucketLib.id("neoforgetest")), new UniversalBucketItem.Properties()));
+
+    private void register(RegisterCapabilitiesEvent evt) {
+        BucketLibApi.registerBucket(evt, TEST_BUCKET.getId());
+    }
 
     static {
         DATA_COMPONENT_TYPES.register(BucketLibComponents.BUCKET_CONTENT_LOCATION.getPath(), () -> BucketLibComponents.BUCKET_CONTENT);
@@ -88,6 +92,10 @@ public class BucketLibMod {
         RECIPE_SERIALIZERS.register(eventBus);
         //ingredient serializer
         INGREDIENT_TYPES.register(eventBus);
+
+        //TODO remove test
+        ITEMS.register(eventBus);
+        eventBus.addListener(this::register);
     }
 
     public static List<UniversalBucketItem> getRegisteredBuckets() {
@@ -122,21 +130,6 @@ public class BucketLibMod {
         event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new UniversalBucketFluidHandler(stack), bucket);
         //register dispense behaviour
         DispenserBlock.registerBehavior(bucket, UniversalBucketDispenseBehaviour.getInstance());
-        //register color
-        if (FMLEnvironment.dist.isClient()) {
-            Minecraft.getInstance().getItemColors().register((stack, layer) -> {
-                if (layer == 0 && bucket.isDyeable()) {
-                    return DyedItemColor.getOrDefault(stack, bucket.getDefaultColor());
-                }
-                if (layer == 1) {
-                    Fluid fluid = Services.FLUID.getContainedFluid(stack);
-                    if (fluid != Fluids.EMPTY) {
-                        return IClientFluidTypeExtensions.of(fluid).getTintColor(new FluidStack(fluid, FluidType.BUCKET_VOLUME));
-                    }
-                }
-                return -1;
-            }, bucket);
-        }
     }
 
     private void addItemsToTabs(BuildCreativeModeTabContentsEvent event) {

@@ -21,8 +21,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,7 +37,7 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
     private final EntityType<?> entityType;
 
     public BucketFillingShapedRecipe(String group, CraftingBookCategory category, ShapedRecipePattern pattern, BucketFillingType fillingType, Optional<Fluid> fluid, Optional<Block> block, Optional<EntityType<?>> entityType) {
-        super(group, category, pattern, getAssembledBucket(fillingType, fluid.orElse(null), block.orElse(null), entityType.orElse(null), pattern.ingredients().stream().filter(Optional::isPresent).map(ingredient -> ingredient.get().items().stream().map(itemHolder -> new ItemStack(itemHolder.value())).toList()).flatMap(List::stream).toList()));
+        super(group, category, pattern, getAssembledBucket(fillingType, fluid.orElse(null), block.orElse(null), entityType.orElse(null), pattern.ingredients().stream().filter(Optional::isPresent).map(ingredient -> ingredient.get().items().map(itemHolder -> new ItemStack(itemHolder.value())).toList()).flatMap(List::stream).toList()));
         this.category = category;
         this.pattern = pattern;
         this.fillingType = fillingType;
@@ -80,7 +80,7 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
      * Used to check if a recipe matches current crafting inventory
      */
     @Override
-    public boolean matches(@Nonnull CraftingInput input, @Nonnull Level level) {
+    public boolean matches(@NotNull CraftingInput input, @NotNull Level level) {
         ItemStack bucket = getAffectedBucket(input.items());
         if (bucket == ItemStack.EMPTY) {
             return false;
@@ -97,14 +97,14 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
      * Returns an Item that is the result of this recipe
      */
     @Override
-    @Nonnull
-    public ItemStack assemble(@Nonnull CraftingInput input, @Nonnull HolderLookup.Provider provider) {
+    @NotNull
+    public ItemStack assemble(@NotNull CraftingInput input, @NotNull HolderLookup.Provider provider) {
         return getAssembledBucket(this.fillingType, this.fluid, this.block, this.entityType, input.items());
     }
 
 
     @Override
-    @Nonnull
+    @NotNull
     public RecipeSerializer<? extends ShapedRecipe> getSerializer() {
         return Serializer.INSTANCE;
     }
@@ -132,18 +132,18 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
         }
 
         @Override
-        @Nonnull
+        @NotNull
         public MapCodec<BucketFillingShapedRecipe> codec() {
             return CODEC;
         }
 
         @Override
-        @Nonnull
+        @NotNull
         public StreamCodec<RegistryFriendlyByteBuf, BucketFillingShapedRecipe> streamCodec() {
             return STREAM_CODEC;
         }
 
-        @Nonnull
+        @NotNull
         private static BucketFillingShapedRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
             String group = buf.readUtf();
             CraftingBookCategory category = buf.readEnum(CraftingBookCategory.class);

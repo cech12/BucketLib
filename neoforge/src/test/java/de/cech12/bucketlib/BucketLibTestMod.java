@@ -40,7 +40,7 @@ public class BucketLibTestMod {
     public static final DeferredHolder<Item, ?> WATER_DENYING_BUCKET = registerBucket("water_denying_bucket", new UniversalBucketItem.Properties().deniedFluids(Collections.singletonList(Fluids.WATER)));
     public static final DeferredHolder<Item, ?> WATER_DENYING_TAG_BUCKET = registerBucket("water_denying_tag_bucket", new UniversalBucketItem.Properties().deniedFluids(WATER_TAG));
     public static final DeferredHolder<Item, ?> CRACKING_BUCKET = registerBucket("cracking_bucket", new UniversalBucketItem.Properties().upperCrackingTemperature(1000));
-    public static final DeferredHolder<Item, ?> COLORED_BUCKET = registerBucket("colored_bucket", new UniversalBucketItem.Properties().dyeable(255, 0 ,0));
+    public static final DeferredHolder<Item, ?> COLORED_BUCKET = registerBucket("colored_bucket", new UniversalBucketItem.Properties());
     public static final DeferredHolder<Item, ?> ANTI_MILK_BUCKET = registerBucket("anti_milk_bucket", new UniversalBucketItem.Properties().disableMilking());
     public static final DeferredHolder<Item, ?> NO_ENTITIES_BUCKET = registerBucket("no_entities_bucket", new UniversalBucketItem.Properties().disableEntityObtaining());
     public static final DeferredHolder<Item, ?> ANTI_SALMON_BUCKET = registerBucket("anti_salmon_bucket", new UniversalBucketItem.Properties().deniedEntities(Collections.singletonList(EntityType.SALMON)));

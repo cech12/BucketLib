@@ -4,8 +4,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.material.Fluid;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class BucketLibTags {
 
@@ -24,7 +23,7 @@ public class BucketLibTags {
         private static void init() {
         }
 
-        private static TagKey<EntityType<?>> tag(@Nonnull String name) {
+        private static TagKey<EntityType<?>> tag(@NotNull String name) {
             return TagKey.create(Registries.ENTITY_TYPE, BucketLib.id(name));
         }
 
@@ -38,7 +37,7 @@ public class BucketLibTags {
         private static void init() {
         }
 
-        private static TagKey<Fluid> tag(@Nonnull String name) {
+        private static TagKey<Fluid> tag(@NotNull String name) {
             return TagKey.create(Registries.FLUID, BucketLib.id(name));
         }
 

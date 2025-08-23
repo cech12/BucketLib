@@ -12,8 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Common fluid helper service interface.
@@ -23,6 +22,10 @@ public interface IFluidHelper {
     Component getFluidDescription(Fluid fluid);
 
     int getFluidTemperature(Fluid fluid);
+
+    int getFluidLightLevel(Fluid fluid);
+
+    boolean isFluidLighterThanAir(Fluid fluid);
 
     boolean hasMilkFluid();
 

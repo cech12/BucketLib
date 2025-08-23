@@ -18,8 +18,8 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -160,7 +160,7 @@ public class BlockIngredient implements CustomIngredient {
             return new BlockIngredient(blockOptional.get().value());
         }
 
-        private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull BlockIngredient ingredient) {
+        private static void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull BlockIngredient ingredient) {
             buffer.writeUtf(ingredient.block != null ? Objects.requireNonNull(BuiltInRegistries.BLOCK.getKey(ingredient.block)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }

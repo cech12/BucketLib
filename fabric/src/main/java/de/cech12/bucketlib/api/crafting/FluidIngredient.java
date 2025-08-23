@@ -24,8 +24,8 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -158,7 +158,7 @@ public class FluidIngredient implements CustomIngredient {
             return PACKET_CODEC;
         }
 
-        @Nonnull
+        @NotNull
         private static FluidIngredient read(RegistryFriendlyByteBuf buffer) {
             String fluid = buffer.readUtf();
             String tagId = buffer.readUtf();
@@ -176,7 +176,7 @@ public class FluidIngredient implements CustomIngredient {
             return new FluidIngredient(fluidOptional.get().value());
         }
 
-        private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull FluidIngredient ingredient) {
+        private static void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull FluidIngredient ingredient) {
             buffer.writeUtf(ingredient.fluid != null ? Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(ingredient.fluid)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }

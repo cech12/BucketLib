@@ -1,22 +1,13 @@
 package de.cech12.bucketlib.client;
 
-import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.client.model.UniversalBucketUnbakedModel;
 import de.cech12.bucketlib.mixin.BlockModelAccessor;
-import de.cech12.bucketlib.platform.Services;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ARGB;
-import net.minecraft.world.item.component.DyedItemColor;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,23 +22,6 @@ public class BucketLibClientMod implements ClientModInitializer, ModelLoadingPlu
     @Override
     public void onInitializeClient() {
         ModelLoadingPlugin.register(this);
-        BucketLibMod.getRegisteredBuckets().forEach(item -> {
-            //register item colors
-            ColorProviderRegistry.ITEM.register((stack, layer) -> {
-                if (layer == 0 && item.isDyeable()) {
-                    return DyedItemColor.getOrDefault(stack, item.getDefaultColor());
-                }
-                if (layer == 1) {
-                    Fluid fluid = Services.FLUID.getContainedFluid(stack);
-                    FluidRenderHandler fluidRenderHandler;
-                    if (fluid != Fluids.EMPTY && (fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid)) != null) {
-                        return ARGB.color(255, fluidRenderHandler.getFluidColor(null, null, fluid.defaultFluidState()));
-                    }
-                }
-                return -1;
-            }, item);
-        });
-
     }
 
     @Override

@@ -12,15 +12,15 @@ import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 //TODO wait until forge re-adds capability system
 public class UniversalBucketFluidHandler extends FluidTank {
 
-    @Nonnull
+    @NotNull
     protected ItemStack container;
 
-    public UniversalBucketFluidHandler(@Nonnull ItemStack container) {
+    public UniversalBucketFluidHandler(@NotNull ItemStack container) {
         super(FluidType.BUCKET_VOLUME, e -> {
             Item item = container.getItem();
             if (item instanceof UniversalBucketItem bucketItem) {
@@ -32,7 +32,7 @@ public class UniversalBucketFluidHandler extends FluidTank {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public FluidStack getFluid() {
         FluidStack fluidStack = super.getFluid();
         //fill milk bucket with milk fluid if it is enabled
@@ -59,7 +59,7 @@ public class UniversalBucketFluidHandler extends FluidTank {
         return super.fill(resource, doFill);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public FluidStack drain(int maxDrain, FluidAction action) {
         //only drain the bucket, if there is no entity in the bucket

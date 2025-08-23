@@ -20,8 +20,8 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -39,6 +39,16 @@ public class NeoforgeFluidHelper implements IFluidHelper {
     @Override
     public int getFluidTemperature(Fluid fluid) {
         return fluid.getFluidType().getTemperature();
+    }
+
+    @Override
+    public int getFluidLightLevel(Fluid fluid) {
+        return fluid.getFluidType().getLightLevel();
+    }
+
+    @Override
+    public boolean isFluidLighterThanAir(Fluid fluid) {
+        return fluid.getFluidType().isLighterThanAir();
     }
 
     @Override

@@ -18,8 +18,8 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -32,7 +32,7 @@ public class MilkIngredient implements ICustomIngredient {
     }
 
     @Override
-    public boolean test(@Nonnull ItemStack itemStack) {
+    public boolean test(@NotNull ItemStack itemStack) {
         if (itemStack.isEmpty()) {
             return false;
         }
@@ -57,7 +57,7 @@ public class MilkIngredient implements ICustomIngredient {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
             ArrayList<Holder<Item>> stacks = new ArrayList<>();
@@ -79,7 +79,7 @@ public class MilkIngredient implements ICustomIngredient {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public IngredientType<?> getType() {
         return TYPE;
     }

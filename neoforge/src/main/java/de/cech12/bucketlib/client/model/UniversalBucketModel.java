@@ -1,91 +1,223 @@
 package de.cech12.bucketlib.client.model;
 
 import com.google.common.collect.Maps;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
 import com.mojang.math.Transformation;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.util.BucketLibUtil;
+import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.block.model.BakedOverrides;
-import net.minecraft.client.renderer.block.model.ItemOverride;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.item.BlockModelWrapper;
+import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
-import net.minecraft.client.resources.model.ItemModel;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.ClientHooks;
+import net.neoforged.neoforge.client.NeoForgeRenderTypes;
+import net.neoforged.neoforge.client.RenderTypeGroup;
+import net.neoforged.neoforge.client.color.item.FluidContentsTint;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.client.model.CompositeModel;
-import net.neoforged.neoforge.client.model.DynamicFluidContainerModel;
 import net.neoforged.neoforge.client.model.QuadTransformers;
 import net.neoforged.neoforge.client.model.SimpleModelState;
-import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
-import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
-import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
-import net.neoforged.neoforge.client.model.geometry.StandaloneGeometryBakingContext;
-import net.neoforged.neoforge.client.model.geometry.UnbakedGeometryHelper;
+import net.neoforged.neoforge.client.model.UnbakedCompositeModel;
+import net.neoforged.neoforge.client.model.UnbakedElementsHelper;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.Optional;
 
 /**
  * This implementation is based on net.neoforged.neoforge.client.model.DynamicFluidContainerModel.
  * Multiple changes were done to simplify the class
  */
-public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketModel> {
+public class UniversalBucketModel implements ItemModel {
 
     private static final Map<ResourceLocation, ResourceLocation> TEXTURE_MAP = Maps.newHashMap();
     // Depth offsets to prevent Z-fighting
     private static final Transformation DEPTH_OFFSET_TRANSFORM = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(1, 1, 1.002f), new Quaternionf());
 
-    private static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(BucketLib.id("missing_lower_content")));
+    private static final Material MISSING_LOWER_CONTENT_MATERIAL = ClientHooks.getBlockMaterial(getContentTexture(BucketLib.id("missing_lower_content")));
 
-    @Nonnull
-    private final Fluid fluid;
-    @Nullable
-    private final ResourceLocation otherContent;
+    private final Unbaked unbakedModel;
+    private final BakingContext bakingContext;
+    private final ItemTransforms itemTransforms;
+    private final Map<String, ItemModel> cache = new IdentityHashMap<>(); // contains all the baked models since they'll never change
 
-    private final boolean isCracked;
-    private final boolean isLower;
+    private Integer upperBreakTemperature = null;
+    private Integer lowerBreakTemperature = null;
 
-    public UniversalBucketModel(@Nonnull Fluid fluid, @Nullable ResourceLocation otherContent, boolean isCracked, boolean isLower) {
-        this.fluid = fluid;
-        this.otherContent = otherContent;
-        this.isCracked = isCracked;
-        this.isLower = isLower;
+    public UniversalBucketModel(@NotNull Unbaked unbakedModel, @NotNull BakingContext bakingContext) {
+        this.unbakedModel = unbakedModel;
+        this.bakingContext = bakingContext;
+        var baseItemModel = bakingContext.blockModelBaker().getModel(ResourceLocation.withDefaultNamespace("item/generated"));
+        if (baseItemModel == null) {
+            throw new IllegalStateException("Failed to access item/generated model");
+        }
+        this.itemTransforms = baseItemModel.getTransforms();
     }
 
-    /**
-     * Returns a new UniversalBucketModel with the given fluid.
-     */
-    public UniversalBucketModel withFluid(Fluid newFluid, boolean isCracked) {
-        return new UniversalBucketModel(newFluid, null, isCracked, false);
+    private static RenderTypeGroup getLayerRenderTypes(boolean unlit) {
+        return new RenderTypeGroup(RenderType.translucent(), unlit ? NeoForgeRenderTypes.ITEM_UNSORTED_UNLIT_TRANSLUCENT.get() : NeoForgeRenderTypes.ITEM_UNSORTED_TRANSLUCENT.get());
     }
 
-    /**
-     * Returns a new UniversalBucketModel with the given other content.
-     */
-    public UniversalBucketModel withOtherContent(ResourceLocation otherContent, boolean isCracked, boolean isLower) {
-        return new UniversalBucketModel(Fluids.EMPTY, otherContent, isCracked, isLower);
+    private ItemModel bakeModelForFluid(Fluid fluid, ResourceLocation otherContent, boolean isCracked, boolean isLower) {
+        var sprites = bakingContext.blockModelBaker().sprites();
+
+        Material particleLocation = unbakedModel.textures.particle.map(ClientHooks::getBlockMaterial).orElse(null);
+
+        Material baseLocation = null;
+        if (isLower) {
+            if (isCracked && unbakedModel.textures.crackedLowerBase.isPresent()) {
+                baseLocation = unbakedModel.textures.crackedLowerBase.map(ClientHooks::getBlockMaterial).orElse(null);
+            }
+            if (baseLocation == null && unbakedModel.textures.lowerBase.isPresent()) {
+                baseLocation = unbakedModel.textures.lowerBase.map(ClientHooks::getBlockMaterial).orElse(null);
+            }
+        } else {
+            if (isCracked && unbakedModel.textures.crackedBase.isPresent()) {
+                baseLocation = unbakedModel.textures.crackedBase.map(ClientHooks::getBlockMaterial).orElse(null);
+            }
+            if (baseLocation == null && unbakedModel.textures.base.isPresent()) {
+                baseLocation = unbakedModel.textures.base.map(ClientHooks::getBlockMaterial).orElse(null);
+            }
+        }
+
+        Material otherContentLocation = null;
+        Material fluidLocation = null;
+        Material fluidMaskLocation = null;
+        if (otherContent != null) {
+            otherContentLocation = ClientHooks.getBlockMaterial(getContentTexture(otherContent));
+        }
+        if (fluid != Fluids.EMPTY) {
+            fluidLocation = ClientHooks.getBlockMaterial(getContentTexture(BuiltInRegistries.FLUID.getKey(fluid)));
+            if (isCracked && unbakedModel.textures.crackedFluidMask.isPresent()) {
+                fluidMaskLocation = unbakedModel.textures.crackedFluidMask.map(ClientHooks::getBlockMaterial).orElse(null);
+            }
+            if (fluidMaskLocation == null && unbakedModel.textures.fluidMask.isPresent()) {
+                fluidMaskLocation = unbakedModel.textures.fluidMask.map(ClientHooks::getBlockMaterial).orElse(null);
+            }
+        }
+        //oversteer fluid texture if available
+        if (otherContentLocation == null && fluidLocation != null && !MissingTextureAtlasSprite.getLocation().equals(sprites.get(fluidLocation).contents().name())) {
+            otherContentLocation = fluidLocation;
+        }
+
+        TextureAtlasSprite baseSprite = baseLocation != null ? sprites.get(baseLocation) : null;
+        TextureAtlasSprite otherContentSprite = null;
+        if (otherContentLocation != null) {
+            otherContentSprite = sprites.get(otherContentLocation);
+            //if content texture is missing - fallback to pink content texture
+            if (MissingTextureAtlasSprite.getLocation().equals(otherContentSprite.contents().name())) {
+                otherContentSprite = sprites.get(MISSING_LOWER_CONTENT_MATERIAL);
+            }
+        }
+        TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? sprites.get(ClientHooks.getBlockMaterial(IClientFluidTypeExtensions.of(fluid).getStillTexture())) : null;
+        TextureAtlasSprite particleSprite = particleLocation != null ? sprites.get(particleLocation) : null;
+        if (particleSprite == null) particleSprite = baseSprite;
+        if (particleSprite == null) particleSprite = otherContentSprite;
+        if (particleSprite == null) particleSprite = fluidSprite;
+
+        // if the fluid is lighter than air, will manipulate the initial state to be rotated 180deg to turn it upside down
+        ModelState state = BlockModelRotation.X0_Y0;
+        if (fluid != Fluids.EMPTY && !fluid.defaultFluidState().is(BucketLibTags.Fluids.NO_FLIPPING) && fluid.getFluidType().isLighterThanAir()) {
+            state = new SimpleModelState(
+                    state.getRotation().compose(
+                            new Transformation(null, new Quaternionf(0, 0, 1, 0), null, null)));
+        }
+
+        // We need to disable GUI 3D and block lighting for this to render properly
+        var modelBuilder = UnbakedCompositeModel.Baked.builder(true, false, false, particleSprite, itemTransforms);
+
+        var normalRenderTypes = getLayerRenderTypes(false);
+
+        if (baseSprite != null) {
+            // build base (insidest)
+            var unbaked = UnbakedElementsHelper.createUnbakedItemElements(0, baseSprite);
+            var quads = UnbakedElementsHelper.bakeElements(unbaked, $ -> baseSprite, state);
+            modelBuilder.addQuads(normalRenderTypes, quads);
+        }
+
+        if (otherContentSprite != null) {
+            //layer 2 to avoid coloring the entity layer
+            var transformedState = new SimpleModelState(state.getRotation().compose(DEPTH_OFFSET_TRANSFORM), state.isUvLocked());
+            var unbaked = UnbakedElementsHelper.createUnbakedItemElements(2, otherContentSprite);
+            TextureAtlasSprite finalOtherContentSprite = otherContentSprite;
+            var quads = UnbakedElementsHelper.bakeElements(unbaked, $ -> finalOtherContentSprite, transformedState);
+            modelBuilder.addQuads(normalRenderTypes, quads);
+        } else if (fluidMaskLocation != null && fluidSprite != null) {
+            TextureAtlasSprite templateSprite = sprites.get(fluidMaskLocation);
+            // build liquid layer (inside)
+            var transformedState = new SimpleModelState(state.getRotation().compose(DEPTH_OFFSET_TRANSFORM), state.isUvLocked());
+            var unbaked = UnbakedElementsHelper.createUnbakedItemMaskElements(1, templateSprite); // Use template as mask
+            var quads = UnbakedElementsHelper.bakeElements(unbaked, $ -> fluidSprite, transformedState); // Bake with fluid texture
+
+            var emissive = fluid.getFluidType().getLightLevel() > 0;
+            var renderTypes = getLayerRenderTypes(emissive);
+            if (emissive) QuadTransformers.settingEmissivity(fluid.getFluidType().getLightLevel()).processInPlace(quads);
+
+            modelBuilder.addQuads(renderTypes, quads);
+        }
+
+        modelBuilder.setParticle(particleSprite);
+
+        return new BlockModelWrapper(modelBuilder.build(), List.of(new Constant(-1), FluidContentsTint.INSTANCE));
+    }
+
+    @Override
+    public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver modelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int p_387820_) {
+        if (stack.getItem() instanceof UniversalBucketItem bucket) {
+            boolean containsEntityType = false;
+            String content = BucketLibUtil.getEntityTypeString(stack);
+            if (content != null) {
+                containsEntityType = true;
+            } else {
+                content = BucketLibUtil.getContentString(stack);
+            }
+            Fluid fluid = Fluids.EMPTY;
+            if (content == null) {
+                fluid = BucketLibUtil.getFluid(stack);
+                ResourceLocation location = BuiltInRegistries.FLUID.getKey(fluid);
+                content = (location != BuiltInRegistries.FLUID.getDefaultKey()) ? location.toString() : null;
+            }
+            //reset cache if temperature config changed
+            if (!Objects.equals(upperBreakTemperature, bucket.getUpperBreakTemperature()) || !Objects.equals(lowerBreakTemperature, bucket.getLowerBreakTemperature())) {
+                upperBreakTemperature = bucket.getUpperBreakTemperature();
+                lowerBreakTemperature = bucket.getLowerBreakTemperature();
+                cache.clear();
+            }
+            ItemModel bakedModel = cache.get(content);
+            if (bakedModel == null && content != null) {
+                boolean isCracked = bucket.isCracked(stack);
+                bakedModel = this.bakeModelForFluid(fluid, ResourceLocation.parse(content), isCracked, containsEntityType);
+                cache.put(content, bakedModel);
+            }
+            bakedModel.update(renderState, stack, modelResolver, displayContext, level, entity, p_387820_);
+        }
+
     }
 
     public static ResourceLocation getContentTexture(ResourceLocation otherContentLocation) {
@@ -98,183 +230,55 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         return texture;
     }
 
-    @Override
-    @Nonnull
-    public BakedModel bake(IGeometryBakingContext owner, @Nonnull ModelBaker baker, @Nonnull Function<Material, TextureAtlasSprite> spriteGetter, @Nonnull ModelState modelState, @Nonnull List<ItemOverride> overrides) {
-        Material particleLocation = owner.hasMaterial("particle") ? owner.getMaterial("particle") : null;
-
-        Material baseLocation = null;
-        if (this.isLower) {
-            if (this.isCracked && owner.hasMaterial("crackedLowerBase")) {
-                baseLocation = owner.getMaterial("crackedLowerBase");
-            }
-            if (baseLocation == null && owner.hasMaterial("lowerBase")) {
-                baseLocation = owner.getMaterial("lowerBase");
-            }
-        } else {
-            if (this.isCracked && owner.hasMaterial("crackedBase")) {
-                baseLocation = owner.getMaterial("crackedBase");
-            }
-            if (baseLocation == null && owner.hasMaterial("base")) {
-                baseLocation = owner.getMaterial("base");
-            }
-        }
-
-        Material otherContentLocation = null;
-        Material fluidLocation = null;
-        Material fluidMaskLocation = null;
-        if (this.otherContent != null) {
-            otherContentLocation = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(this.otherContent));
-        }
-        if (this.fluid != Fluids.EMPTY) {
-            fluidLocation = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(BuiltInRegistries.FLUID.getKey(this.fluid)));
-            if (this.isCracked && owner.hasMaterial("crackedFluidMask")) {
-                fluidMaskLocation = owner.getMaterial("crackedFluidMask");
-            }
-            if (fluidMaskLocation == null && owner.hasMaterial("fluidMask")) {
-                fluidMaskLocation = owner.getMaterial("fluidMask");
-            }
-        }
-        //oversteer fluid texture if available
-        if (otherContentLocation == null && fluidLocation != null && !MissingTextureAtlasSprite.getLocation().equals(spriteGetter.apply(fluidLocation).contents().name())) {
-            otherContentLocation = fluidLocation;
-        }
-
-        TextureAtlasSprite baseSprite = baseLocation != null ? spriteGetter.apply(baseLocation) : null;
-        TextureAtlasSprite otherContentSprite = null;
-        if (otherContentLocation != null) {
-            otherContentSprite = spriteGetter.apply(otherContentLocation);
-            //if content texture is missing - fallback to pink content texture
-            if (MissingTextureAtlasSprite.getLocation().equals(otherContentSprite.contents().name())) {
-                otherContentSprite = spriteGetter.apply(MISSING_LOWER_CONTENT_MATERIAL);
-            }
-        }
-        TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? spriteGetter.apply(ClientHooks.getBlockMaterial(IClientFluidTypeExtensions.of(fluid).getStillTexture())) : null;
-        TextureAtlasSprite particleSprite = particleLocation != null ? spriteGetter.apply(particleLocation) : null;
-        if (particleSprite == null) particleSprite = baseSprite;
-        if (particleSprite == null) particleSprite = otherContentSprite;
-        if (particleSprite == null) particleSprite = fluidSprite;
-
-        // if the fluid is lighter than air, will manipulate the initial state to be rotated 180deg to turn it upside down
-        if (fluid != Fluids.EMPTY && !fluid.defaultFluidState().is(BucketLibTags.Fluids.NO_FLIPPING) && fluid.getFluidType().isLighterThanAir()) {
-            modelState = new SimpleModelState(
-                    modelState.getRotation().compose(
-                            new Transformation(null, new Quaternionf(0, 0, 1, 0), null, null)));
-        }
-
-        // We need to disable GUI 3D and block lighting for this to render properly
-        var itemContext = StandaloneGeometryBakingContext.builder(owner).withGui3d(false).withUseBlockLight(false).build(BucketLib.id("universal_bucket"));
-        var modelBuilder = CompositeModel.Baked.builder(itemContext, particleSprite, owner.getTransforms());
-
-        var normalRenderTypes = DynamicFluidContainerModel.getLayerRenderTypes(false);
-
-        if (baseSprite != null) {
-            // build base (insidest)
-            var unbaked = UnbakedGeometryHelper.createUnbakedItemElements(0, baseSprite);
-            var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> baseSprite, modelState);
-            modelBuilder.addQuads(normalRenderTypes, quads);
-        }
-
-        if (otherContentSprite != null) {
-            //layer 2 to avoid coloring the entity layer
-            var transformedState = new SimpleModelState(modelState.getRotation().compose(DEPTH_OFFSET_TRANSFORM), modelState.isUvLocked());
-            var unbaked = UnbakedGeometryHelper.createUnbakedItemElements(2, otherContentSprite);
-            TextureAtlasSprite finalOtherContentSprite = otherContentSprite;
-            var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> finalOtherContentSprite, transformedState);
-            modelBuilder.addQuads(normalRenderTypes, quads);
-        } else if (fluidMaskLocation != null && fluidSprite != null) {
-            TextureAtlasSprite templateSprite = spriteGetter.apply(fluidMaskLocation);
-            if (templateSprite != null) {
-                // build liquid layer (inside)
-                var transformedState = new SimpleModelState(modelState.getRotation().compose(DEPTH_OFFSET_TRANSFORM), modelState.isUvLocked());
-                var unbaked = UnbakedGeometryHelper.createUnbakedItemMaskElements(1, templateSprite); // Use template as mask
-                var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> fluidSprite, transformedState); // Bake with fluid texture
-
-                var emissive = fluid.getFluidType().getLightLevel() > 0;
-                var renderTypes = DynamicFluidContainerModel.getLayerRenderTypes(emissive);
-                if (emissive) QuadTransformers.settingEmissivity(fluid.getFluidType().getLightLevel()).processInPlace(quads);
-
-                modelBuilder.addQuads(renderTypes, quads);
-            }
-        }
-
-        modelBuilder.setParticle(particleSprite);
-
-        BakedModel bakedModel = modelBuilder.build();
-        ContainedFluidOverrideHandler bakedOverrides = new ContainedFluidOverrideHandler(new BakedOverrides(baker, overrides, spriteGetter), bakedModel, baker, itemContext, this);
-        return new ItemModel.BakedModelWithOverrides(bakedModel, bakedOverrides);
+    public record Textures(
+            Optional<ResourceLocation> particle,
+            Optional<ResourceLocation> base,
+            Optional<ResourceLocation> lowerBase,
+            Optional<ResourceLocation> fluidMask,
+            Optional<ResourceLocation> crackedBase,
+            Optional<ResourceLocation> crackedLowerBase,
+            Optional<ResourceLocation> crackedFluidMask) {
+        public static final Codec<Textures> CODEC = RecordCodecBuilder.<Textures>create(
+                        instance -> instance
+                                .group(
+                                        ResourceLocation.CODEC.optionalFieldOf("particle").forGetter(Textures::particle),
+                                        ResourceLocation.CODEC.optionalFieldOf("base").forGetter(Textures::base),
+                                        ResourceLocation.CODEC.optionalFieldOf("lowerBase").forGetter(Textures::lowerBase),
+                                        ResourceLocation.CODEC.optionalFieldOf("fluidMask").forGetter(Textures::fluidMask),
+                                        ResourceLocation.CODEC.optionalFieldOf("crackedBase").forGetter(Textures::crackedBase),
+                                        ResourceLocation.CODEC.optionalFieldOf("crackedLowerBase").forGetter(Textures::crackedLowerBase),
+                                        ResourceLocation.CODEC.optionalFieldOf("crackedFluidMask").forGetter(Textures::crackedFluidMask))
+                                .apply(instance, Textures::new))
+                .validate(textures -> {
+                    if (textures.base.isPresent() && textures.fluidMask.isPresent() && textures.lowerBase.isPresent()) {
+                        return DataResult.success(textures);
+                    }
+                    return DataResult.error(() -> "Universal bucket model requires at least a base, fluidMask and lowerBase texture.");
+                });
     }
 
-    public static final class Loader implements IGeometryLoader<UniversalBucketModel>
-    {
-        public static final Loader INSTANCE = new Loader();
+    public record Unbaked(Textures textures) implements ItemModel.Unbaked {
+
+        public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance
+                .group(Textures.CODEC.fieldOf("textures").forGetter(Unbaked::textures))
+                .apply(instance, Unbaked::new));
 
         @Override
-        @Nonnull
-        public UniversalBucketModel read(@Nonnull JsonObject jsonObject, @Nonnull JsonDeserializationContext deserializationContext)
-        {
-            // create new model
-            return new UniversalBucketModel(Fluids.EMPTY, null, false, false);
-        }
-    }
-
-    private static final class ContainedFluidOverrideHandler extends BakedOverrides {
-
-        private final Map<String, BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
-        private final BakedOverrides nested;
-        private final BakedModel baseModel;
-        private final ModelBaker baker;
-        private final IGeometryBakingContext owner;
-        private final UniversalBucketModel parent;
-
-        private Integer upperBreakTemperature = null;
-        private Integer lowerBreakTemperature = null;
-
-        private ContainedFluidOverrideHandler(BakedOverrides nested, BakedModel baseModel, ModelBaker baker, IGeometryBakingContext owner, UniversalBucketModel parent)
-        {
-            this.nested = nested;
-            this.baseModel = baseModel;
-            this.baker = baker;
-            this.owner = owner;
-            this.parent = parent;
+        @NotNull
+        public MapCodec<? extends ItemModel.Unbaked> type() {
+            return MAP_CODEC;
         }
 
-        @Nullable
         @Override
-        public BakedModel findOverride(@Nonnull ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed)
-        {
-            BakedModel overridden = nested.findOverride(stack, level, entity, seed);
-            if (overridden != null) return overridden;
-            if (stack.getItem() instanceof UniversalBucketItem bucket) {
-                boolean containsEntityType = false;
-                String content = BucketLibUtil.getEntityTypeString(stack);
-                if (content != null) {
-                    containsEntityType = true;
-                } else {
-                    content = BucketLibUtil.getContentString(stack);
-                }
-                Fluid fluid = null;
-                if (content == null) {
-                    fluid = BucketLibUtil.getFluid(stack);
-                    ResourceLocation location = BuiltInRegistries.FLUID.getKey(fluid);
-                    content = (location != BuiltInRegistries.FLUID.getDefaultKey()) ? location.toString() : null;
-                }
-                //reset cache if temperature config changed
-                if (!Objects.equals(upperBreakTemperature, bucket.getUpperBreakTemperature()) || !Objects.equals(lowerBreakTemperature, bucket.getLowerBreakTemperature())) {
-                    upperBreakTemperature = bucket.getUpperBreakTemperature();
-                    lowerBreakTemperature = bucket.getLowerBreakTemperature();
-                    cache.clear();
-                }
-                BakedModel bakedModel = cache.get(content);
-                if (bakedModel == null && content != null) {
-                    boolean isCracked = bucket.isCracked(stack);
-                    UniversalBucketModel unbaked = (fluid == null) ? this.parent.withOtherContent(ResourceLocation.parse(content), isCracked, containsEntityType) : this.parent.withFluid(fluid, isCracked);
-                    bakedModel = unbaked.bake(owner, baker, Material::sprite, BlockModelRotation.X0_Y0, List.of());
-                    cache.put(content, bakedModel);
-                }
-                return bakedModel;
-            }
-            return baseModel;
+        @NotNull
+        public ItemModel bake(@NotNull BakingContext bakingContext) {
+            return new UniversalBucketModel(this, bakingContext);
+        }
+
+        @Override
+        public void resolveDependencies(@NotNull Resolver resolver) {
+
+            //No dependencies
         }
     }
 

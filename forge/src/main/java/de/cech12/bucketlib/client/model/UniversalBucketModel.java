@@ -38,8 +38,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -56,7 +56,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
 
     private static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(BucketLib.id("missing_lower_content")));
 
-    @Nonnull
+    @NotNull
     private final Fluid fluid;
     @Nullable
     private final ResourceLocation otherContent;
@@ -64,7 +64,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
     private final boolean isCracked;
     private final boolean isLower;
 
-    public UniversalBucketModel(@Nonnull Fluid fluid, @Nullable ResourceLocation otherContent, boolean isCracked, boolean isLower) {
+    public UniversalBucketModel(@NotNull Fluid fluid, @Nullable ResourceLocation otherContent, boolean isCracked, boolean isLower) {
         this.fluid = fluid;
         this.otherContent = otherContent;
         this.isCracked = isCracked;
@@ -204,7 +204,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         public static final Loader INSTANCE = new Loader();
 
         @Override
-        @Nonnull
+        @NotNull
         public UniversalBucketModel read(JsonObject jsonObject, JsonDeserializationContext deserializationContext)
         {
             // create new model
@@ -235,7 +235,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
 
         @Nullable
         @Override
-        public BakedModel resolve(@Nonnull BakedModel originalModel, @Nonnull ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int number)
+        public BakedModel resolve(@NotNull BakedModel originalModel, @NotNull ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int number)
         {
             BakedModel overridden = nested.resolve(originalModel, stack, world, entity, number);
             if (overridden != originalModel) return overridden;

@@ -18,8 +18,8 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -131,7 +131,7 @@ public class EmptyIngredient implements CustomIngredient {
             return PACKET_CODEC;
         }
 
-        @Nonnull
+        @NotNull
         private static EmptyIngredient read(RegistryFriendlyByteBuf buffer) {
             String item = buffer.readUtf();
             String tagId = buffer.readUtf();
@@ -148,7 +148,7 @@ public class EmptyIngredient implements CustomIngredient {
             return new EmptyIngredient();
         }
 
-        private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull EmptyIngredient ingredient) {
+        private static void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull EmptyIngredient ingredient) {
             buffer.writeUtf(ingredient.item != null ? Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(ingredient.item)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }

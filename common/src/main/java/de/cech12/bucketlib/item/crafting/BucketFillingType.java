@@ -1,8 +1,7 @@
 package de.cech12.bucketlib.item.crafting;
 
 import net.minecraft.util.StringRepresentable;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public enum BucketFillingType implements StringRepresentable {
 
@@ -20,7 +19,7 @@ public enum BucketFillingType implements StringRepresentable {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public String getSerializedName() {
         return this.name;
     }

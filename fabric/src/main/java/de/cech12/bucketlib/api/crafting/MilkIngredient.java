@@ -16,8 +16,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,7 +101,7 @@ public class MilkIngredient implements CustomIngredient {
             return new MilkIngredient();
         }
 
-        private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull MilkIngredient ingredient) {
+        private static void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull MilkIngredient ingredient) {
         }
     }
 
