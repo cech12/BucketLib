@@ -8,9 +8,9 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 
 public class UniversalBucketBakedModel implements BakedModel {
@@ -27,9 +27,9 @@ public class UniversalBucketBakedModel implements BakedModel {
         this.particleSprite = particleSprite;
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, @Nonnull RandomSource randomSource) {
+    public List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, @NotNull RandomSource randomSource) {
         return this.bakedQuads;
     }
 
@@ -53,19 +53,19 @@ public class UniversalBucketBakedModel implements BakedModel {
         return false;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public TextureAtlasSprite getParticleIcon() {
         return this.particleSprite;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public ItemTransforms getTransforms() {
         return this.itemTransforms;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public BakedOverrides overrides() {
         return overrides;
