@@ -233,7 +233,7 @@ public class UniversalBucketItem extends Item {
                 if (caldronInteractionResult.getResult().consumesAction()) {
                     return caldronInteractionResult;
                 }
-                Tuple<Boolean, ItemStack> result = Services.FLUID.tryPickUpFluid(BucketLibUtil.removeEntityType(itemstack, serverLevel, player, false), player, level, interactionHand, hitBlockPos, hitDirection);
+                Tuple<Boolean, ItemStack> result = Services.FLUID.tryPickUpFluid(BucketLibUtil.removeEntityData(itemstack, serverLevel, player, false), player, level, interactionHand, hitBlockPos, hitDirection);
                 if (result.getA()) {
                     return InteractionResultHolder.sidedSuccess(ItemUtils.createFilledResult(itemstack, player, result.getB()), level.isClientSide());
                 }
@@ -259,7 +259,7 @@ public class UniversalBucketItem extends Item {
                     //try to place fluid at hit block and then at the relative block
                     for (BlockPos pos : Arrays.asList(hitBlockPos, relativeBlockPos)) {
                         //remove entity to be able to use tryPlaceFluid method
-                        Tuple<Boolean, ItemStack> result = Services.FLUID.tryPlaceFluid(BucketLibUtil.removeEntityType(itemstack, serverLevel, player, false), player, level, interactionHand, pos);
+                        Tuple<Boolean, ItemStack> result = Services.FLUID.tryPlaceFluid(BucketLibUtil.removeEntityData(itemstack, serverLevel, player, false), player, level, interactionHand, pos);
                         if (result.getA()) {
                             if (BucketLibUtil.containsEntityType(itemstack)) {
                                 //place entity if exists
@@ -308,7 +308,7 @@ public class UniversalBucketItem extends Item {
                 if (player != null) {
                     serverLevel.gameEvent(player, GameEvent.ENTITY_PLACE, pos);
                 }
-                return BucketLibUtil.removeEntityType(itemStack, serverLevel, player, damage);
+                return BucketLibUtil.removeEntityData(itemStack, serverLevel, player, entity, damage);
             }
         }
         return itemStack.copy();
@@ -407,7 +407,7 @@ public class UniversalBucketItem extends Item {
             damaged = true;
         }
         if (BucketLibUtil.containsEntityType(result)) {
-            result = BucketLibUtil.removeEntityType(result, null, null, !damaged); //TODO get ServerLevel!
+            result = BucketLibUtil.removeEntityData(result, null, null, !damaged); //TODO get ServerLevel!
         }
         if (BucketLibUtil.containsFluid(result) || BucketLibUtil.containsMilk(result)) {
             result = BucketLibUtil.removeFluid(result, null, null); //TODO get ServerLevel!

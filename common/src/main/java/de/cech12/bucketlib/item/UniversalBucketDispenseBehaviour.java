@@ -94,7 +94,7 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
             if (stack.getItem() instanceof UniversalBucketItem bucketItem) {
                 if (BucketLibUtil.containsFluid(stack)) {
                     //fluid can only be placed correctly if the entity is not inside
-                    ItemStack stackWithoutEntity = BucketLibUtil.removeEntityType(stack.copy(), level, null, false);
+                    ItemStack stackWithoutEntity = BucketLibUtil.removeEntityData(stack.copy(), level, null, false);
                     ItemStack fluidResult = Services.FLUID.dispenseFluidContainer(source, stackWithoutEntity);
                     bucketItem.spawnEntityFromBucket(null, source.level(), stack, placePosition, false);
                     return fluidResult;

@@ -6,6 +6,7 @@ import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.mixin.LivingEntityAccessor;
 import de.cech12.bucketlib.platform.Services;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.registries.VanillaRegistries;
@@ -18,6 +19,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -29,6 +31,9 @@ import net.minecraft.world.level.material.Fluids;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class BucketLibUtil {
@@ -261,9 +266,49 @@ public class BucketLibUtil {
         return setTagContent(itemStack, "EntityType", Services.REGISTRY.getEntityTypeLocation(entityType).toString());
     }
 
-    public static ItemStack removeEntityType(ItemStack itemStack, ServerLevel level, @Nullable Player player, boolean damage) {
+    public static ItemStack removeEntityData(ItemStack itemStack, ServerLevel level, @Nullable Player player, boolean damage) {
+        EntityType<?> entityType;
+        if (level != null && (entityType = BucketLibUtil.getEntityType(itemStack)) != null) {
+            Entity entity = entityType.create(level);
+            ItemStack stack = removeEntityData(itemStack, level, player, entity, damage);
+            if (entity != null) {
+                entity.discard();
+            }
+            return stack;
+        }
+        return removeEntityData(itemStack, level, player, null, damage);
+    }
+
+
+    public static ItemStack removeEntityData(ItemStack itemStack, ServerLevel level, @Nullable Player player, @Nullable Entity entity, boolean damage) {
         ItemStack emptyStack = removeTagContent(itemStack, "EntityType");
-        emptyStack.remove(DataComponents.BUCKET_ENTITY_DATA); //remove entity data
+        Set<DataComponentType<?>> types = new HashSet<>();
+        types.add(DataComponents.BUCKET_ENTITY_DATA);
+        //support custom item stack data components
+        if (entity instanceof Bucketable bucketable) {
+            ItemStack emptyVanillaStack = new ItemStack(BucketLibUtil.getFluid(itemStack).getBucket());
+            ItemStack changedVanillaStack = new ItemStack(BucketLibUtil.getFluid(itemStack).getBucket());
+            bucketable.saveToBucketTag(changedVanillaStack);
+            changedVanillaStack.getComponents().stream().forEach(typedDataComponent -> {
+                AtomicBoolean addType = new AtomicBoolean(true);
+                emptyVanillaStack.getComponents().stream().forEach(typedDataComponentVanilla -> {
+                    //only types that were changed
+                    if (typedDataComponent.type() == typedDataComponentVanilla.type()) {
+                        addType.set(false);
+                        if (changedVanillaStack.get(typedDataComponent.type()) != null && changedVanillaStack.get(typedDataComponent.type()) != emptyVanillaStack.get(typedDataComponentVanilla.type()) ) {
+                            types.add(typedDataComponent.type());
+                        }
+                    }
+                });
+                //and added types
+                if (addType.get()) {
+                    types.add(typedDataComponent.type());
+                }
+            });
+        }
+        for (DataComponentType<?> type : types) {
+            emptyStack.remove(type);
+        }
         if (damage) damageByOne(emptyStack, level, player);
         return emptyStack;
     }
