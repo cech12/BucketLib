@@ -5,7 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [1.21.3-4.2.4.0] - 2025-11-11
 ### Added
-- Support custom data components of bucketable entities (thanks to benbenlaw for your report) #92
+- Support custom data components of bucketable entities (thanks to benbenlaw for your report) https://github.com/cech12/CeramicBucket/issues/92
+- Added French translation (thanks to Paulem for the contribution) #69
 
 ## [1.21.3-4.2.3.0] - 2025-07-15
 ### Added
