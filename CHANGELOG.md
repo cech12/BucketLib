@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [1.20.1-2.3.8.0] - 2026-04-15
 ### Added
 - entity texture of Caverns And Chasms mod (thanks to KreloX for the report) #75
-- entity texture of Tide 2 mod (thanks to KreloX for the report) #75
+- entity textures of Tide 2 mod (thanks to KreloX for the report) #75
 
 ## [1.20.1-2.3.7.1] - 2025-06-09
 ### Fixed
