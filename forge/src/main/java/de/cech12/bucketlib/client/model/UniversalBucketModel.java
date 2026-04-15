@@ -19,7 +19,6 @@ import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -54,7 +53,7 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
     // Depth offsets to prevent Z-fighting
     private static final Transformation DEPTH_OFFSET_TRANSFORM = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(1, 1, 1.002f), new Quaternionf());
 
-    private static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(BucketLib.id("missing_lower_content")));
+    private static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(TextureAtlas.LOCATION_BLOCKS, getContentTexture(BucketLib.id("missing_lower_content")));
 
     @NotNull
     private final Fluid fluid;
@@ -120,10 +119,10 @@ public class UniversalBucketModel implements IUnbakedGeometry<UniversalBucketMod
         Material fluidLocation = null;
         Material fluidMaskLocation = null;
         if (this.otherContent != null) {
-            otherContentLocation = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(this.otherContent));
+            otherContentLocation = new Material(TextureAtlas.LOCATION_BLOCKS, getContentTexture(this.otherContent));
         }
         if (this.fluid != Fluids.EMPTY) {
-            fluidLocation = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(ForgeRegistries.FLUIDS.getKey(this.fluid)));
+            fluidLocation = new Material(TextureAtlas.LOCATION_BLOCKS, getContentTexture(ForgeRegistries.FLUIDS.getKey(this.fluid)));
             if (this.isCracked && owner.hasMaterial("crackedFluidMask")) {
                 fluidMaskLocation = owner.getMaterial("crackedFluidMask");
             }

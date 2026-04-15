@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
@@ -26,7 +27,6 @@ import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -46,7 +46,7 @@ import java.util.function.Function;
 public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedModel {
 
     private static final Map<ResourceLocation, ResourceLocation> TEXTURE_MAP = Maps.newHashMap();
-    private static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(BucketLib.id("missing_lower_content")));
+    private static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(TextureAtlas.LOCATION_BLOCKS, getContentTexture(BucketLib.id("missing_lower_content")));
 
     @NotNull
     private Fluid fluid = Fluids.EMPTY;
@@ -151,10 +151,10 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
         Material fluidLocation = null;
         Material fluidMaskLocation = null;
         if (this.otherContent != null) {
-            otherContentLocation = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(this.otherContent));
+            otherContentLocation = new Material(TextureAtlas.LOCATION_BLOCKS, getContentTexture(this.otherContent));
         }
         if (this.fluid != Fluids.EMPTY) {
-            fluidLocation = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(BuiltInRegistries.FLUID.getKey(this.fluid)));
+            fluidLocation = new Material(TextureAtlas.LOCATION_BLOCKS, getContentTexture(BuiltInRegistries.FLUID.getKey(this.fluid)));
             if (this.isCracked) {
                 fluidMaskLocation = this.getMaterial("crackedFluidMask");
             }
