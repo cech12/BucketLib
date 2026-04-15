@@ -30,9 +30,9 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +48,7 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
     private static final Map<ResourceLocation, ResourceLocation> TEXTURE_MAP = Maps.newHashMap();
     private static final Material MISSING_LOWER_CONTENT_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, getContentTexture(BucketLib.id("missing_lower_content")));
 
-    @Nonnull
+    @NotNull
     private Fluid fluid = Fluids.EMPTY;
     @Nullable
     private ResourceLocation otherContent = null;
@@ -68,7 +68,7 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
         );
     }
 
-    public UniversalBucketUnbakedModel(BlockModel blockModel, @Nonnull Fluid fluid, @Nullable ResourceLocation otherContent, boolean isCracked, boolean isLower) {
+    public UniversalBucketUnbakedModel(BlockModel blockModel, @NotNull Fluid fluid, @Nullable ResourceLocation otherContent, boolean isCracked, boolean isLower) {
         this(blockModel);
         this.fluid = fluid;
         this.otherContent = otherContent;
@@ -104,7 +104,7 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
         return this.parentLocation;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public BlockModel getRootModel() {
         if (this.parent == null) {
@@ -117,9 +117,9 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
         return this.parent.getRootModel();
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public BakedModel bake(@Nonnull ModelBaker modelBaker, @Nonnull Function<Material, TextureAtlasSprite> spriteGetter, @Nonnull ModelState modelState) {
+    public BakedModel bake(@NotNull ModelBaker modelBaker, @NotNull Function<Material, TextureAtlasSprite> spriteGetter, @NotNull ModelState modelState) {
         //resolve parents to use their defined materials, too
         if (this.parent == null) {
             resolveDependencies(BucketLibClientMod::getModel);
@@ -185,7 +185,7 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
 
         TextureAtlasSprite fluidSprite = null;
         if (fluid != Fluids.EMPTY && FluidRenderHandlerRegistry.INSTANCE.get(fluid) != null) {
-            TextureAtlasSprite[] sprites = Objects.requireNonNull(FluidRenderHandlerRegistry.INSTANCE.get(fluid)).getFluidSprites(null, null, fluid.defaultFluidState());
+            TextureAtlasSprite[] sprites = Objects.requireNotNull(FluidRenderHandlerRegistry.INSTANCE.get(fluid)).getFluidSprites(null, null, fluid.defaultFluidState());
             if (sprites.length > 0) {
                 fluidSprite = sprites[0];
                 if (particleSprite == null)
@@ -252,7 +252,7 @@ public class UniversalBucketUnbakedModel extends BlockModel implements UnbakedMo
 
         @Nullable
         @Override
-        public BakedModel findOverride(@Nonnull ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+        public BakedModel findOverride(@NotNull ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
             BakedModel overridden = nested.findOverride(stack, level, entity, seed);
             if (overridden != null) return overridden;
             if (stack.getItem() instanceof UniversalBucketItem bucket) {
