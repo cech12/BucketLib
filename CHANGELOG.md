@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [1.21.3-4.2.5.0] - 2026-04-15
+### Added
+- entity texture of Caverns And Chasms mod (thanks to KreloX for the report) #75
+- entity texture of Tide 2 mod (thanks to KreloX for the report) #75
+
 ## [1.21.3-4.2.4.0] - 2025-11-11
 ### Added
 - Support custom data components of bucketable entities (thanks to benbenlaw for your report) https://github.com/cech12/CeramicBucket/issues/92
