@@ -188,7 +188,7 @@ public class UniversalBucketModel implements ItemModel {
     }
 
     @Override
-    public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver modelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int p_387820_) {
+    public void update(@NotNull ItemStackRenderState renderState, ItemStack stack, @NotNull ItemModelResolver modelResolver, @NotNull ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int p_387820_) {
         if (stack.getItem() instanceof UniversalBucketItem bucket) {
             boolean containsEntityType = false;
             String content = BucketLibUtil.getEntityTypeString(stack);
@@ -201,7 +201,7 @@ public class UniversalBucketModel implements ItemModel {
             if (content == null) {
                 fluid = BucketLibUtil.getFluid(stack);
                 ResourceLocation location = BuiltInRegistries.FLUID.getKey(fluid);
-                content = (location != BuiltInRegistries.FLUID.getDefaultKey()) ? location.toString() : null;
+                content = !BuiltInRegistries.FLUID.getDefaultKey().equals(location) ? location.toString() : null;
             }
             //reset cache if temperature config changed
             if (!Objects.equals(upperBreakTemperature, bucket.getUpperBreakTemperature()) || !Objects.equals(lowerBreakTemperature, bucket.getLowerBreakTemperature())) {
@@ -210,9 +210,9 @@ public class UniversalBucketModel implements ItemModel {
                 cache.clear();
             }
             ItemModel bakedModel = cache.get(content);
-            if (bakedModel == null && content != null) {
+            if (bakedModel == null) {
                 boolean isCracked = bucket.isCracked(stack);
-                bakedModel = this.bakeModelForFluid(fluid, ResourceLocation.parse(content), isCracked, containsEntityType);
+                bakedModel = this.bakeModelForFluid(fluid, ((content != null && fluid == Fluids.EMPTY) ? ResourceLocation.parse(content) : null), isCracked, containsEntityType);
                 cache.put(content, bakedModel);
             }
             bakedModel.update(renderState, stack, modelResolver, displayContext, level, entity, p_387820_);
