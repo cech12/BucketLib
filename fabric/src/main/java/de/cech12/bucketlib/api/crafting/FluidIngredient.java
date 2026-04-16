@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class FluidIngredient implements CustomIngredient {
 
@@ -87,7 +88,7 @@ public class FluidIngredient implements CustomIngredient {
     }
 
     @Override
-    public List<Holder<Item>> getMatchingItems() {
+    public Stream<Holder<Item>> getMatchingItems() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
             List<Fluid> fluids = new ArrayList<>();
@@ -112,7 +113,7 @@ public class FluidIngredient implements CustomIngredient {
                 });
             }
         }
-        return this.matchingStacks;
+        return this.matchingStacks.stream();
     }
 
     @Override

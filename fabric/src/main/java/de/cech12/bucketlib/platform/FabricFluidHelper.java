@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
@@ -60,6 +61,17 @@ public class FabricFluidHelper implements IFluidHelper {
     @Override
     public int getFluidTemperature(Fluid fluid) {
         return FluidVariantAttributes.getTemperature(FluidVariant.of(fluid));
+    }
+
+    @Override
+    public int getFluidLightLevel(Fluid fluid) {
+        return FluidVariantAttributes.getLuminance(FluidVariant.of(fluid));
+    }
+
+    @Override
+    public boolean isFluidLighterThanAir(Fluid fluid) {
+        FluidVariantAttributeHandler handler = FluidVariantAttributes.getHandler(fluid);
+        return handler != null && handler.isLighterThanAir(FluidVariant.of(fluid));
     }
 
     @Override

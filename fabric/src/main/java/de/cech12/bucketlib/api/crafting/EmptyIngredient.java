@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class EmptyIngredient implements CustomIngredient {
 
@@ -69,7 +70,7 @@ public class EmptyIngredient implements CustomIngredient {
     }
 
     @Override
-    public List<Holder<Item>> getMatchingItems() {
+    public Stream<Holder<Item>> getMatchingItems() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
             if (this.item == null && this.tag == null) {
@@ -85,7 +86,7 @@ public class EmptyIngredient implements CustomIngredient {
                 }
             });
         }
-        return this.matchingStacks;
+        return this.matchingStacks.stream();
     }
 
     @Override

@@ -19,9 +19,6 @@
     "main": [
       "de.cech12.bucketlib.BucketLibMod"
     ],
-    "client": [
-      "de.cech12.bucketlib.client.BucketLibClientMod"
-    ],
     "modmenu": [
       "de.cech12.bucketlib.compat.ModMenuCompat"
     ],

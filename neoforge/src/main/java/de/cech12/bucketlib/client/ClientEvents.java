@@ -5,7 +5,6 @@ import de.cech12.bucketlib.client.model.UniversalBucketModel;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterItemModelsEvent;
 
 @SuppressWarnings("unused")
@@ -19,8 +18,4 @@ public class ClientEvents {
         event.register(BucketLib.id("universal_bucket"), UniversalBucketModel.Unbaked.MAP_CODEC);
     }
 
-    @SubscribeEvent
-    static void registerItemModels(ModelEvent.RegisterLoaders event) {
-        //event.register(BucketLib.id("universal_bucket"), UniversalBucketModel.Unbaked.MAP_CODEC);
-    }
 }

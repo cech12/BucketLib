@@ -6,9 +6,9 @@
   "mixins": [
   ],
   "client": [
-    "BlockModelAccessor",
     "FuelValuesMixin",
-    "ItemModelGeneratorAccessor"
+    "ItemModelGeneratorAccessor",
+    "ItemModelsMixin"
   ],
   "server": [
   ],

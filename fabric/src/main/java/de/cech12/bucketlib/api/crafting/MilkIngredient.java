@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class MilkIngredient implements CustomIngredient {
 
@@ -45,7 +46,7 @@ public class MilkIngredient implements CustomIngredient {
     }
 
     @Override
-    public List<Holder<Item>> getMatchingItems() {
+    public Stream<Holder<Item>> getMatchingItems() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
             this.matchingStacks.add(Holder.direct(Items.MILK_BUCKET));
@@ -56,7 +57,7 @@ public class MilkIngredient implements CustomIngredient {
                 }
             });
         }
-        return this.matchingStacks;
+        return this.matchingStacks.stream();
     }
 
     @Override
