@@ -41,7 +41,7 @@ public abstract class AxolotlMixin extends Animal {
 	private void usePlayerItemProxy(Player player, InteractionHand hand, ItemStack stack, CallbackInfo ci) {
 		if (this.isFood(stack) && stack.getItem() instanceof UniversalBucketItem) {
 			ServerLevel serverLevel = (player.level() instanceof ServerLevel) ? (ServerLevel) player.level() : null;
-			player.setItemInHand(hand, BucketLibUtil.removeEntityType(stack, serverLevel, player, true));
+			player.setItemInHand(hand, BucketLibUtil.removeEntityData(stack, serverLevel, player, true));
 			ci.cancel();
 		}
 	}

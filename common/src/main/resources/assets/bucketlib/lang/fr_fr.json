@@ -1,0 +1,15 @@
+{
+  "tag.fluid.c.milk": "Lait",
+
+  "tag.entity_type.bucketlib.milkable": "Entités pouvant être traites",
+  "tag.fluid.bucketlib.infinity_enchantable": "Liquides permettant l'enchantement Infinité",
+
+  "text.autoconfig.bucketlib.title": "Paramètres de BucketLib",
+
+  "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED": "Enchantement Infinité activé",
+  "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED.@Tooltip[0]": "§6§lEnchantement Infinité activé",
+  "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED.@Tooltip[1]": "Si oui ou non l'enchantement Infinité est actif pour les seaux moddés",
+  "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED.@Tooltip[2]": "remplis avec des liquides du tag",
+  "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED.@Tooltip[3]": "\"bucketlib:infinity_enchantable\" devrait être activé.",
+  "text.autoconfig.bucketlib.option.INFINITY_ENCHANTMENT_ENABLED.@Tooltip[4]": "§7§oDéfaut: non"
+}

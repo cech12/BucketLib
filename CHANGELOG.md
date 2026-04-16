@@ -11,6 +11,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Updated REI support (18.0.808) (NeoForge, Fabric/Quilt)
 - Coloring buckets was removed from the API, because colors are defined in the item model files https://minecraft.wiki/w/Items_model_definition and with the "minecraft:dyeable" item tag
 
+## [1.21.3-4.2.5.0] - 2026-04-15
+### Added
+- entity texture of Caverns And Chasms mod (thanks to KreloX for the report) #75
+- entity texture of Tide 2 mod (thanks to KreloX for the report) #75
+
+## [1.21.3-4.2.4.0] - 2025-11-11
+### Added
+- Support custom data components of bucketable entities (thanks to benbenlaw for your report) https://github.com/cech12/CeramicBucket/issues/92
+- Added French translation (thanks to Paulem for the contribution) #69
+
 ## [1.21.3-4.2.3.0] - 2025-07-15
 ### Added
 - Added Hungarian translation (thanks to bayi for the contribution) #67
