@@ -277,7 +277,6 @@ public class UniversalBucketModel implements ItemModel {
 
         @Override
         public void resolveDependencies(@NotNull Resolver resolver) {
-
             //No dependencies
         }
     }

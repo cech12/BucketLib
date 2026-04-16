@@ -1,7 +1,13 @@
 {
     "model": {
-        "type": "minecraft:model",
-        "model": "bucketlib:item/test_bucket"
-
+        "type": "bucketlib:universal_bucket",
+        "textures": {
+            "base": "bucketlib:item/test_bucket",
+            "lowerBase": "bucketlib:item/lower_test_bucket",
+            "fluidMask": "neoforge:item/mask/bucket_fluid",
+            "crackedBase": "bucketlib:item/universal_bucket_cracked_base",
+            "crackedLowerBase": "bucketlib:item/universal_bucket_cracked_lower_base",
+            "crackedFluidMask": "neoforge:item/mask/bucket_fluid"
+        }
     }
 }

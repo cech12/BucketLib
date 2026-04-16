@@ -58,7 +58,6 @@ public class BucketLibMod {
     //TODO remove test
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, BucketLib.MOD_ID);
     public static final DeferredHolder<Item, ?> TEST_BUCKET = ITEMS.register("test_bucket", () -> new UniversalBucketItem(ResourceKey.create(BuiltInRegistries.ITEM.key(), BucketLib.id("test_bucket")), new UniversalBucketItem.Properties()));
-    public static final DeferredHolder<Item, ?> NEOFORGE_TEST = ITEMS.register("neoforgetest", () -> new UniversalBucketItem(ResourceKey.create(BuiltInRegistries.ITEM.key(), BucketLib.id("neoforgetest")), new UniversalBucketItem.Properties()));
 
     private void register(RegisterCapabilitiesEvent evt) {
         BucketLibApi.registerBucket(evt, TEST_BUCKET.getId());

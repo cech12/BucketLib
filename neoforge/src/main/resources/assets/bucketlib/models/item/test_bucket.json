@@ -1,8 +1,0 @@
-{
-  "parent": "bucketlib:item/universal_bucket",
-
-  "textures": {
-    "base": "bucketlib:item/test_bucket",
-    "lowerBase": "bucketlib:item/lower_test_bucket"
-  }
-}

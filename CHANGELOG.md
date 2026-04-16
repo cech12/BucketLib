@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [1.21.4-4.3.0.0] - 2026-??-??
 ### Changed
-- Updated to Minecraft 1.21.4 (Fabric 0.116.0+1.21.4, NeoForge 21.4.151)
+- Updated to Minecraft 1.21.4 (Fabric 0.116.0+1.21.4, NeoForge 21.4.157)
 - Updated Cloth Config support (17.0.144) (Fabric/Quilt)
 - Updated ModMenu support (13.0.3) (Fabric/Quilt)
 - Updated REI support (18.0.808) (NeoForge, Fabric/Quilt)
