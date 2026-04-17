@@ -29,9 +29,9 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -119,7 +119,7 @@ public class BucketLibUtil {
      * @param itemStack checked item stack
      * @return boolean
      */
-    public static boolean isAffectedByInfinityEnchantment(@Nonnull ItemStack itemStack) {
+    public static boolean isAffectedByInfinityEnchantment(@NotNull ItemStack itemStack) {
         if (!Services.CONFIG.isInfinityEnchantmentEnabled()) {
             return false;
         }

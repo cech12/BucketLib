@@ -24,6 +24,11 @@ public class NeoforgeRegistryHelper implements IRegistryHelper {
     }
 
     @Override
+    public ResourceLocation getItemLocation(Item item) {
+        return BuiltInRegistries.ITEM.getKey(item);
+    }
+
+    @Override
     public EntityType<?> getEntityType(ResourceLocation location) {
         return BuiltInRegistries.ENTITY_TYPE.get(location).map(Holder.Reference::value).orElse(null);
     }

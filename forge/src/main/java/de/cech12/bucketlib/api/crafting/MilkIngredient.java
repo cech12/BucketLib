@@ -20,7 +20,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -59,7 +59,7 @@ public class MilkIngredient extends AbstractIngredient {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public ItemStack[] getItems() {
         if (this.matchingStacks == null) {
             ArrayList<ItemStack> stacks = new ArrayList<>();
@@ -110,7 +110,7 @@ public class MilkIngredient extends AbstractIngredient {
         }
 
         @Override
-        public void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull MilkIngredient ingredient) {
+        public void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull MilkIngredient ingredient) {
         }
     };
 }

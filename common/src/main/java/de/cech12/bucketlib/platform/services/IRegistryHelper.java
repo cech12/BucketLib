@@ -16,6 +16,8 @@ public interface IRegistryHelper {
 
     List<UniversalBucketItem> getRegisteredBuckets();
 
+    ResourceLocation getItemLocation(Item item);
+
     EntityType<?> getEntityType(ResourceLocation location);
 
     ResourceLocation getEntityTypeLocation(EntityType<?> entityType);

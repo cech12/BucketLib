@@ -24,12 +24,13 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class FluidIngredient implements CustomIngredient {
 
@@ -75,10 +76,7 @@ public class FluidIngredient implements CustomIngredient {
         Storage<FluidVariant> storage = ContainerItemContext.withConstant(container).find(FluidStorage.ITEM);
         StorageView<FluidVariant> fluidView = null;
         if (storage != null) {
-            for (StorageView<FluidVariant> view : storage.nonEmptyViews()) {
-                fluidView = view;
-                break;
-            }
+            fluidView = storage.nonEmptyViews().iterator().next();
         }
         if (fluidView == null) {
             return false;
@@ -87,7 +85,7 @@ public class FluidIngredient implements CustomIngredient {
     }
 
     @Override
-    public List<Holder<Item>> getMatchingItems() {
+    public Stream<Holder<Item>> getMatchingItems() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
             List<Fluid> fluids = new ArrayList<>();
@@ -112,7 +110,7 @@ public class FluidIngredient implements CustomIngredient {
                 });
             }
         }
-        return this.matchingStacks;
+        return this.matchingStacks.stream();
     }
 
     @Override
@@ -158,7 +156,7 @@ public class FluidIngredient implements CustomIngredient {
             return PACKET_CODEC;
         }
 
-        @Nonnull
+        @NotNull
         private static FluidIngredient read(RegistryFriendlyByteBuf buffer) {
             String fluid = buffer.readUtf();
             String tagId = buffer.readUtf();
@@ -176,7 +174,7 @@ public class FluidIngredient implements CustomIngredient {
             return new FluidIngredient(fluidOptional.get().value());
         }
 
-        private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull FluidIngredient ingredient) {
+        private static void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull FluidIngredient ingredient) {
             buffer.writeUtf(ingredient.fluid != null ? Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(ingredient.fluid)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }

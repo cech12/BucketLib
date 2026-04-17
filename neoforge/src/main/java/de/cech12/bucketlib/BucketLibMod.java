@@ -13,16 +13,13 @@ import de.cech12.bucketlib.item.UniversalBucketDispenseBehaviour;
 import de.cech12.bucketlib.item.UniversalBucketFluidHandler;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapedRecipe;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapelessRecipe;
-import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.material.Fluid;
@@ -30,15 +27,11 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.SimpleFluidContent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -122,21 +115,6 @@ public class BucketLibMod {
         event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new UniversalBucketFluidHandler(stack), bucket);
         //register dispense behaviour
         DispenserBlock.registerBehavior(bucket, UniversalBucketDispenseBehaviour.getInstance());
-        //register color
-        if (FMLEnvironment.dist.isClient()) {
-            Minecraft.getInstance().getItemColors().register((stack, layer) -> {
-                if (layer == 0 && bucket.isDyeable()) {
-                    return DyedItemColor.getOrDefault(stack, bucket.getDefaultColor());
-                }
-                if (layer == 1) {
-                    Fluid fluid = Services.FLUID.getContainedFluid(stack);
-                    if (fluid != Fluids.EMPTY) {
-                        return IClientFluidTypeExtensions.of(fluid).getTintColor(new FluidStack(fluid, FluidType.BUCKET_VOLUME));
-                    }
-                }
-                return -1;
-            }, bucket);
-        }
     }
 
     private void addItemsToTabs(BuildCreativeModeTabContentsEvent event) {

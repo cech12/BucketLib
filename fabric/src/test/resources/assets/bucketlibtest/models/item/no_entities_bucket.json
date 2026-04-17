@@ -1,6 +1,0 @@
-{
-  "parent": "bucketlib:item/universal_bucket",
-  "textures": {
-    "base": "bucketlibtest:item/test_bucket"
-  }
-}

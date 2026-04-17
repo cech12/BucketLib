@@ -9,11 +9,14 @@ import de.cech12.bucketlib.item.UniversalBucketFluidStorage;
 import de.cech12.bucketlib.platform.services.IFluidHelper;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
@@ -63,6 +66,27 @@ public class FabricFluidHelper implements IFluidHelper {
     }
 
     @Override
+    public int getFluidTintColor(ItemStack stack) {
+        Fluid fluid = Services.FLUID.getContainedFluid(stack);
+        FluidRenderHandler renderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid);
+        if (renderHandler != null) {
+            return renderHandler.getFluidColor(null, null, fluid.defaultFluidState()) | 0xFF000000; //add full opacity, because color has no transparency value
+        }
+        return 0xFFFFFFFF;
+    }
+
+    @Override
+    public int getFluidLightLevel(Fluid fluid) {
+        return FluidVariantAttributes.getLuminance(FluidVariant.of(fluid));
+    }
+
+    @Override
+    public boolean isFluidLighterThanAir(Fluid fluid) {
+        FluidVariantAttributeHandler handler = FluidVariantAttributes.getHandler(fluid);
+        return handler != null && handler.isLighterThanAir(FluidVariant.of(fluid));
+    }
+
+    @Override
     public boolean hasMilkFluid() {
         return false;
     }
@@ -104,9 +128,7 @@ public class FabricFluidHelper implements IFluidHelper {
         ContainerItemContext context = new StackItemContext(stack);
         Storage<FluidVariant> storage = context.find(FluidStorage.ITEM);
         if (storage != null) {
-            for (StorageView<FluidVariant> view : storage.nonEmptyViews()) {
-                return view.getResource().getFluid();
-            }
+            return storage.nonEmptyViews().iterator().next().getResource().getFluid();
         }
         return Fluids.EMPTY;
     }

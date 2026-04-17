@@ -12,16 +12,15 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidHandlerItemStack;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
 
-    public UniversalBucketFluidHandler(@Nonnull ItemStack container) {
+    public UniversalBucketFluidHandler(@NotNull ItemStack container) {
         super(BucketLibMod.FLUID_COMPONENT, container, FluidType.BUCKET_VOLUME);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public FluidStack getFluid() {
         FluidStack fluidStack = super.getFluid();
@@ -37,7 +36,7 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
     }
 
     @Override
-    public int fill(@Nonnull FluidStack resource, @Nonnull IFluidHandler.FluidAction doFill) {
+    public int fill(@NotNull FluidStack resource, @NotNull IFluidHandler.FluidAction doFill) {
         //only fill the bucket, if there is no milk inside it.
         if (BucketLibUtil.containsMilk(getContainer())) {
             return 0;
@@ -49,9 +48,9 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
         return super.fill(resource, doFill);
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public FluidStack drain(int maxDrain, @Nonnull FluidAction action) {
+    public FluidStack drain(int maxDrain, @NotNull FluidAction action) {
         //only drain the bucket, if there is no entity in the bucket
         if (BucketLibUtil.containsEntityType(getContainer())) {
             return FluidStack.EMPTY;
@@ -91,7 +90,7 @@ public class UniversalBucketFluidHandler extends FluidHandlerItemStack {
     }
 
     @Override
-    public boolean canFillFluidType(@Nonnull FluidStack fluid) {
+    public boolean canFillFluidType(@NotNull FluidStack fluid) {
         Item item = container.getItem();
         if (item instanceof UniversalBucketItem bucketItem) {
             return fluid.getFluid() != Fluids.EMPTY && bucketItem.canHoldFluid(fluid.getFluid());

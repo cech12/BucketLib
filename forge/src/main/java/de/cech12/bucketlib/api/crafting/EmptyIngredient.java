@@ -16,7 +16,7 @@ import net.minecraftforge.common.crafting.ingredients.AbstractIngredient;
 import net.minecraftforge.common.crafting.ingredients.IIngredientSerializer;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
@@ -67,7 +67,7 @@ public class EmptyIngredient extends AbstractIngredient {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public ItemStack[] getItems() {
         if (this.matchingStacks == null) {
             ArrayList<ItemStack> stacks = new ArrayList<>();
@@ -103,7 +103,7 @@ public class EmptyIngredient extends AbstractIngredient {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public IIngredientSerializer<? extends Ingredient> serializer() {
         return SERIALIZER;
     }
@@ -137,7 +137,7 @@ public class EmptyIngredient extends AbstractIngredient {
         }
 
         @Override
-        public void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull EmptyIngredient ingredient) {
+        public void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull EmptyIngredient ingredient) {
             buffer.writeUtf(ingredient.item != null ? Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(ingredient.item)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }

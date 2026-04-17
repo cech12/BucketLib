@@ -28,7 +28,7 @@ runs {
     gameTestServer {
         systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
     }
-    data {
+    clientData {
         arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
     }
 }
@@ -40,13 +40,13 @@ dependencies {
     compileOnly project(":common")
     testCompileOnly project(":common")
 
-    //compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
-    //testCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
-    //runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
+    compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+    testCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+    runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 
     compileOnly("me.shedaniel:RoughlyEnoughItems-api-neoforge:$rei_version")
     compileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:$rei_version")
-    runtimeOnly("me.shedaniel:RoughlyEnoughItems-neoforge:$rei_version")
+    //runtimeOnly("me.shedaniel:RoughlyEnoughItems-neoforge:$rei_version")
     implementation("me.shedaniel.cloth:cloth-config-neoforge:$cloth_config_version")
     implementation("dev.architectury:architectury-neoforge:$architectury_version")
 }

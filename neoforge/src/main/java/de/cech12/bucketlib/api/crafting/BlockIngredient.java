@@ -14,8 +14,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +45,7 @@ public class BlockIngredient implements ICustomIngredient {
     }
 
     @Override
-    public boolean test(@Nonnull ItemStack itemStack) {
+    public boolean test(@NotNull ItemStack itemStack) {
         if (itemStack.isEmpty()) {
             return false;
         }
@@ -59,17 +59,18 @@ public class BlockIngredient implements ICustomIngredient {
         } else {
             bucketBlocks = RegistryUtil.getBucketBlocks().stream().filter(bucketBlock -> bucketBlock.block().defaultBlockState().is(this.tag)).toList();
         }
-        for (RegistryUtil.BucketBlock bucketBlock : bucketBlocks) {
-            if (itemStack.getItem() == bucketBlock.bucketItem()) {
-                return true;
-            }
-            return BucketLibUtil.getBlock(itemStack) == bucketBlock.block();
+        if (bucketBlocks.isEmpty()) {
+            return false;
         }
-        return false;
+        RegistryUtil.BucketBlock bucketBlock = bucketBlocks.getFirst();
+        if (itemStack.getItem() == bucketBlock.bucketItem()) {
+            return true;
+        }
+        return BucketLibUtil.getBlock(itemStack) == bucketBlock.block();
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
             ArrayList<Holder<Item>> stacks = new ArrayList<>();
@@ -104,7 +105,7 @@ public class BlockIngredient implements ICustomIngredient {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public IngredientType<?> getType() {
         return TYPE;
     }

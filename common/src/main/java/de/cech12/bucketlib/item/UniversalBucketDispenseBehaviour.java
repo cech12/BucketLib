@@ -14,8 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavior {
 
@@ -31,8 +30,8 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
     private final DefaultDispenseItemBehavior dispenseBehavior = new DefaultDispenseItemBehavior();
 
     @Override
-    @Nonnull
-    public ItemStack execute(@Nonnull BlockSource source, @Nonnull ItemStack stack) {
+    @NotNull
+    public ItemStack execute(@NotNull BlockSource source, @NotNull ItemStack stack) {
         if (stack.getItem() instanceof UniversalBucketItem) {
             if (BucketLibUtil.isEmpty(stack)) {
                 return fillBucket(source, stack);
@@ -43,7 +42,7 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
         return Services.FLUID.dispenseFluidContainer(source, stack);
     }
 
-    private ItemStack fillBucket(@Nonnull BlockSource source, @Nonnull ItemStack stack) {
+    private ItemStack fillBucket(@NotNull BlockSource source, @NotNull ItemStack stack) {
         ServerLevel level = source.level();
         BlockPos pickupPosition = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
         BlockState blockState = level.getBlockState(pickupPosition);
@@ -78,7 +77,7 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
         return Services.FLUID.dispenseFluidContainer(source, stack);
     }
 
-    private ItemStack emptyBucket(@Nonnull BlockSource source, @Nonnull ItemStack stack) {
+    private ItemStack emptyBucket(@NotNull BlockSource source, @NotNull ItemStack stack) {
         ServerLevel level = source.level();
         BlockPos placePosition = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
         if (BucketLibUtil.containsBlock(stack)) {

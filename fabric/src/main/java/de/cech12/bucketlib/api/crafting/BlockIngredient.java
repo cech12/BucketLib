@@ -18,12 +18,13 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class BlockIngredient implements CustomIngredient {
 
@@ -63,17 +64,18 @@ public class BlockIngredient implements CustomIngredient {
         } else {
             bucketBlocks = RegistryUtil.getBucketBlocks().stream().filter(bucketBlock -> bucketBlock.block().defaultBlockState().is(this.tag)).toList();
         }
-        for (RegistryUtil.BucketBlock bucketBlock : bucketBlocks) {
-            if (itemStack.getItem() == bucketBlock.bucketItem()) {
-                return true;
-            }
-            return BucketLibUtil.getBlock(itemStack) == bucketBlock.block();
+        if (bucketBlocks.isEmpty()) {
+            return false;
         }
-        return false;
+        RegistryUtil.BucketBlock bucketBlock = bucketBlocks.getFirst();
+        if (itemStack.getItem() == bucketBlock.bucketItem()) {
+            return true;
+        }
+        return BucketLibUtil.getBlock(itemStack) == bucketBlock.block();
     }
 
     @Override
-    public List<Holder<Item>> getMatchingItems() {
+    public Stream<Holder<Item>> getMatchingItems() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
             List<Block> blocks = new ArrayList<>();
@@ -97,7 +99,7 @@ public class BlockIngredient implements CustomIngredient {
                 });
             }
         }
-        return this.matchingStacks;
+        return this.matchingStacks.stream();
     }
 
     @Override
@@ -160,7 +162,7 @@ public class BlockIngredient implements CustomIngredient {
             return new BlockIngredient(blockOptional.get().value());
         }
 
-        private static void write(@Nonnull RegistryFriendlyByteBuf buffer, @Nonnull BlockIngredient ingredient) {
+        private static void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull BlockIngredient ingredient) {
             buffer.writeUtf(ingredient.block != null ? Objects.requireNonNull(BuiltInRegistries.BLOCK.getKey(ingredient.block)).toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }

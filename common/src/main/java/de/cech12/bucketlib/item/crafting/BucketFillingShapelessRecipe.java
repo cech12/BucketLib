@@ -22,8 +22,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,7 +38,7 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
     private final EntityType<?> entityType;
 
     public BucketFillingShapelessRecipe(String group, CraftingBookCategory category, List<Ingredient> ingredients, BucketFillingType fillingType, Optional<Fluid> fluid, Optional<Block> block, Optional<EntityType<?>> entityType) {
-        super(group, category, getAssembledBucket(fillingType, fluid.orElse(null), block.orElse(null), entityType.orElse(null), ingredients.stream().map(ingredient -> ingredient.items().stream().map(itemHolder -> new ItemStack(itemHolder.value())).toList()).flatMap(List::stream).toList()), ingredients);
+        super(group, category, getAssembledBucket(fillingType, fluid.orElse(null), block.orElse(null), entityType.orElse(null), ingredients.stream().map(ingredient -> ingredient.items().map(itemHolder -> new ItemStack(itemHolder.value())).toList()).flatMap(List::stream).toList()), ingredients);
         this.category = category;
         this.ingredients = ingredients;
         this.fillingType = fillingType;
@@ -81,7 +81,7 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
      * Used to check if a recipe matches current crafting inventory
      */
     @Override
-    public boolean matches(@Nonnull CraftingInput input, @Nonnull Level level) {
+    public boolean matches(@NotNull CraftingInput input, @NotNull Level level) {
         ItemStack bucket = getAffectedBucket(input.items());
         if (bucket == ItemStack.EMPTY) {
             return false;
@@ -98,13 +98,13 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
      * Returns an Item that is the result of this recipe
      */
     @Override
-    @Nonnull
-    public ItemStack assemble(CraftingInput input, @Nonnull HolderLookup.Provider provider) {
+    @NotNull
+    public ItemStack assemble(CraftingInput input, @NotNull HolderLookup.Provider provider) {
         return getAssembledBucket(this.fillingType, this.fluid, this.block, this.entityType, input.items());
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public RecipeSerializer<ShapelessRecipe> getSerializer() {
         return (RecipeSerializer<ShapelessRecipe>) (Object) Serializer.INSTANCE;
     }
@@ -132,18 +132,18 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
         }
 
         @Override
-        @Nonnull
+        @NotNull
         public MapCodec<BucketFillingShapelessRecipe> codec() {
             return CODEC;
         }
 
         @Override
-        @Nonnull
+        @NotNull
         public StreamCodec<RegistryFriendlyByteBuf, BucketFillingShapelessRecipe> streamCodec() {
             return STREAM_CODEC;
         }
 
-        @Nonnull
+        @NotNull
         private static BucketFillingShapelessRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
             String group = buf.readUtf();
             CraftingBookCategory category = buf.readEnum(CraftingBookCategory.class);

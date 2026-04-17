@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.fluids.DispenseFluidContainer;
 import net.neoforged.neoforge.fluids.FluidActionResult;
@@ -20,8 +21,8 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -39,6 +40,24 @@ public class NeoforgeFluidHelper implements IFluidHelper {
     @Override
     public int getFluidTemperature(Fluid fluid) {
         return fluid.getFluidType().getTemperature();
+    }
+
+    @Override
+    public int getFluidTintColor(ItemStack stack) {
+        return FluidUtil.getFluidHandler(stack)
+                .map(fluidHandler -> fluidHandler.getFluidInTank(0))
+                .map(fluidStack -> IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack))
+                .orElse(0xFFFFFFFF);
+    }
+
+    @Override
+    public int getFluidLightLevel(Fluid fluid) {
+        return fluid.getFluidType().getLightLevel();
+    }
+
+    @Override
+    public boolean isFluidLighterThanAir(Fluid fluid) {
+        return fluid.getFluidType().isLighterThanAir();
     }
 
     @Override

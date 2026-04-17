@@ -17,7 +17,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -47,9 +46,9 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
@@ -64,8 +63,8 @@ public class UniversalBucketItem extends Item {
     }
 
     @Override
-    @Nonnull
-    public Component getName(@Nonnull ItemStack stack) {
+    @NotNull
+    public Component getName(@NotNull ItemStack stack) {
         String descriptionId = this.getDescriptionId();
         Component argument;
         if (BucketLibUtil.containsEntityType(stack)) {
@@ -179,34 +178,35 @@ public class UniversalBucketItem extends Item {
     }
 
     @Override
-    public void inventoryTick(@Nonnull ItemStack itemStack, @Nonnull Level level, @Nonnull Entity entity, int position, boolean selected) {
+    public void inventoryTick(@NotNull ItemStack itemStack, @NotNull Level level, @NotNull Entity entity, int position, boolean selected) {
         if (!level.isClientSide) {
+            ServerLevel serverLevel = (ServerLevel) level;
             if (!entity.fireImmune() && this.hasBurningContent(itemStack)) {
                 entity.setTicksFrozen(0); //avoid extinguish sounds
                 entity.setRemainingFireTicks(100);
                 if (BucketLibUtil.notCreative(entity) && entity.tickCount % 20 == 0) {
-                    BucketLibUtil.damageByOne(itemStack, (ServerLevel) level, (entity instanceof Player) ? (Player) entity : null);
+                    BucketLibUtil.damageByOne(itemStack, serverLevel, (entity instanceof Player) ? (Player) entity : null);
                 }
             } else if (!entity.isOnFire() && entity.canFreeze() && this.hasFreezingContent(itemStack)) {
                 int ticks = entity.getTicksFrozen() + (entity.isInPowderSnow ? 1 : 3); //2 are subtracted when not in powder snow
                 entity.setTicksFrozen(Math.min(entity.getTicksRequiredToFreeze(), ticks));
                 //damaging here because, the vanilla mechanic is reducing the freeze ticks below fully freezing
                 if (BucketLibUtil.notCreative(entity) && entity.tickCount % 40 == 0 && entity.isFullyFrozen()) {
-                    entity.hurt(level.damageSources().freeze(), entity.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
-                    BucketLibUtil.damageByOne(itemStack, (ServerLevel) level, (entity instanceof Player) ? (Player) entity : null);
+                    entity.hurtServer(serverLevel, level.damageSources().freeze(), entity.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
+                    BucketLibUtil.damageByOne(itemStack, serverLevel, (entity instanceof Player) ? (Player) entity : null);
                 }
             }
         }
     }
 
-    private boolean hasBurningContent(@Nonnull ItemStack itemStack) {
+    private boolean hasBurningContent(@NotNull ItemStack itemStack) {
         Integer burningTemperature = this.getBurningTemperature();
         Fluid fluid = BucketLibUtil.getFluid(itemStack);
         return fluid != Fluids.EMPTY && (burningTemperature != null && Services.FLUID.getFluidTemperature(fluid) >= burningTemperature || this.isBurningFluid(fluid))
                 || this.isBurningBlock(BucketLibUtil.getBlock(itemStack));
     }
 
-    private boolean hasFreezingContent(@Nonnull ItemStack itemStack) {
+    private boolean hasFreezingContent(@NotNull ItemStack itemStack) {
         Integer freezingTemperature = this.getFreezingTemperature();
         Fluid fluid = BucketLibUtil.getFluid(itemStack);
         return fluid != Fluids.EMPTY && (freezingTemperature != null && Services.FLUID.getFluidTemperature(fluid) <= freezingTemperature || this.isFreezingFluid(fluid))
@@ -214,8 +214,8 @@ public class UniversalBucketItem extends Item {
     }
 
     @Override
-    @Nonnull
-    public InteractionResult use(@Nonnull Level level, @Nonnull Player player, @Nonnull InteractionHand interactionHand) {
+    @NotNull
+    public InteractionResult use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand interactionHand) {
         ItemStack itemstack = player.getItemInHand(interactionHand);
         boolean isEmpty = BucketLibUtil.isEmpty(itemstack);
         //check hit block
@@ -314,8 +314,8 @@ public class UniversalBucketItem extends Item {
     }
 
     @Override
-    @Nonnull
-    public InteractionResult interactLivingEntity(@Nonnull ItemStack itemStack, @Nonnull Player player, @Nonnull LivingEntity entity, @Nonnull InteractionHand interactionHand) {
+    @NotNull
+    public InteractionResult interactLivingEntity(@NotNull ItemStack itemStack, @NotNull Player player, @NotNull LivingEntity entity, @NotNull InteractionHand interactionHand) {
         if (entity instanceof Bucketable && !BucketLibUtil.containsEntityType(itemStack) && canHoldEntity(entity.getType())) {
             InteractionResult result = this.pickupEntityWithBucket(player, interactionHand, (LivingEntity & Bucketable) entity);
             if (result.consumesAction()) {
@@ -339,10 +339,9 @@ public class UniversalBucketItem extends Item {
             entity.playSound(entity.getPickupSound(), 1.0F, 1.0F);
             ItemStack filledItemStack = BucketLibUtil.addEntityType(itemStack, entity.getType());
             entity.saveToBucketTag(filledItemStack);
-            Level level = entity.level();
             ItemStack handItemStack = ItemUtils.createFilledResult(itemStack, player, filledItemStack, false);
             player.setItemInHand(interactionHand, handItemStack);
-            if (!level.isClientSide) {
+            if (!entity.level().isClientSide) {
                 CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, new ItemStack(entity.getBucketItemStack().getItem()));
             }
             entity.discard();
@@ -352,8 +351,8 @@ public class UniversalBucketItem extends Item {
     }
 
     @Override
-    @Nonnull
-    public ItemStack finishUsingItem(@Nonnull ItemStack itemStack, @Nonnull Level level, @Nonnull LivingEntity player) {
+    @NotNull
+    public ItemStack finishUsingItem(@NotNull ItemStack itemStack, @NotNull Level level, @NotNull LivingEntity player) {
         if (player instanceof ServerPlayer serverPlayer) {
             CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, new ItemStack(Items.MILK_BUCKET));
             serverPlayer.awardStat(Stats.ITEM_USED.get(Items.MILK_BUCKET));
@@ -368,7 +367,7 @@ public class UniversalBucketItem extends Item {
     }
 
     @Override
-    public int getUseDuration(@Nonnull ItemStack itemStack, @Nonnull LivingEntity livingEntity) {
+    public int getUseDuration(@NotNull ItemStack itemStack, @NotNull LivingEntity livingEntity) {
         if (BucketLibUtil.containsMilk(itemStack)) {
             return 32;
         }
@@ -376,8 +375,8 @@ public class UniversalBucketItem extends Item {
     }
 
     @Override
-    @Nonnull
-    public ItemUseAnimation getUseAnimation(@Nonnull ItemStack itemStack) {
+    @NotNull
+    public ItemUseAnimation getUseAnimation(@NotNull ItemStack itemStack) {
         if (BucketLibUtil.containsMilk(itemStack)) {
             return ItemUseAnimation.DRINK;
         }
@@ -385,7 +384,7 @@ public class UniversalBucketItem extends Item {
     }
 
     @Override
-    public void onUseTick(@Nonnull Level level, @Nonnull LivingEntity livingEntity, @Nonnull ItemStack itemStack, int useRemainingTicks) {
+    public void onUseTick(@NotNull Level level, @NotNull LivingEntity livingEntity, @NotNull ItemStack itemStack, int useRemainingTicks) {
         if (BucketLibUtil.containsMilk(itemStack) && Consumables.MILK_BUCKET.shouldEmitParticlesAndSounds(useRemainingTicks)) {
             Consumables.MILK_BUCKET.emitParticlesAndSounds(level.getRandom(), livingEntity, itemStack, 5);
         }
@@ -463,14 +462,6 @@ public class UniversalBucketItem extends Item {
 
     public int getDurability() {
         return getIntProperty(this.properties.durabilityConfig, this.properties.durability);
-    }
-
-    public boolean isDyeable() {
-        return this.properties.dyeable;
-    }
-
-    public int getDefaultColor() {
-        return this.properties.defaultColor;
     }
 
     public Integer getMaxTemperature() {
@@ -561,9 +552,6 @@ public class UniversalBucketItem extends Item {
         int durability = 0;
         Supplier<Integer> durabilityConfig = null;
 
-        boolean dyeable = false;
-        int defaultColor = -1;
-
         Integer maxTemperature = null;
         Supplier<Integer> maxTemperatureConfig = null;
         Integer upperCrackingTemperature = null;
@@ -648,34 +636,6 @@ public class UniversalBucketItem extends Item {
          */
         public Properties durability(Supplier<Integer> durabilityConfig) {
             this.durabilityConfig = durabilityConfig;
-            return this;
-        }
-
-        /**
-         * Sets a default color of the bucket and enables colored rendering.
-         * Don't forget to add your bucket to the item tag "minecraft:dyeable" to enable the dye recipe.
-         *
-         * @param defaultColor color value {@link ARGB}
-         * @return Properties object
-         */
-        public Properties dyeable(int defaultColor) {
-            this.dyeable = true;
-            this.defaultColor = defaultColor;
-            return this;
-        }
-
-        /**
-         * Sets a default color of the bucket and enables colored rendering.
-         * Don't forget to add your bucket to the item tag "minecraft:dyeable" to enable the dye recipe.
-         *
-         * @param red red value (0-255)
-         * @param green green value (0-255)
-         * @param blue blue value (0-255)
-         * @return Properties object
-         */
-        public Properties dyeable(int red, int green, int blue) {
-            this.dyeable = true;
-            this.defaultColor = ARGB.color(red, green, blue);
             return this;
         }
 

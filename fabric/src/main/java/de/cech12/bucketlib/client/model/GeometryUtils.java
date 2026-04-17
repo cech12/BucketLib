@@ -5,9 +5,9 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockElement;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
 import net.minecraft.client.renderer.block.model.BlockFaceUV;
-import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.FaceBakery;
 import net.minecraft.client.renderer.block.model.ItemModelGenerator;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelState;
@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 public class GeometryUtils {
 
-    private static final FaceBakery FACE_BAKERY = new FaceBakery();
     private static final ItemModelGeneratorAccessor ITEM_MODEL_GENERATOR = (ItemModelGeneratorAccessor) new ItemModelGenerator();
 
     private static final float MASK_OFFSET = 0.002F;
@@ -36,7 +35,7 @@ public class GeometryUtils {
 
     public static List<BlockElement> createUnbakedItemMaskElements(int tintIndex, String name, SpriteContents spriteContents) {
         List<BlockElement> elements = createUnbakedItemElements(tintIndex, name, spriteContents);
-        elements.remove(0);
+        elements.removeFirst();
         int width = spriteContents.width();
         int height = spriteContents.height();
         BitSet bits = new BitSet(width * height);
@@ -92,13 +91,13 @@ public class GeometryUtils {
         return elements;
     }
 
-    public static List<BakedQuad> bakeElements(BlockModel blockModel, List<BlockElement> elements, TextureAtlasSprite sprite, ModelState modelState) {
+    public static List<BakedQuad> bakeElements(ItemTransforms itemTransforms, List<BlockElement> elements, TextureAtlasSprite sprite, ModelState modelState) {
         if (elements.isEmpty()) {
             return List.of();
         } else {
-            SimpleBakedModel.Builder simplebakedmodel$builder = (new SimpleBakedModel.Builder(blockModel, false)).particle(sprite);
-            bakeElements(simplebakedmodel$builder, elements, sprite, modelState);
-            return simplebakedmodel$builder.build().getQuads(null, null, RandomSource.create());
+            SimpleBakedModel.Builder simpleBakedModelBuilder = (new SimpleBakedModel.Builder(false, false, true, itemTransforms)).particle(sprite);
+            bakeElements(simpleBakedModelBuilder, elements, sprite, modelState);
+            return simpleBakedModelBuilder.build().getQuads(null, null, RandomSource.create());
         }
     }
 
@@ -116,7 +115,7 @@ public class GeometryUtils {
     }
 
     private static BakedQuad bakeElementFace(BlockElement element, BlockElementFace face, TextureAtlasSprite sprite, Direction direction, ModelState state) {
-        return FACE_BAKERY.bakeQuad(element.from, element.to, face, sprite, direction, state, element.rotation, element.shade, element.lightEmission);
+        return FaceBakery.bakeQuad(element.from, element.to, face, sprite, direction, state, element.rotation, element.shade, element.lightEmission);
     }
 
 }
