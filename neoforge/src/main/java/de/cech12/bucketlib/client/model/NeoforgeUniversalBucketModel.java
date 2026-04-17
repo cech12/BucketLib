@@ -13,7 +13,6 @@ import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.SpriteGetter;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.NeoForgeRenderTypes;
@@ -23,7 +22,6 @@ import net.neoforged.neoforge.client.model.QuadTransformers;
 import net.neoforged.neoforge.client.model.SimpleModelState;
 import net.neoforged.neoforge.client.model.UnbakedCompositeModel;
 import net.neoforged.neoforge.client.model.UnbakedElementsHelper;
-import org.jetbrains.annotations.NotNull;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -34,15 +32,8 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
     // Depth offsets to prevent Z-fighting
     private static final Transformation DEPTH_OFFSET_TRANSFORM = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(1, 1, 1.002f), new Quaternionf());
 
-    private final ItemTransforms itemTransforms;
-
-    public NeoforgeUniversalBucketModel(@NotNull UniversalBucketModel.Unbaked unbakedModel, @NotNull BakingContext bakingContext) {
-        super(unbakedModel, bakingContext);
-        var baseItemModel = bakingContext.blockModelBaker().getModel(ResourceLocation.withDefaultNamespace("item/generated"));
-        if (baseItemModel == null) {
-            throw new IllegalStateException("Failed to access item/generated model");
-        }
-        this.itemTransforms = baseItemModel.getTransforms();
+    public NeoforgeUniversalBucketModel(UniversalBucketModel.Unbaked unbakedModel, BakingContext bakingContext, ItemTransforms itemTransforms) {
+        super(unbakedModel, bakingContext, itemTransforms);
     }
 
     private static RenderTypeGroup getLayerRenderTypes(boolean unlit) {

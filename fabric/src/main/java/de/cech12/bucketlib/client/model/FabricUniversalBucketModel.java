@@ -23,11 +23,8 @@ import java.util.List;
 
 public class FabricUniversalBucketModel extends UniversalBucketModel {
 
-    private final ItemTransforms itemTransforms;
-
-    public FabricUniversalBucketModel(@NotNull UniversalBucketModel.Unbaked unbakedModel, @NotNull BakingContext bakingContext) {
-        super(unbakedModel, bakingContext);
-        itemTransforms = ItemTransforms.NO_TRANSFORMS; //TODO get item transforms in a better and correct way!
+    public FabricUniversalBucketModel(@NotNull UniversalBucketModel.Unbaked unbakedModel, @NotNull BakingContext bakingContext, ItemTransforms itemTransforms) {
+        super(unbakedModel, bakingContext, itemTransforms);
     }
 
     @Override

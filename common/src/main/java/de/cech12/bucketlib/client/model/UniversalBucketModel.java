@@ -10,6 +10,7 @@ import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
@@ -46,10 +47,12 @@ public abstract class UniversalBucketModel implements ItemModel {
     private Integer lowerBreakTemperature = null;
 
     protected final BakingContext bakingContext;
+    protected final ItemTransforms itemTransforms;
 
-    public UniversalBucketModel(@NotNull UniversalBucketModel.Unbaked unbakedModel, @NotNull BakingContext bakingContext) {
+    public UniversalBucketModel(UniversalBucketModel.Unbaked unbakedModel, BakingContext bakingContext, ItemTransforms itemTransforms) {
         this.unbakedModel = unbakedModel;
         this.bakingContext = bakingContext;
+        this.itemTransforms = itemTransforms;
     }
 
     private static Material getBlockMaterial(ResourceLocation id) {
@@ -167,6 +170,9 @@ public abstract class UniversalBucketModel implements ItemModel {
                 .group(Textures.CODEC.fieldOf("textures").forGetter(Unbaked::textures))
                 .apply(instance, Unbaked::new));
 
+        private static final ResourceLocation ITEM_GENERATED_ID = ResourceLocation.withDefaultNamespace("item/generated");
+        private static ItemTransforms itemTransforms = null;
+
         @Override
         @NotNull
         public MapCodec<? extends ItemModel.Unbaked> type() {
@@ -176,12 +182,14 @@ public abstract class UniversalBucketModel implements ItemModel {
         @Override
         @NotNull
         public ItemModel bake(@NotNull ItemModel.BakingContext bakingContext) {
-            return Services.CLIENT.createItemModel(this, bakingContext);
+            return Services.CLIENT.createItemModel(this, bakingContext, itemTransforms);
         }
 
         @Override
         public void resolveDependencies(@NotNull Resolver resolver) {
-            //No dependencies
+            if (itemTransforms == null) {
+                itemTransforms = resolver.resolve(ITEM_GENERATED_ID).getTransforms();
+            }
         }
 
         public record Textures(
