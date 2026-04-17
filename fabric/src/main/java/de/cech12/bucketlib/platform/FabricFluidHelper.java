@@ -128,7 +128,10 @@ public class FabricFluidHelper implements IFluidHelper {
         ContainerItemContext context = new StackItemContext(stack);
         Storage<FluidVariant> storage = context.find(FluidStorage.ITEM);
         if (storage != null) {
-            return storage.nonEmptyViews().iterator().next().getResource().getFluid();
+            var iterator = storage.nonEmptyViews().iterator();
+            if (iterator.hasNext()) {
+                return iterator.next().getResource().getFluid();
+            }
         }
         return Fluids.EMPTY;
     }

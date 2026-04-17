@@ -45,11 +45,11 @@ public abstract class UniversalBucketModel implements ItemModel {
     private static final Map<ResourceLocation, ResourceLocation> TEXTURE_MAP = Maps.newHashMap();
 
     private static final Material MISSING_LOWER_CONTENT_MATERIAL = getBlockMaterial(getContentTexture(BucketLib.id("missing_lower_content")));
-    private static final Material DEFAULT_FLUID_MASK = getBlockMaterial(getContentTexture(BucketLib.id("mask/bucket_fluid")));
-    private static final Material UNIVERSAL_BUCKET_BASE = getBlockMaterial(getContentTexture(BucketLib.id("universal_bucket_base")));
-    private static final Material UNIVERSAL_BUCKET_CRACKED_BASE = getBlockMaterial(getContentTexture(BucketLib.id("universal_bucket_cracked_base")));
-    private static final Material UNIVERSAL_BUCKET_LOWER_BASE = getBlockMaterial(getContentTexture(BucketLib.id("universal_bucket_lower_base")));
-    private static final Material UNIVERSAL_BUCKET_CRACKED_LOWER_BASE = getBlockMaterial(getContentTexture(BucketLib.id("universal_bucket_cracked_lower_base")));
+    private static final Material DEFAULT_FLUID_MASK = getBlockMaterial(getItemTexture(BucketLib.id("mask/bucket_fluid")));
+    private static final Material UNIVERSAL_BUCKET_BASE = getBlockMaterial(getItemTexture(BucketLib.id("universal_bucket_base")));
+    private static final Material UNIVERSAL_BUCKET_CRACKED_BASE = getBlockMaterial(getItemTexture(BucketLib.id("universal_bucket_cracked_base")));
+    private static final Material UNIVERSAL_BUCKET_LOWER_BASE = getBlockMaterial(getItemTexture(BucketLib.id("universal_bucket_lower_base")));
+    private static final Material UNIVERSAL_BUCKET_CRACKED_LOWER_BASE = getBlockMaterial(getItemTexture(BucketLib.id("universal_bucket_cracked_lower_base")));
 
     private final Unbaked unbakedModel;
     private final Map<String, ItemModel> cache = new IdentityHashMap<>(); // contains all the baked models since they'll never change
@@ -165,12 +165,15 @@ public abstract class UniversalBucketModel implements ItemModel {
 
     }
 
-    public static ResourceLocation getContentTexture(ResourceLocation otherContentLocation) {
-        ResourceLocation texture = TEXTURE_MAP.get(otherContentLocation);
+    public static ResourceLocation getContentTexture(ResourceLocation id) {
+        return getItemTexture(id.withPath(String.format("bucket_content/%s", id.getPath())));
+    }
+
+    public static ResourceLocation getItemTexture(ResourceLocation id) {
+        ResourceLocation texture = TEXTURE_MAP.get(id);
         if (texture == null) {
-            String textureLocation = String.format("item/bucket_content/%s", otherContentLocation.getPath());
-            texture = otherContentLocation.withPath(textureLocation);
-            TEXTURE_MAP.put(otherContentLocation, texture);
+            texture = id.withPath(String.format("item/%s", id.getPath()));
+            TEXTURE_MAP.put(id, texture);
         }
         return texture;
     }
