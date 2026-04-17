@@ -23,6 +23,8 @@ public interface IFluidHelper {
 
     int getFluidTemperature(Fluid fluid);
 
+    int getFluidTintColor(ItemStack stack);
+
     int getFluidLightLevel(Fluid fluid);
 
     boolean isFluidLighterThanAir(Fluid fluid);

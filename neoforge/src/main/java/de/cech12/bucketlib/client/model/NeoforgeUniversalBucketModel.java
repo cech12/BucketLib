@@ -2,6 +2,7 @@ package de.cech12.bucketlib.client.model;
 
 import com.mojang.math.Transformation;
 import de.cech12.bucketlib.api.BucketLibTags;
+import de.cech12.bucketlib.client.color.BucketFluidTint;
 import de.cech12.bucketlib.platform.Services;
 import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.renderer.RenderType;
@@ -17,7 +18,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.NeoForgeRenderTypes;
 import net.neoforged.neoforge.client.RenderTypeGroup;
-import net.neoforged.neoforge.client.color.item.FluidContentsTint;
 import net.neoforged.neoforge.client.model.QuadTransformers;
 import net.neoforged.neoforge.client.model.SimpleModelState;
 import net.neoforged.neoforge.client.model.UnbakedCompositeModel;
@@ -86,7 +86,7 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
 
         modelBuilder.setParticle(particleSprite);
 
-        return new BlockModelWrapper(modelBuilder.build(), List.of(new Constant(-1), FluidContentsTint.INSTANCE));
+        return new BlockModelWrapper(modelBuilder.build(), List.of(new Constant(-1), BucketFluidTint.INSTANCE));
     }
 
 }

@@ -1,6 +1,7 @@
 package de.cech12.bucketlib.client.model;
 
 import de.cech12.bucketlib.api.BucketLibTags;
+import de.cech12.bucketlib.client.color.BucketFluidTint;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.client.color.item.Constant;
@@ -55,7 +56,7 @@ public class FabricUniversalBucketModel extends UniversalBucketModel {
 
         BakedModel bakedModel = new UniversalBucketBakedModel(quads, itemTransforms, particleSprite);
 
-        return new BlockModelWrapper(bakedModel, List.of(new Constant(-1)));
+        return new BlockModelWrapper(bakedModel, List.of(new Constant(-1), BucketFluidTint.INSTANCE));
     }
 
 }

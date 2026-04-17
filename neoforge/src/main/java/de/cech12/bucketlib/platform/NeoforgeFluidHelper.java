@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.fluids.DispenseFluidContainer;
 import net.neoforged.neoforge.fluids.FluidActionResult;
@@ -39,6 +40,14 @@ public class NeoforgeFluidHelper implements IFluidHelper {
     @Override
     public int getFluidTemperature(Fluid fluid) {
         return fluid.getFluidType().getTemperature();
+    }
+
+    @Override
+    public int getFluidTintColor(ItemStack stack) {
+        return FluidUtil.getFluidHandler(stack)
+                .map(fluidHandler -> fluidHandler.getFluidInTank(0))
+                .map(fluidStack -> IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack))
+                .orElse(0xFFFFFFFF);
     }
 
     @Override
