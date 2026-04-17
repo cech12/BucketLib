@@ -3,11 +3,7 @@
         "type": "bucketlib:universal_bucket",
         "textures": {
             "base": "bucketlib:item/test_bucket",
-            "lowerBase": "bucketlib:item/lower_test_bucket",
-            "fluidMask": "bucketlib:item/mask/bucket_fluid",
-            "crackedBase": "bucketlib:item/universal_bucket_cracked_base",
-            "crackedLowerBase": "bucketlib:item/universal_bucket_cracked_lower_base",
-            "crackedFluidMask": "bucketlib:item/mask/bucket_fluid"
+            "lowerBase": "bucketlib:item/lower_test_bucket"
         },
         "tints": [
             {
