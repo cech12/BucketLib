@@ -7,16 +7,21 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
+import de.cech12.bucketlib.client.color.BucketFluidTint;
 import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
+import net.minecraft.client.color.item.Constant;
+import net.minecraft.client.color.item.ItemTintSource;
+import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.SpriteGetter;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -30,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,12 +53,12 @@ public abstract class UniversalBucketModel implements ItemModel {
     private Integer lowerBreakTemperature = null;
 
     protected final BakingContext bakingContext;
-    protected final ItemTransforms itemTransforms;
+    protected final BakedModel baseModel;
 
-    public UniversalBucketModel(UniversalBucketModel.Unbaked unbakedModel, BakingContext bakingContext, ItemTransforms itemTransforms) {
+    public UniversalBucketModel(UniversalBucketModel.Unbaked unbakedModel, BakingContext bakingContext, BakedModel baseModel) {
         this.unbakedModel = unbakedModel;
         this.bakingContext = bakingContext;
-        this.itemTransforms = itemTransforms;
+        this.baseModel = baseModel;
     }
 
     private static Material getBlockMaterial(ResourceLocation id) {
@@ -62,6 +68,7 @@ public abstract class UniversalBucketModel implements ItemModel {
     private ItemModel bakeModelForFluid(Fluid fluid, ResourceLocation otherContent, boolean isCracked, boolean isLower) {
         var sprites = bakingContext.blockModelBaker().sprites();
 
+        ItemTintSource bucketTint = (!unbakedModel.tints().isEmpty()) ? unbakedModel.tints().getFirst() : new Constant(-1);
         Material particleLocation = unbakedModel.textures().particle().map(UniversalBucketModel::getBlockMaterial).orElse(null);
 
         Material baseLocation = null;
@@ -116,10 +123,12 @@ public abstract class UniversalBucketModel implements ItemModel {
         if (particleSprite == null) particleSprite = otherContentSprite;
         if (particleSprite == null) particleSprite = fluidSprite;
 
-        return specialBaking(sprites, fluid, baseSprite, otherContentSprite, fluidSprite, particleSprite, fluidMaskLocation);
+        BakedModel specialModel = specialBaking(sprites, fluid, baseSprite, otherContentSprite, fluidSprite, particleSprite, fluidMaskLocation);
+
+        return new BlockModelWrapper(specialModel, List.of(bucketTint, BucketFluidTint.INSTANCE));
     }
 
-    abstract ItemModel specialBaking(SpriteGetter spriteGetter, Fluid fluid, TextureAtlasSprite baseSprite, TextureAtlasSprite otherContentSprite, TextureAtlasSprite fluidSprite, TextureAtlasSprite particleSprite, Material fluidMaskLocation);
+    abstract BakedModel specialBaking(SpriteGetter spriteGetter, Fluid fluid, TextureAtlasSprite baseSprite, TextureAtlasSprite otherContentSprite, TextureAtlasSprite fluidSprite, TextureAtlasSprite particleSprite, Material fluidMaskLocation);
 
     @Override
     public void update(@NotNull ItemStackRenderState renderState, ItemStack stack, @NotNull ItemModelResolver modelResolver, @NotNull ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int p_387820_) {
@@ -164,14 +173,13 @@ public abstract class UniversalBucketModel implements ItemModel {
         return texture;
     }
 
-    public record Unbaked(Textures textures) implements ItemModel.Unbaked {
+    public record Unbaked(Textures textures, List<ItemTintSource> tints) implements ItemModel.Unbaked {
 
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance
-                .group(Textures.CODEC.fieldOf("textures").forGetter(Unbaked::textures))
+                .group(Textures.CODEC.fieldOf("textures").forGetter(Unbaked::textures), ItemTintSources.CODEC.listOf().optionalFieldOf("tints", List.of()).forGetter(Unbaked::tints))
                 .apply(instance, Unbaked::new));
 
         private static final ResourceLocation ITEM_GENERATED_ID = ResourceLocation.withDefaultNamespace("item/generated");
-        private static ItemTransforms itemTransforms = null;
 
         @Override
         @NotNull
@@ -182,14 +190,13 @@ public abstract class UniversalBucketModel implements ItemModel {
         @Override
         @NotNull
         public ItemModel bake(@NotNull ItemModel.BakingContext bakingContext) {
-            return Services.CLIENT.createItemModel(this, bakingContext, itemTransforms);
+            BakedModel baseModel = bakingContext.bake(ITEM_GENERATED_ID);
+            return Services.CLIENT.createItemModel(this, bakingContext, baseModel);
         }
 
         @Override
         public void resolveDependencies(@NotNull Resolver resolver) {
-            if (itemTransforms == null) {
-                itemTransforms = resolver.resolve(ITEM_GENERATED_ID).getTransforms();
-            }
+            resolver.resolve(ITEM_GENERATED_ID);
         }
 
         public record Textures(

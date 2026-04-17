@@ -8,6 +8,12 @@
             "crackedBase": "bucketlib:item/universal_bucket_cracked_base",
             "crackedLowerBase": "bucketlib:item/universal_bucket_cracked_lower_base",
             "crackedFluidMask": "bucketlib:item/mask/bucket_fluid"
-        }
+        },
+        "tints": [
+            {
+                "type": "minecraft:dye",
+                "default": -6919786
+            }
+        ]
     }
 }

@@ -1,0 +1,6 @@
+{
+  "replace": false,
+  "values": [
+    "bucketlib:test_bucket"
+  ]
+}

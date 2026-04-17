@@ -2,14 +2,10 @@ package de.cech12.bucketlib.client.model;
 
 import com.mojang.math.Transformation;
 import de.cech12.bucketlib.api.BucketLibTags;
-import de.cech12.bucketlib.client.color.BucketFluidTint;
 import de.cech12.bucketlib.platform.Services;
-import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.item.BlockModelWrapper;
-import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelState;
@@ -25,15 +21,13 @@ import net.neoforged.neoforge.client.model.UnbakedElementsHelper;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.List;
-
 public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
 
     // Depth offsets to prevent Z-fighting
     private static final Transformation DEPTH_OFFSET_TRANSFORM = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(1, 1, 1.002f), new Quaternionf());
 
-    public NeoforgeUniversalBucketModel(UniversalBucketModel.Unbaked unbakedModel, BakingContext bakingContext, ItemTransforms itemTransforms) {
-        super(unbakedModel, bakingContext, itemTransforms);
+    public NeoforgeUniversalBucketModel(UniversalBucketModel.Unbaked unbakedModel, BakingContext bakingContext, BakedModel baseModel) {
+        super(unbakedModel, bakingContext, baseModel);
     }
 
     private static RenderTypeGroup getLayerRenderTypes(boolean unlit) {
@@ -41,7 +35,7 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
     }
 
     @Override
-    ItemModel specialBaking(SpriteGetter spriteGetter, Fluid fluid, TextureAtlasSprite baseSprite, TextureAtlasSprite otherContentSprite, TextureAtlasSprite fluidSprite, TextureAtlasSprite particleSprite, Material fluidMaskLocation) {
+    BakedModel specialBaking(SpriteGetter spriteGetter, Fluid fluid, TextureAtlasSprite baseSprite, TextureAtlasSprite otherContentSprite, TextureAtlasSprite fluidSprite, TextureAtlasSprite particleSprite, Material fluidMaskLocation) {
         var sprites = bakingContext.blockModelBaker().sprites();
 
         ModelState state = BlockModelRotation.X0_Y0;
@@ -52,7 +46,7 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
         }
 
         // We need to disable GUI 3D and block lighting for this to render properly
-        var modelBuilder = UnbakedCompositeModel.Baked.builder(true, false, false, particleSprite, itemTransforms);
+        var modelBuilder = UnbakedCompositeModel.Baked.builder(baseModel.useAmbientOcclusion(), baseModel.isGui3d(), false, particleSprite, baseModel.getTransforms());
 
         var normalRenderTypes = getLayerRenderTypes(false);
 
@@ -86,7 +80,7 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
 
         modelBuilder.setParticle(particleSprite);
 
-        return new BlockModelWrapper(modelBuilder.build(), List.of(new Constant(-1), BucketFluidTint.INSTANCE));
+        return modelBuilder.build();
     }
 
 }

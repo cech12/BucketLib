@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class BucketFluidTint implements ItemTintSource  {
+public class BucketFluidTint implements ItemTintSource {
 
     public static final BucketFluidTint INSTANCE = new BucketFluidTint();
     public static final MapCodec<BucketFluidTint> MAP_CODEC = MapCodec.unit(INSTANCE);

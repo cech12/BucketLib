@@ -5,9 +5,9 @@ import de.cech12.bucketlib.client.model.UniversalBucketModel;
 import de.cech12.bucketlib.platform.services.IClientHelper;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.SpriteGetter;
 import net.minecraft.world.level.material.Fluid;
 
@@ -27,8 +27,8 @@ public class FabricClientHelper implements IClientHelper {
     }
 
     @Override
-    public UniversalBucketModel createItemModel(UniversalBucketModel.Unbaked unbakedModel, ItemModel.BakingContext bakingContext, ItemTransforms itemTransforms) {
-        return new FabricUniversalBucketModel(unbakedModel, bakingContext, itemTransforms);
+    public UniversalBucketModel createItemModel(UniversalBucketModel.Unbaked unbakedModel, ItemModel.BakingContext bakingContext, BakedModel baseModel) {
+        return new FabricUniversalBucketModel(unbakedModel, bakingContext, baseModel);
     }
 
 }
