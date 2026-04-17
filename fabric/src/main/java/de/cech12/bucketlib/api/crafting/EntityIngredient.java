@@ -64,13 +64,14 @@ public class EntityIngredient implements CustomIngredient {
         } else {
             bucketEntities = RegistryUtil.getBucketEntities().stream().filter(bucketBlock -> bucketBlock.entityType().is(this.tag)).toList();
         }
-        for (RegistryUtil.BucketEntity bucketEntity : bucketEntities) {
-            if (itemStack.getItem() == bucketEntity.bucketItem()) {
-                return true;
-            }
-            return BucketLibUtil.getEntityType(itemStack) == bucketEntity.entityType();
+        if (bucketEntities.isEmpty()) {
+            return false;
         }
-        return false;
+        RegistryUtil.BucketEntity bucketEntity = bucketEntities.getFirst();
+        if (itemStack.getItem() == bucketEntity.bucketItem()) {
+            return true;
+        }
+        return BucketLibUtil.getEntityType(itemStack) == bucketEntity.entityType();
     }
 
     @Override

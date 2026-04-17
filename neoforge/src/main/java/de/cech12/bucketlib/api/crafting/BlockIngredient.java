@@ -59,13 +59,14 @@ public class BlockIngredient implements ICustomIngredient {
         } else {
             bucketBlocks = RegistryUtil.getBucketBlocks().stream().filter(bucketBlock -> bucketBlock.block().defaultBlockState().is(this.tag)).toList();
         }
-        for (RegistryUtil.BucketBlock bucketBlock : bucketBlocks) {
-            if (itemStack.getItem() == bucketBlock.bucketItem()) {
-                return true;
-            }
-            return BucketLibUtil.getBlock(itemStack) == bucketBlock.block();
+        if (bucketBlocks.isEmpty()) {
+            return false;
         }
-        return false;
+        RegistryUtil.BucketBlock bucketBlock = bucketBlocks.getFirst();
+        if (itemStack.getItem() == bucketBlock.bucketItem()) {
+            return true;
+        }
+        return BucketLibUtil.getBlock(itemStack) == bucketBlock.block();
     }
 
     @Override

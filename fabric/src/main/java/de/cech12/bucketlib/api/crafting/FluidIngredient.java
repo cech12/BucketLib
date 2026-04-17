@@ -76,10 +76,7 @@ public class FluidIngredient implements CustomIngredient {
         Storage<FluidVariant> storage = ContainerItemContext.withConstant(container).find(FluidStorage.ITEM);
         StorageView<FluidVariant> fluidView = null;
         if (storage != null) {
-            for (StorageView<FluidVariant> view : storage.nonEmptyViews()) {
-                fluidView = view;
-                break;
-            }
+            fluidView = storage.nonEmptyViews().iterator().next();
         }
         if (fluidView == null) {
             return false;
