@@ -54,7 +54,7 @@ public class BucketLibTestMod implements ModInitializer {
         registerBucket(WATER_DENYING_BUCKET, new UniversalBucketItem.Properties().deniedFluids(Collections.singletonList(Fluids.WATER)));
         registerBucket(WATER_DENYING_TAG_BUCKET, new UniversalBucketItem.Properties().deniedFluids(WATER_TAG));
         registerBucket(CRACKING_BUCKET, new UniversalBucketItem.Properties().upperCrackingTemperature(1000));
-        registerBucket(COLORED_BUCKET, new UniversalBucketItem.Properties().dyeable(255, 0 ,0));
+        registerBucket(COLORED_BUCKET, new UniversalBucketItem.Properties());
         registerBucket(ANTI_MILK_BUCKET, new UniversalBucketItem.Properties().disableMilking());
         registerBucket(NO_ENTITIES_BUCKET, new UniversalBucketItem.Properties().disableEntityObtaining());
         registerBucket(ANTI_SALMON_BUCKET, new UniversalBucketItem.Properties().deniedEntities(Collections.singletonList(EntityType.SALMON)));

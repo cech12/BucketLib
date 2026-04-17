@@ -23,7 +23,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.Collections;
 
 @Mod(BucketLibTestMod.MOD_ID)
-@EventBusSubscriber(modid= BucketLibTestMod.MOD_ID, bus= EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid= BucketLibTestMod.MOD_ID)
 public class BucketLibTestMod {
 
     public static final String MOD_ID = "bucketlibtest";

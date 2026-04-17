@@ -1,0 +1,8 @@
+{
+  "model": {
+    "type": "bucketlib:universal_bucket",
+    "textures": {
+      "base": "bucketlibtest:item/test_bucket"
+    }
+  }
+}

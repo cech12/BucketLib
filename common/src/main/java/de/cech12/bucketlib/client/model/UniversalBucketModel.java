@@ -220,10 +220,10 @@ public abstract class UniversalBucketModel implements ItemModel {
                                             ResourceLocation.CODEC.optionalFieldOf("crackedFluidMask").forGetter(Textures::crackedFluidMask))
                                     .apply(instance, Textures::new))
                     .validate(textures -> {
-                        if (textures.base.isPresent() && textures.lowerBase.isPresent()) {
+                        if (textures.base.isPresent()) {
                             return DataResult.success(textures);
                         }
-                        return DataResult.error(() -> "Universal bucket model requires at least a base and lowerBase texture.");
+                        return DataResult.error(() -> "Universal bucket model requires at least a base texture.");
                     });
         }
 
