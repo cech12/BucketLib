@@ -103,6 +103,7 @@ public class MilkIngredient implements CustomIngredient {
         }
 
         private static void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull MilkIngredient ingredient) {
+            //nothing to write here
         }
     }
 

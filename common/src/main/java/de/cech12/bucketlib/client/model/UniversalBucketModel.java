@@ -60,7 +60,7 @@ public abstract class UniversalBucketModel implements ItemModel {
     protected final BakingContext bakingContext;
     protected final BakedModel baseModel;
 
-    public UniversalBucketModel(UniversalBucketModel.Unbaked unbakedModel, BakingContext bakingContext, BakedModel baseModel) {
+    protected UniversalBucketModel(UniversalBucketModel.Unbaked unbakedModel, BakingContext bakingContext, BakedModel baseModel) {
         this.unbakedModel = unbakedModel;
         this.bakingContext = bakingContext;
         this.baseModel = baseModel;
@@ -133,7 +133,7 @@ public abstract class UniversalBucketModel implements ItemModel {
     abstract BakedModel specialBaking(SpriteGetter spriteGetter, Fluid fluid, TextureAtlasSprite baseSprite, TextureAtlasSprite otherContentSprite, TextureAtlasSprite fluidSprite, TextureAtlasSprite particleSprite, Material fluidMaskLocation);
 
     @Override
-    public void update(@NotNull ItemStackRenderState renderState, ItemStack stack, @NotNull ItemModelResolver modelResolver, @NotNull ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int p_387820_) {
+    public void update(@NotNull ItemStackRenderState renderState, ItemStack stack, @NotNull ItemModelResolver modelResolver, @NotNull ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int integer) {
         if (stack.getItem() instanceof UniversalBucketItem bucket) {
             boolean containsEntityType = false;
             String content = BucketLibUtil.getEntityTypeString(stack);
@@ -160,7 +160,7 @@ public abstract class UniversalBucketModel implements ItemModel {
                 bakedModel = this.bakeModelForFluid(fluid, ((content != null && fluid == Fluids.EMPTY) ? ResourceLocation.parse(content) : null), isCracked, containsEntityType);
                 cache.put(content, bakedModel);
             }
-            bakedModel.update(renderState, stack, modelResolver, displayContext, level, entity, p_387820_);
+            bakedModel.update(renderState, stack, modelResolver, displayContext, level, entity, integer);
         }
 
     }
@@ -192,8 +192,7 @@ public abstract class UniversalBucketModel implements ItemModel {
         @Override
         @NotNull
         public ItemModel bake(@NotNull ItemModel.BakingContext bakingContext) {
-            BakedModel baseModel = bakingContext.bake(ITEM_GENERATED_ID);
-            return Services.CLIENT.createItemModel(this, bakingContext, baseModel);
+            return Services.CLIENT.createItemModel(this, bakingContext, bakingContext.bake(ITEM_GENERATED_ID));
         }
 
         @Override

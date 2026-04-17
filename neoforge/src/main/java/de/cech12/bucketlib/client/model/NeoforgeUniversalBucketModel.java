@@ -53,7 +53,7 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
         if (baseSprite != null) {
             // build base (insidest)
             var unbaked = UnbakedElementsHelper.createUnbakedItemElements(0, baseSprite);
-            var quads = UnbakedElementsHelper.bakeElements(unbaked, $ -> baseSprite, state);
+            var quads = UnbakedElementsHelper.bakeElements(unbaked, material -> baseSprite, state);
             modelBuilder.addQuads(normalRenderTypes, quads);
         }
 
@@ -62,14 +62,14 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
             var transformedState = new SimpleModelState(state.getRotation().compose(DEPTH_OFFSET_TRANSFORM), state.isUvLocked());
             var unbaked = UnbakedElementsHelper.createUnbakedItemElements(2, otherContentSprite);
             TextureAtlasSprite finalOtherContentSprite = otherContentSprite;
-            var quads = UnbakedElementsHelper.bakeElements(unbaked, $ -> finalOtherContentSprite, transformedState);
+            var quads = UnbakedElementsHelper.bakeElements(unbaked, material -> finalOtherContentSprite, transformedState);
             modelBuilder.addQuads(normalRenderTypes, quads);
         } else if (fluidMaskLocation != null && fluidSprite != null) {
             TextureAtlasSprite templateSprite = sprites.get(fluidMaskLocation);
             // build liquid layer (inside)
             var transformedState = new SimpleModelState(state.getRotation().compose(DEPTH_OFFSET_TRANSFORM), state.isUvLocked());
             var unbaked = UnbakedElementsHelper.createUnbakedItemMaskElements(1, templateSprite); // Use template as mask
-            var quads = UnbakedElementsHelper.bakeElements(unbaked, $ -> fluidSprite, transformedState); // Bake with fluid texture
+            var quads = UnbakedElementsHelper.bakeElements(unbaked, material -> fluidSprite, transformedState); // Bake with fluid texture
 
             var emissive = fluid.getFluidType().getLightLevel() > 0;
             var renderTypes = getLayerRenderTypes(emissive);

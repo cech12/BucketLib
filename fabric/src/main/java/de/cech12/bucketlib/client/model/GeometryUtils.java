@@ -95,9 +95,9 @@ public class GeometryUtils {
         if (elements.isEmpty()) {
             return List.of();
         } else {
-            SimpleBakedModel.Builder simplebakedmodel$builder = (new SimpleBakedModel.Builder(false, false, true, itemTransforms)).particle(sprite);
-            bakeElements(simplebakedmodel$builder, elements, sprite, modelState);
-            return simplebakedmodel$builder.build().getQuads(null, null, RandomSource.create());
+            SimpleBakedModel.Builder simpleBakedModelBuilder = (new SimpleBakedModel.Builder(false, false, true, itemTransforms)).particle(sprite);
+            bakeElements(simpleBakedModelBuilder, elements, sprite, modelState);
+            return simpleBakedModelBuilder.build().getQuads(null, null, RandomSource.create());
         }
     }
 
