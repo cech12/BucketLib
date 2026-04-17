@@ -3,13 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
-## [1.21.4-4.3.0.0] - 2026-??-??
+## [1.21.4-4.3.0.0] - 2026-04-17
 ### Changed
 - Updated to Minecraft 1.21.4 (Fabric 0.116.0+1.21.4, NeoForge 21.4.157)
 - Updated Cloth Config support (17.0.144) (Fabric/Quilt)
 - Updated ModMenu support (13.0.3) (Fabric/Quilt)
 - Updated REI support (18.0.808) (NeoForge, Fabric/Quilt)
 - Re-added JEI support (20.0.0.4) (NeoForge)
+- new mod specific model type "bucketlib:universal_bucket" with "textures" and "tints" entries to support the new vanilla item model system 
 - Coloring buckets was removed from the API, because colors are defined in the item model files https://minecraft.wiki/w/Items_model_definition and with the "minecraft:dyeable" item tag
 
 ## [1.21.3-4.2.5.0] - 2026-04-15

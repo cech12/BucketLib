@@ -1,7 +1,6 @@
 package de.cech12.bucketlib;
 
 import de.cech12.bucketlib.api.BucketLib;
-import de.cech12.bucketlib.api.BucketLibApi;
 import de.cech12.bucketlib.api.BucketLibComponents;
 import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.crafting.BlockIngredient;
@@ -18,7 +17,6 @@ import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -55,14 +53,6 @@ public class BucketLibMod {
 
     public static DeferredHolder<DataComponentType<?>, DataComponentType<SimpleFluidContent>> FLUID_COMPONENT = DATA_COMPONENT_TYPES.register(BucketLibComponents.FLUID_LOCATION.getPath(), () -> new DataComponentType.Builder<SimpleFluidContent>().persistent(SimpleFluidContent.CODEC).networkSynchronized(SimpleFluidContent.STREAM_CODEC).build());
 
-    //TODO remove test
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, BucketLib.MOD_ID);
-    public static final DeferredHolder<Item, ?> TEST_BUCKET = ITEMS.register("test_bucket", () -> new UniversalBucketItem(ResourceKey.create(BuiltInRegistries.ITEM.key(), BucketLib.id("test_bucket")), new UniversalBucketItem.Properties()));
-
-    private void register(RegisterCapabilitiesEvent evt) {
-        BucketLibApi.registerBucket(evt, TEST_BUCKET.getId());
-    }
-
     static {
         DATA_COMPONENT_TYPES.register(BucketLibComponents.BUCKET_CONTENT_LOCATION.getPath(), () -> BucketLibComponents.BUCKET_CONTENT);
 
@@ -91,10 +81,6 @@ public class BucketLibMod {
         RECIPE_SERIALIZERS.register(eventBus);
         //ingredient serializer
         INGREDIENT_TYPES.register(eventBus);
-
-        //TODO remove test
-        ITEMS.register(eventBus);
-        eventBus.addListener(this::register);
     }
 
     public static List<UniversalBucketItem> getRegisteredBuckets() {

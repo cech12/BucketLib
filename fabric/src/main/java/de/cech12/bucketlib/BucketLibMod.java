@@ -1,7 +1,6 @@
 package de.cech12.bucketlib;
 
 import de.cech12.bucketlib.api.BucketLib;
-import de.cech12.bucketlib.api.BucketLibApi;
 import de.cech12.bucketlib.api.BucketLibComponents;
 import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.crafting.BlockIngredient;
@@ -17,17 +16,12 @@ import de.cech12.bucketlib.item.crafting.BucketFillingShapedRecipe;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapelessRecipe;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 
@@ -42,12 +36,6 @@ public class BucketLibMod implements ModInitializer {
     public static DataComponentType<FluidStorageData> STORAGE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, BucketLibComponents.FLUID_LOCATION,
             new DataComponentType.Builder<FluidStorageData>().persistent(FluidStorageData.CODEC).networkSynchronized(FluidStorageData.STREAM_CODEC).build()
     );
-
-    //TODO remove test bucket
-    public static final ResourceLocation TEST_BUCKET_ID = BucketLib.id("test_bucket");
-    public static final Item TEST_BUCKET = Registry.register(BuiltInRegistries.ITEM, TEST_BUCKET_ID, new UniversalBucketItem(
-            ResourceKey.create(BuiltInRegistries.ITEM.key(), TEST_BUCKET_ID),
-            new UniversalBucketItem.Properties()));
 
     static {
         Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, BucketLibComponents.BUCKET_CONTENT_LOCATION, BucketLibComponents.BUCKET_CONTENT);
@@ -73,14 +61,6 @@ public class BucketLibMod implements ModInitializer {
         CommonLoader.init();
         //Ensure that the tags are initialized
         BucketLibTags.init();
-
-        //TODO remove!!
-        //register bucket
-        BucketLibApi.registerBucket(TEST_BUCKET_ID);
-        //register creative tab
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(content -> {
-            content.accept(TEST_BUCKET);
-        });
     }
 
     public static void addBucket(UniversalBucketItem bucket) {
