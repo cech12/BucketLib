@@ -6,7 +6,6 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.util.TriState;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -20,7 +19,7 @@ public class ItemBlockRenderTypesMixin {
     // avoid transparent fluid textures let you look through the bucket base texture
     @Unique
     private static final RenderType UNSORTED_TRANSLUCENT = RenderType.create("bucketlib_entity_unsorted_translucent", 256, true, false, RenderPipelines.ENTITY_TRANSLUCENT, RenderType.CompositeState.builder()
-            .setTextureState(new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_BLOCKS, TriState.DEFAULT, false))
+            .setTextureState(new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_BLOCKS, false))
             .setLightmapState(RenderType.LIGHTMAP)
             .setOverlayState(RenderType.OVERLAY)
             .createCompositeState(true));

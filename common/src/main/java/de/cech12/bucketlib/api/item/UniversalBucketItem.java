@@ -56,6 +56,9 @@ import java.util.function.Supplier;
 
 public class UniversalBucketItem extends Item {
 
+    public static final String DESCRIPTION_ENTITY_SUFFIX = ".entity";
+    public static final String DESCRIPTION_FILLED_SUFFIX = ".filled";
+
     private final Properties properties;
 
     public UniversalBucketItem(ResourceKey<Item> id, Properties properties) {
@@ -69,19 +72,19 @@ public class UniversalBucketItem extends Item {
         String descriptionId = this.getDescriptionId();
         Component argument;
         if (BucketLibUtil.containsEntityType(stack)) {
-            descriptionId += ".entity";
+            descriptionId += DESCRIPTION_ENTITY_SUFFIX;
             EntityType<?> entityType = BucketLibUtil.getEntityType(stack);
             argument = (entityType != null) ? entityType.getDescription() : Component.literal("?");
         } else if (BucketLibUtil.containsFluid(stack)) {
-            descriptionId += ".filled";
+            descriptionId += DESCRIPTION_FILLED_SUFFIX;
             Fluid fluid = BucketLibUtil.getFluid(stack);
             argument = Services.FLUID.getFluidDescription(fluid);
         } else if (BucketLibUtil.containsBlock(stack)) {
-            descriptionId += ".filled";
+            descriptionId += DESCRIPTION_FILLED_SUFFIX;
             Block block = BucketLibUtil.getBlock(stack);
             argument = (block != null) ? block.getName() : Component.literal("?");
         } else if (BucketLibUtil.containsMilk(stack)) {
-            descriptionId += ".filled";
+            descriptionId += DESCRIPTION_FILLED_SUFFIX;
             argument = Component.translatable(Services.PLATFORM.getMilkTranslationKey());
         } else {
             //is empty
@@ -406,14 +409,14 @@ public class UniversalBucketItem extends Item {
         ItemStack result = itemStack.copy();
         boolean damaged = BucketLibUtil.containsFluid(result); //damaging is done by fluid handler
         if (BucketLibUtil.containsBlock(result)) {
-            result = BucketLibUtil.removeBlock(result, null, null, !damaged); //TODO get ServerLevel!
+            result = BucketLibUtil.removeBlock(result, null, null, !damaged); //ServerLevel not available here
             damaged = true;
         }
         if (BucketLibUtil.containsEntityType(result)) {
-            result = BucketLibUtil.removeEntityData(result, null, null, !damaged); //TODO get ServerLevel!
+            result = BucketLibUtil.removeEntityData(result, null, null, !damaged); //ServerLevel not available here
         }
         if (BucketLibUtil.containsFluid(result) || BucketLibUtil.containsMilk(result)) {
-            result = BucketLibUtil.removeFluid(result, null, null); //TODO get ServerLevel!
+            result = BucketLibUtil.removeFluid(result, null, null); //ServerLevel not available here
         }
         return result;
     }

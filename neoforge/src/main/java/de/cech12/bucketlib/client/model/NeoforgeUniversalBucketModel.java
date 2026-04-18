@@ -14,7 +14,6 @@ import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.NeoForgeRenderTypes;
-import net.neoforged.neoforge.client.RenderTypeGroup;
 import net.neoforged.neoforge.client.color.item.FluidContentsTint;
 import net.neoforged.neoforge.client.model.ComposedModelState;
 import net.neoforged.neoforge.client.model.QuadTransformers;
@@ -34,8 +33,8 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
         super(unbakedModel, bakingContext);
     }
 
-    private static RenderTypeGroup getLayerRenderTypes(boolean unlit) {
-        return new RenderTypeGroup(RenderType.translucent(), unlit ? NeoForgeRenderTypes.ITEM_UNSORTED_UNLIT_TRANSLUCENT.get() : NeoForgeRenderTypes.ITEM_UNSORTED_TRANSLUCENT.get());
+    private static RenderType getLayerRenderType(boolean unlit) {
+        return unlit ? NeoForgeRenderTypes.ITEM_UNSORTED_UNLIT_TRANSLUCENT.get() : NeoForgeRenderTypes.ITEM_UNSORTED_TRANSLUCENT.get();
     }
 
     @Override
@@ -48,13 +47,13 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
         List<ItemModel> subModels = new ArrayList<>();
         ModelRenderProperties renderProperties = new ModelRenderProperties(false, particleSprite, itemTransforms);
 
-        var normalRenderTypes = getLayerRenderTypes(false);
+        var normalRenderType = getLayerRenderType(false);
 
         if (baseSprite != null) {
             // build base (insidest)
             var unbaked = UnbakedElementsHelper.createUnbakedItemElements(0, baseSprite);
             var quads = UnbakedElementsHelper.bakeElements(unbaked, material -> baseSprite, state);
-            subModels.add(new BlockModelWrapper(List.of(bucketTint), quads, renderProperties, normalRenderTypes.entity()));
+            subModels.add(new BlockModelWrapper(List.of(bucketTint), quads, renderProperties, normalRenderType));
         }
 
         if (otherContentSprite != null) {
@@ -62,7 +61,7 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
             var unbaked = UnbakedElementsHelper.createUnbakedItemElements(0, otherContentSprite);
             var quads = UnbakedElementsHelper.bakeElements(unbaked, material -> otherContentSprite, transformedState);
 
-            subModels.add(new BlockModelWrapper(List.of(), quads, renderProperties, normalRenderTypes.entity()));
+            subModels.add(new BlockModelWrapper(List.of(), quads, renderProperties, normalRenderType));
         } else if (fluidSprite != null && fluidMaskSprite != null) {
             // build liquid layer (inside)
             var transformedState = new ComposedModelState(state, DEPTH_OFFSET_TRANSFORM);
@@ -70,10 +69,10 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
             var quads = UnbakedElementsHelper.bakeElements(unbaked, material -> fluidSprite, transformedState); // Bake with fluid texture
 
             var emissive = fluid.getFluidType().getLightLevel() > 0;
-            var renderTypes = getLayerRenderTypes(emissive);
+            var renderType = getLayerRenderType(emissive);
             if (emissive) QuadTransformers.settingEmissivity(fluid.getFluidType().getLightLevel()).processInPlace(quads);
 
-            subModels.add(new BlockModelWrapper(List.of(FluidContentsTint.INSTANCE), quads, renderProperties, renderTypes.entity()));
+            subModels.add(new BlockModelWrapper(List.of(FluidContentsTint.INSTANCE), quads, renderProperties, renderType));
         }
 
         return subModels;

@@ -9,6 +9,6 @@ public class BucketLibComponents {
     public static final ResourceLocation BUCKET_CONTENT_LOCATION = BucketLib.id("bucket_content");
     public static final ResourceLocation FLUID_LOCATION = BucketLib.id("fluid");
 
-    public static DataComponentType<CustomData> BUCKET_CONTENT = new DataComponentType.Builder<CustomData>().persistent(CustomData.CODEC).networkSynchronized(CustomData.STREAM_CODEC).build();
+    public static final DataComponentType<CustomData> BUCKET_CONTENT = new DataComponentType.Builder<CustomData>().persistent(CustomData.CODEC).networkSynchronized(CustomData.STREAM_CODEC).build();
 
 }

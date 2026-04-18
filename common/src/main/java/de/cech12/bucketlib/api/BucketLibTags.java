@@ -8,6 +8,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class BucketLibTags {
 
+    private BucketLibTags() {
+        //avoid instantiating this class
+    }
+
     /**
      * Call to force make sure this is all initialized
      */
@@ -21,6 +25,7 @@ public class BucketLibTags {
         public static final TagKey<EntityType<?>> MILKABLE = tag("milkable");
 
         private static void init() {
+            //empty method to be called to initialize the static fields
         }
 
         private static TagKey<EntityType<?>> tag(@NotNull String name) {
@@ -35,6 +40,7 @@ public class BucketLibTags {
         public static final TagKey<Fluid> NO_FLIPPING = tag("no_flipping");
 
         private static void init() {
+            //empty method to be called to initialize the static fields
         }
 
         private static TagKey<Fluid> tag(@NotNull String name) {
