@@ -12,9 +12,10 @@
     },
     "B": "minecraft:sugar",
     "C": "minecraft:wheat",
-    "E": "minecraft:egg"
+    "E": "#minecraft:eggs"
   },
   "result": {
+    "count": 1,
     "id": "minecraft:cake"
   }
 }
