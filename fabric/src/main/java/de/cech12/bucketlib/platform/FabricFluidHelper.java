@@ -232,7 +232,7 @@ public class FabricFluidHelper implements IFluidHelper {
             int z = pos.getZ();
             level.playSound(player, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (level.random.nextFloat() - level.random.nextFloat()) * 0.8F);
             for (int i = 0; i < 8; ++i) {
-                level.addParticle(ParticleTypes.LARGE_SMOKE, (double) x + Math.random(), (double) y + Math.random(), (double) z + Math.random(), 0.0, 0.0, 0.0);
+                level.addParticle(ParticleTypes.LARGE_SMOKE, (double) x + level.random.nextDouble(), (double) y + level.random.nextDouble(), (double) z + level.random.nextDouble(), 0.0, 0.0, 0.0);
             }
             return new Tuple<>(true, BucketLibUtil.removeFluid(stack, serverLevel, player));
         }
