@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [1.21.5-4.4.0.2] - 2026-04-18
+### Changed
+- re-added JEI as optional dependency for NeoForge
+
 ## [1.21.5-4.4.0.1] - 2026-04-18
 ### Fixed
 - fixed cake recipe to use the minecraft:eggs item tag instead of the vanilla egg item
