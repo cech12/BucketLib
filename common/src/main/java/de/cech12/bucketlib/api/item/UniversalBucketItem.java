@@ -23,6 +23,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.player.Player;
@@ -178,23 +179,20 @@ public class UniversalBucketItem extends Item {
     }
 
     @Override
-    public void inventoryTick(@NotNull ItemStack itemStack, @NotNull Level level, @NotNull Entity entity, int position, boolean selected) {
-        if (!level.isClientSide) {
-            ServerLevel serverLevel = (ServerLevel) level;
-            if (!entity.fireImmune() && this.hasBurningContent(itemStack)) {
-                entity.setTicksFrozen(0); //avoid extinguish sounds
-                entity.setRemainingFireTicks(100);
-                if (BucketLibUtil.notCreative(entity) && entity.tickCount % 20 == 0) {
-                    BucketLibUtil.damageByOne(itemStack, serverLevel, (entity instanceof Player) ? (Player) entity : null);
-                }
-            } else if (!entity.isOnFire() && entity.canFreeze() && this.hasFreezingContent(itemStack)) {
-                int ticks = entity.getTicksFrozen() + (entity.isInPowderSnow ? 1 : 3); //2 are subtracted when not in powder snow
-                entity.setTicksFrozen(Math.min(entity.getTicksRequiredToFreeze(), ticks));
-                //damaging here because, the vanilla mechanic is reducing the freeze ticks below fully freezing
-                if (BucketLibUtil.notCreative(entity) && entity.tickCount % 40 == 0 && entity.isFullyFrozen()) {
-                    entity.hurtServer(serverLevel, level.damageSources().freeze(), entity.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
-                    BucketLibUtil.damageByOne(itemStack, serverLevel, (entity instanceof Player) ? (Player) entity : null);
-                }
+    public void inventoryTick(@NotNull ItemStack itemStack, @NotNull ServerLevel level, @NotNull Entity entity, @Nullable EquipmentSlot slot) {
+        if (!entity.fireImmune() && this.hasBurningContent(itemStack)) {
+            entity.setTicksFrozen(0); //avoid extinguish sounds
+            entity.setRemainingFireTicks(100);
+            if (BucketLibUtil.notCreative(entity) && entity.tickCount % 20 == 0) {
+                BucketLibUtil.damageByOne(itemStack, level, (entity instanceof Player) ? (Player) entity : null);
+            }
+        } else if (!entity.isOnFire() && entity.canFreeze() && this.hasFreezingContent(itemStack)) {
+            int ticks = entity.getTicksFrozen() + (entity.isInPowderSnow ? 1 : 3); //2 are subtracted when not in powder snow
+            entity.setTicksFrozen(Math.min(entity.getTicksRequiredToFreeze(), ticks));
+            //damaging here because, the vanilla mechanic is reducing the freeze ticks below fully freezing
+            if (BucketLibUtil.notCreative(entity) && entity.tickCount % 40 == 0 && entity.isFullyFrozen()) {
+                entity.hurtServer(level, level.damageSources().freeze(), entity.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
+                BucketLibUtil.damageByOne(itemStack, level, (entity instanceof Player) ? (Player) entity : null);
             }
         }
     }

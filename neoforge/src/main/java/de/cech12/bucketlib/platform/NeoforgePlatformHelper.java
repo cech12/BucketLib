@@ -8,10 +8,8 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.Objects;
@@ -41,7 +39,7 @@ public class NeoforgePlatformHelper implements IPlatformHelper {
         if (ServerLifecycleHooks.getCurrentServer() != null) {
             return ServerLifecycleHooks.getCurrentServer().overworld();
         }
-        return LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT).orElse(null);
+        return null;
     }
 
     @Override

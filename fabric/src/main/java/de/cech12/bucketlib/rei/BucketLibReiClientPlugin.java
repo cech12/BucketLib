@@ -34,7 +34,7 @@ public class BucketLibReiClientPlugin implements REIClientPlugin {
                     if (fluid != Fluids.EMPTY && bucketItem.canHoldFluid(fluid) && fluid.defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {
                         ItemStack bucket = BucketLibUtil.addFluid(new ItemStack(bucketItem), fluid);
                         ItemStack enchantedBucket = bucket.copy();
-                        enchantedBucket.enchant(data.enchantment, data.level);
+                        enchantedBucket.enchant(data.enchantment(), data.level());
                         registry.add(new DefaultAnvilDisplay(
                                 List.of(EntryIngredients.of(bucket), EntryIngredients.of(EnchantmentHelper.createBook(data))),
                                 List.of(EntryIngredients.of(enchantedBucket)),

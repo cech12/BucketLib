@@ -66,7 +66,7 @@ public class BucketLibUtil {
             //player.broadcastBreakEvent(hand); //does not work here to play the sound, because the hand is empty until this event gotten
             if (!initialStack.isEmpty()) {
                 if (!player.isSilent()) {
-                    player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK, player.getSoundSource(), 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F, false);
+                    player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK.value(), player.getSoundSource(), 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F, false);
                 }
                 ((LivingEntityAccessor) player).bucketlib_spawnItemParticles(initialStack, 5);
             }
@@ -141,7 +141,7 @@ public class BucketLibUtil {
     private static String getTagContent(ItemStack itemStack, String tagName) {
         CustomData customdata = itemStack.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
         if (customdata.contains(tagName)) {
-            return customdata.copyTag().getString(tagName);
+            return customdata.copyTag().getString(tagName).orElse(null);
         }
         return null;
     }

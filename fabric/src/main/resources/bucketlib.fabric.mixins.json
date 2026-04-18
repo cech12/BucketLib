@@ -7,7 +7,7 @@
   ],
   "client": [
     "FuelValuesMixin",
-    "ItemModelGeneratorAccessor"
+    "ItemBlockRenderTypesMixin"
   ],
   "server": [
   ],

@@ -78,9 +78,9 @@ public class ModJEIPlugin implements IModPlugin {
                     if (fluid != Fluids.EMPTY && bucketItem.canHoldFluid(fluid) && fluid.defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {
                         ItemStack bucket = BucketLibUtil.addFluid(new ItemStack(bucketItem), fluid);
                         ItemStack enchantedBook = new ItemStack(Items.ENCHANTED_BOOK);
-                        enchantedBook.enchant(data.enchantment, data.level);
+                        enchantedBook.enchant(data.enchantment(), data.level());
                         ItemStack enchantedBucket = bucket.copy();
-                        enchantedBucket.enchant(data.enchantment, data.level);
+                        enchantedBucket.enchant(data.enchantment(), data.level());
                         recipes.add(factory.createAnvilRecipe(bucket,
                                 Collections.singletonList(enchantedBook),
                                 Collections.singletonList(enchantedBucket),

@@ -7,23 +7,22 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
-import de.cech12.bucketlib.client.color.BucketFluidTint;
 import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.item.BlockModelWrapper;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.item.CompositeModel;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.SpriteGetter;
+import net.minecraft.client.resources.model.ModelDebugName;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -44,12 +43,16 @@ public abstract class UniversalBucketModel implements ItemModel {
 
     private static final Map<ResourceLocation, ResourceLocation> TEXTURE_MAP = Maps.newHashMap();
 
+    private static final ResourceLocation ITEM_GENERATED_ID = ResourceLocation.withDefaultNamespace("item/generated");
+
     private static final Material MISSING_LOWER_CONTENT_MATERIAL = getBlockMaterial(getContentTexture(BucketLib.id("missing_lower_content")));
     private static final Material DEFAULT_FLUID_MASK = getBlockMaterial(getItemTexture(BucketLib.id("mask/bucket_fluid")));
     private static final Material UNIVERSAL_BUCKET_BASE = getBlockMaterial(getItemTexture(BucketLib.id("universal_bucket_base")));
     private static final Material UNIVERSAL_BUCKET_CRACKED_BASE = getBlockMaterial(getItemTexture(BucketLib.id("universal_bucket_cracked_base")));
     private static final Material UNIVERSAL_BUCKET_LOWER_BASE = getBlockMaterial(getItemTexture(BucketLib.id("universal_bucket_lower_base")));
     private static final Material UNIVERSAL_BUCKET_CRACKED_LOWER_BASE = getBlockMaterial(getItemTexture(BucketLib.id("universal_bucket_cracked_lower_base")));
+
+    private static final ModelDebugName DEBUG_NAME = () -> "UniversalBucketModel";
 
     private final Unbaked unbakedModel;
     private final Map<String, ItemModel> cache = new IdentityHashMap<>(); // contains all the baked models since they'll never change
@@ -58,12 +61,12 @@ public abstract class UniversalBucketModel implements ItemModel {
     private Integer lowerBreakTemperature = null;
 
     protected final BakingContext bakingContext;
-    protected final BakedModel baseModel;
+    protected final ItemTransforms itemTransforms;
 
-    protected UniversalBucketModel(UniversalBucketModel.Unbaked unbakedModel, BakingContext bakingContext, BakedModel baseModel) {
+    protected UniversalBucketModel(UniversalBucketModel.Unbaked unbakedModel, BakingContext bakingContext) {
         this.unbakedModel = unbakedModel;
         this.bakingContext = bakingContext;
-        this.baseModel = baseModel;
+        this.itemTransforms = bakingContext.blockModelBaker().getModel(ITEM_GENERATED_ID).getTopTransforms();
     }
 
     private static Material getBlockMaterial(ResourceLocation id) {
@@ -106,31 +109,33 @@ public abstract class UniversalBucketModel implements ItemModel {
             }
         }
         //oversteer fluid texture if available
-        if (otherContentLocation == null && fluidLocation != null && !MissingTextureAtlasSprite.getLocation().equals(sprites.get(fluidLocation).contents().name())) {
+        if (otherContentLocation == null && fluidLocation != null && !MissingTextureAtlasSprite.getLocation().equals(sprites.get(fluidLocation, DEBUG_NAME).contents().name())) {
             otherContentLocation = fluidLocation;
         }
 
-        TextureAtlasSprite baseSprite = sprites.get(baseLocation);
+        TextureAtlasSprite baseSprite = sprites.get(baseLocation, DEBUG_NAME);
         TextureAtlasSprite otherContentSprite = null;
         if (otherContentLocation != null) {
-            otherContentSprite = sprites.get(otherContentLocation);
+            otherContentSprite = sprites.get(otherContentLocation, DEBUG_NAME);
             //if content texture is missing - fallback to pink content texture
             if (MissingTextureAtlasSprite.getLocation().equals(otherContentSprite.contents().name())) {
-                otherContentSprite = sprites.get(MISSING_LOWER_CONTENT_MATERIAL);
+                otherContentSprite = sprites.get(MISSING_LOWER_CONTENT_MATERIAL, DEBUG_NAME);
             }
         }
-        TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? Services.CLIENT.getFluidTextureMaterial(sprites, fluid) : null;
-        TextureAtlasSprite particleSprite = particleLocation != null ? sprites.get(particleLocation) : null;
+        TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? Services.CLIENT.getFluidTextureMaterial(sprites, DEBUG_NAME, fluid) : null;
+        TextureAtlasSprite fluidMaskSprite = (fluidMaskLocation != null && fluidSprite != null) ? sprites.get(fluidMaskLocation, DEBUG_NAME) : null;
+
+        TextureAtlasSprite particleSprite = particleLocation != null ? sprites.get(particleLocation, DEBUG_NAME) : null;
         if (particleSprite == null){
             particleSprite = baseSprite;
         }
 
-        BakedModel specialModel = specialBaking(sprites, fluid, baseSprite, otherContentSprite, fluidSprite, particleSprite, fluidMaskLocation);
+        List<ItemModel> itemModels = specialBaking(fluid, bucketTint, baseSprite, otherContentSprite, fluidSprite, fluidMaskSprite, particleSprite);
 
-        return new BlockModelWrapper(specialModel, List.of(bucketTint, BucketFluidTint.INSTANCE));
+        return new CompositeModel(itemModels);
     }
 
-    abstract BakedModel specialBaking(SpriteGetter spriteGetter, Fluid fluid, TextureAtlasSprite baseSprite, TextureAtlasSprite otherContentSprite, TextureAtlasSprite fluidSprite, TextureAtlasSprite particleSprite, Material fluidMaskLocation);
+    abstract List<ItemModel> specialBaking(Fluid fluid, ItemTintSource bucketTint, TextureAtlasSprite baseSprite, TextureAtlasSprite otherContentSprite, TextureAtlasSprite fluidSprite, TextureAtlasSprite fluidMaskSprite, TextureAtlasSprite particleSprite);
 
     @Override
     public void update(@NotNull ItemStackRenderState renderState, ItemStack stack, @NotNull ItemModelResolver modelResolver, @NotNull ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int integer) {
@@ -184,8 +189,6 @@ public abstract class UniversalBucketModel implements ItemModel {
                 .group(Textures.CODEC.fieldOf("textures").forGetter(Unbaked::textures), ItemTintSources.CODEC.listOf().optionalFieldOf("tints", List.of()).forGetter(Unbaked::tints))
                 .apply(instance, Unbaked::new));
 
-        private static final ResourceLocation ITEM_GENERATED_ID = ResourceLocation.withDefaultNamespace("item/generated");
-
         @Override
         @NotNull
         public MapCodec<? extends ItemModel.Unbaked> type() {
@@ -195,12 +198,12 @@ public abstract class UniversalBucketModel implements ItemModel {
         @Override
         @NotNull
         public ItemModel bake(@NotNull ItemModel.BakingContext bakingContext) {
-            return Services.CLIENT.createItemModel(this, bakingContext, bakingContext.bake(ITEM_GENERATED_ID));
+            return Services.CLIENT.createItemModel(this, bakingContext);
         }
 
         @Override
         public void resolveDependencies(@NotNull Resolver resolver) {
-            resolver.resolve(ITEM_GENERATED_ID);
+            //no dependencies
         }
 
         public record Textures(

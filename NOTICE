@@ -1,0 +1,8 @@
+THIRD-PARTY CODE
+================
+
+All files in the package de.cech12.bucketlib.client.model.neoforge
+(fabric/src/main/java/de/cech12/bucketlib/client/model/neoforge/)
+contain code derived from NeoForge.
+Source: https://github.com/neoforged/NeoForge
+License: LGPL-2.1-only (see LICENSE-LGPLv2.1)
