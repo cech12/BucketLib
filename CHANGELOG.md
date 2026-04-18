@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [1.21.4-4.3.0.2] - 2026-04-18
+### Changed
+- re-added JEI as optional dependency for NeoForge
+
 ## [1.21.4-4.3.0.1] - 2026-04-17
 ### Fixed
 - fixed missing access widener setting in fabric.mod.json to fix startup crash (Fabric)
