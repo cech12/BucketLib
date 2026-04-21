@@ -7,8 +7,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
+import de.cech12.bucketlib.client.ClientServices;
 import de.cech12.bucketlib.client.color.BucketFluidTint;
-import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.color.item.ItemTintSource;
@@ -119,7 +119,7 @@ public abstract class UniversalBucketModel implements ItemModel {
                 otherContentSprite = sprites.get(MISSING_LOWER_CONTENT_MATERIAL);
             }
         }
-        TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? Services.CLIENT.getFluidTextureMaterial(sprites, fluid) : null;
+        TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? ClientServices.CLIENT.getFluidTextureMaterial(sprites, fluid) : null;
         TextureAtlasSprite particleSprite = particleLocation != null ? sprites.get(particleLocation) : null;
         if (particleSprite == null){
             particleSprite = baseSprite;
@@ -195,7 +195,7 @@ public abstract class UniversalBucketModel implements ItemModel {
         @Override
         @NotNull
         public ItemModel bake(@NotNull ItemModel.BakingContext bakingContext) {
-            return Services.CLIENT.createItemModel(this, bakingContext, bakingContext.bake(ITEM_GENERATED_ID));
+            return ClientServices.CLIENT.createItemModel(this, bakingContext, bakingContext.bake(ITEM_GENERATED_ID));
         }
 
         @Override
