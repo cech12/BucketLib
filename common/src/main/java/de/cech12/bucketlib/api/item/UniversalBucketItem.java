@@ -342,7 +342,7 @@ public class UniversalBucketItem extends Item {
             entity.saveToBucketTag(filledItemStack);
             ItemStack handItemStack = ItemUtils.createFilledResult(itemStack, player, filledItemStack, false);
             player.setItemInHand(interactionHand, handItemStack);
-            if (!entity.level().isClientSide) {
+            if (!entity.level().isClientSide()) {
                 CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, new ItemStack(entity.getBucketItemStack().getItem()));
             }
             entity.discard();
@@ -358,7 +358,7 @@ public class UniversalBucketItem extends Item {
             CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, new ItemStack(Items.MILK_BUCKET));
             serverPlayer.awardStat(Stats.ITEM_USED.get(Items.MILK_BUCKET));
         }
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             Services.FLUID.curePotionEffects(player, new ItemStack(Items.MILK_BUCKET));
             if (BucketLibUtil.notCreative(player)) {
                 return BucketLibUtil.removeMilk(itemStack, (ServerLevel) level, (player instanceof Player) ? (Player) player : null);

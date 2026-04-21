@@ -11,17 +11,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
-import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class MilkIngredient implements ICustomIngredient {
@@ -46,11 +46,10 @@ public class MilkIngredient implements ICustomIngredient {
         }
         if (NeoForgeMod.MILK.isBound()) {
             ItemStack container = itemStack.copyWithCount(1);
-            Optional<FluidStack> drainedFluidOptional = FluidUtil.getFluidHandler(container)
-                    .map(fluidHandler -> fluidHandler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE));
-            if (drainedFluidOptional.isPresent() && !drainedFluidOptional.get().isEmpty()) {
-                FluidStack drainedFluid = drainedFluidOptional.get();
-                return drainedFluid.getFluid() == NeoForgeMod.MILK.get() && drainedFluid.getAmount() == FluidType.BUCKET_VOLUME;
+            ItemAccess access = ItemAccess.forStack(container);
+            ResourceHandler<FluidResource> handler = access.getCapability(Capabilities.Fluid.ITEM);
+            if (handler != null) {
+                return handler.getResource(0).getFluid() == NeoForgeMod.MILK.get() && handler.getAmountAsInt(0) == FluidType.BUCKET_VOLUME;
             }
         }
         return BucketLibUtil.containsMilk(itemStack.copy());

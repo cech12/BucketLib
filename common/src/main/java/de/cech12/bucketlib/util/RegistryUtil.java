@@ -8,6 +8,9 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Encoder;
 import de.cech12.bucketlib.mixin.MobBucketItemAccessor;
 import de.cech12.bucketlib.platform.Services;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -62,6 +65,7 @@ public class RegistryUtil {
 
     private static List<BucketBlock> bucketBlocks;
     private static List<BucketEntity> bucketEntities;
+    private static RegistryAccess registryAccess;
 
     private RegistryUtil() {}
 
@@ -116,6 +120,18 @@ public class RegistryUtil {
             }
         }
         return null;
+    }
+
+    public static RegistryAccess getRegistryAccess() {
+        if (registryAccess == null) {
+            Minecraft minecraft = Minecraft.getInstance();
+            ClientLevel level = minecraft.level;
+            if (level == null) {
+                throw new IllegalStateException("Could not get registry, registry access is unavailable because the level is currently null");
+            }
+            registryAccess = level.registryAccess();
+        }
+        return registryAccess;
     }
 
     public record BucketBlock(Block block, SolidBucketItem bucketItem) {}

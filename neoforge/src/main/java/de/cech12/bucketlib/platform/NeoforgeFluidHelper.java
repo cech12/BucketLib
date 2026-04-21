@@ -13,17 +13,19 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.common.NeoForgeMod;
-import net.neoforged.neoforge.fluids.DispenseFluidContainer;
-import net.neoforged.neoforge.fluids.FluidActionResult;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.fluid.DispenseFluidContainer;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.fluid.FluidUtil;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The fluid service implementation for NeoForge.
@@ -44,10 +46,16 @@ public class NeoforgeFluidHelper implements IFluidHelper {
 
     @Override
     public int getFluidTintColor(ItemStack stack) {
-        return FluidUtil.getFluidHandler(stack)
-                .map(fluidHandler -> fluidHandler.getFluidInTank(0))
-                .map(fluidStack -> IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack))
-                .orElse(0xFFFFFFFF);
+        ResourceHandler<FluidResource> handler = ItemAccess.forStack(stack).getCapability(Capabilities.Fluid.ITEM);
+        if (handler != null) {
+            FluidResource resource = handler.getResource(0);
+            Fluid fluid = resource.getFluid();
+            if (fluid != Fluids.EMPTY) {
+                FluidStack fluidStack = resource.toStack(FluidType.BUCKET_VOLUME);
+                return IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack);
+            }
+        }
+        return 0xFFFFFFFF;
     }
 
     @Override
@@ -77,41 +85,62 @@ public class NeoforgeFluidHelper implements IFluidHelper {
 
     @Override
     public Fluid getContainedFluid(ItemStack stack) {
-        return FluidUtil.getFluidHandler(stack).map(fluidHandler -> fluidHandler.getFluidInTank(0)).orElse(FluidStack.EMPTY).getFluid();
+        ResourceHandler<FluidResource> handler = ItemAccess.forStack(stack).getCapability(Capabilities.Fluid.ITEM);
+        if (handler != null) {
+            return handler.getResource(0).getFluid();
+        }
+        return Fluids.EMPTY;
     }
 
     @Override
     public ItemStack addFluid(ItemStack stack, Fluid fluid) {
-        AtomicReference<ItemStack> resultItemStack = new AtomicReference<>(stack.copy());
-        FluidUtil.getFluidHandler(resultItemStack.get()).ifPresent(fluidHandler -> {
-            fluidHandler.fill(new FluidStack(fluid, FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
-            resultItemStack.set(fluidHandler.getContainer());
-        });
-        return resultItemStack.get();
+        ItemAccess access = ItemAccess.forStack(stack.copy());
+        ResourceHandler<FluidResource> handler = access.getCapability(Capabilities.Fluid.ITEM);
+        if (handler != null) {
+            try (Transaction transaction = Transaction.open(null)) {
+                FluidResource resource = FluidResource.of(fluid);
+                int insertedAmount = handler.insert(resource, FluidType.BUCKET_VOLUME, transaction);
+                if (insertedAmount == FluidType.BUCKET_VOLUME) {
+                    transaction.commit();
+                    stack = access.getResource().toStack();
+                }
+            }
+        }
+        return stack;
     }
 
     @Override
     public ItemStack removeFluid(ItemStack stack, ServerLevel level, @Nullable Player player) {
-        AtomicReference<ItemStack> resultItemStack = new AtomicReference<>(stack.copy());
-        FluidUtil.getFluidHandler(resultItemStack.get()).ifPresent(fluidHandler -> {
-            fluidHandler.drain(new FluidStack(fluidHandler.getFluidInTank(0).getFluid(), FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
-            //damaging is done by fluid handler
-            resultItemStack.set(fluidHandler.getContainer());
-        });
-        return resultItemStack.get();
+        ItemAccess access = ItemAccess.forStack(stack.copy());
+        ResourceHandler<FluidResource> handler = access.getCapability(Capabilities.Fluid.ITEM);
+        if (handler != null) {
+            try (Transaction transaction = Transaction.open(null)) {
+                FluidResource resource = handler.getResource(0);
+                int extractedAmount = handler.extract(resource, FluidType.BUCKET_VOLUME, transaction);
+                if (extractedAmount == FluidType.BUCKET_VOLUME) {
+                    //damaging is done by fluid handler
+                    transaction.commit();
+                    stack = access.getResource().toStack();
+                }
+            }
+        }
+        return stack;
     }
 
     @Override
     public Tuple<Boolean, ItemStack> tryPickUpFluid(ItemStack stack, Player player, Level level, InteractionHand interactionHand, BlockPos pos, Direction direction) {
-        FluidActionResult fluidActionResult = FluidUtil.tryPickUpFluid(stack, player, level, pos, direction);
-        return new Tuple<>(fluidActionResult.isSuccess(), fluidActionResult.getResult());
+        ItemAccess access = ItemAccess.forStack(stack.copy());
+        ResourceHandler<FluidResource> handler = access.getCapability(Capabilities.Fluid.ITEM);
+        FluidStack pickedFluidStack = FluidUtil.tryPickupFluid(handler, player, level, pos, direction);
+        return new Tuple<>(!pickedFluidStack.isEmpty(), access.getResource().toStack());
     }
 
     @Override
     public Tuple<Boolean, ItemStack> tryPlaceFluid(ItemStack stack, Player player, Level level, InteractionHand interactionHand, BlockPos pos) {
-        FluidStack fluidStack = FluidUtil.getFluidHandler(stack).map(fluidHandler -> fluidHandler.getFluidInTank(0)).orElse(FluidStack.EMPTY);
-        FluidActionResult fluidActionResult = FluidUtil.tryPlaceFluid(player, level, interactionHand, pos, stack, fluidStack);
-        return new Tuple<>(fluidActionResult.isSuccess(), fluidActionResult.getResult());
+        ItemAccess access = ItemAccess.forStack(stack.copy());
+        ResourceHandler<FluidResource> handler = access.getCapability(Capabilities.Fluid.ITEM);
+        FluidStack placedFluidStack = FluidUtil.tryPlaceFluid(handler, player, level, interactionHand, pos);
+        return new Tuple<>(!placedFluidStack.isEmpty(), access.getResource().toStack());
     }
 
     @Override

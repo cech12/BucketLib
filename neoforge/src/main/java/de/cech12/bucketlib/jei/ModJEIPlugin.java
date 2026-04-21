@@ -5,6 +5,7 @@ import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
+import de.cech12.bucketlib.util.RegistryUtil;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
@@ -13,7 +14,6 @@ import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -70,7 +70,7 @@ public class ModJEIPlugin implements IModPlugin {
     public void registerRecipes(@NotNull IRecipeRegistration registration) {
         if (Services.CONFIG.isInfinityEnchantmentEnabled()) {
             IVanillaRecipeFactory factory = registration.getVanillaRecipeFactory();
-            EnchantmentInstance data = new EnchantmentInstance(VanillaRegistries.createLookup().lookup(Registries.ENCHANTMENT).get().getOrThrow(Enchantments.INFINITY), 1);
+            EnchantmentInstance data = new EnchantmentInstance(RegistryUtil.getRegistryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.INFINITY), 1);
             List<IJeiAnvilRecipe> recipes = new ArrayList<>();
             for (UniversalBucketItem bucketItem : Services.REGISTRY.getRegisteredBuckets()) {
                 ResourceLocation itemId = Services.REGISTRY.getItemLocation(bucketItem);

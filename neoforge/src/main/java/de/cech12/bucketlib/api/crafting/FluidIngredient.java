@@ -12,12 +12,13 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
-import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -66,11 +67,10 @@ public class FluidIngredient implements ICustomIngredient {
             return false;
         }
         ItemStack container = itemStack.copyWithCount(1);
-        Optional<FluidStack> drainedFluidOptional = FluidUtil.getFluidHandler(container)
-                .map(fluidHandler -> fluidHandler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE));
-        if (drainedFluidOptional.isPresent() && !drainedFluidOptional.get().isEmpty()) {
-            FluidStack drainedFluid = drainedFluidOptional.get();
-            return this.isFluidCorrect(drainedFluid.getFluid()) && drainedFluid.getAmount() == FluidType.BUCKET_VOLUME;
+        ItemAccess access = ItemAccess.forStack(container);
+        ResourceHandler<FluidResource> handler = access.getCapability(Capabilities.Fluid.ITEM);
+        if (handler != null) {
+            return this.isFluidCorrect(handler.getResource(0).getFluid()) && handler.getAmountAsInt(0) == FluidType.BUCKET_VOLUME;
         }
         return false;
     }

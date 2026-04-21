@@ -112,7 +112,7 @@ public class BucketLibMod {
     private static void registerBucket(RegisterCapabilitiesEvent event, UniversalBucketItem bucket) {
         buckets.add(bucket);
         //register item capability
-        event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new UniversalBucketFluidHandler(stack), bucket);
+        event.registerItem(Capabilities.Fluid.ITEM, (stack, ctx) -> new UniversalBucketFluidHandler(ctx, FLUID_COMPONENT.get()), bucket);
         //register dispense behaviour
         DispenserBlock.registerBehavior(bucket, UniversalBucketDispenseBehaviour.getInstance());
     }

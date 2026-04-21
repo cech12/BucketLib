@@ -2,7 +2,7 @@ package de.cech12.bucketlib.platform;
 
 import de.cech12.bucketlib.client.model.FabricUniversalBucketModel;
 import de.cech12.bucketlib.client.model.UniversalBucketModel;
-import de.cech12.bucketlib.platform.services.IClientHelper;
+import de.cech12.bucketlib.client.services.IClientHelper;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.client.renderer.item.ItemModel;

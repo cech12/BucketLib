@@ -7,7 +7,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
-import de.cech12.bucketlib.platform.Services;
+import de.cech12.bucketlib.client.ClientServices;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.color.item.ItemTintSource;
@@ -25,7 +25,7 @@ import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelDebugName;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
@@ -122,7 +122,7 @@ public abstract class UniversalBucketModel implements ItemModel {
                 otherContentSprite = sprites.get(MISSING_LOWER_CONTENT_MATERIAL, DEBUG_NAME);
             }
         }
-        TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? Services.CLIENT.getFluidTextureMaterial(sprites, DEBUG_NAME, fluid) : null;
+        TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? ClientServices.CLIENT.getFluidTextureMaterial(sprites, DEBUG_NAME, fluid) : null;
         TextureAtlasSprite fluidMaskSprite = (fluidMaskLocation != null && fluidSprite != null) ? sprites.get(fluidMaskLocation, DEBUG_NAME) : null;
 
         TextureAtlasSprite particleSprite = particleLocation != null ? sprites.get(particleLocation, DEBUG_NAME) : null;
@@ -138,7 +138,7 @@ public abstract class UniversalBucketModel implements ItemModel {
     abstract List<ItemModel> specialBaking(Fluid fluid, ItemTintSource bucketTint, TextureAtlasSprite baseSprite, TextureAtlasSprite otherContentSprite, TextureAtlasSprite fluidSprite, TextureAtlasSprite fluidMaskSprite, TextureAtlasSprite particleSprite);
 
     @Override
-    public void update(@NotNull ItemStackRenderState renderState, ItemStack stack, @NotNull ItemModelResolver modelResolver, @NotNull ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int integer) {
+    public void update(@NotNull ItemStackRenderState renderState, ItemStack stack, @NotNull ItemModelResolver modelResolver, @NotNull ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable ItemOwner itemOwner, int integer) {
         if (stack.getItem() instanceof UniversalBucketItem bucket) {
             boolean containsEntityType = false;
             String content = BucketLibUtil.getEntityTypeString(stack);
@@ -165,7 +165,7 @@ public abstract class UniversalBucketModel implements ItemModel {
                 bakedModel = this.bakeModelForFluid(fluid, ((content != null && fluid == Fluids.EMPTY) ? ResourceLocation.parse(content) : null), isCracked, containsEntityType);
                 cache.put(content, bakedModel);
             }
-            bakedModel.update(renderState, stack, modelResolver, displayContext, level, entity, integer);
+            bakedModel.update(renderState, stack, modelResolver, displayContext, level, itemOwner, integer);
         }
 
     }
@@ -198,7 +198,7 @@ public abstract class UniversalBucketModel implements ItemModel {
         @Override
         @NotNull
         public ItemModel bake(@NotNull ItemModel.BakingContext bakingContext) {
-            return Services.CLIENT.createItemModel(this, bakingContext);
+            return ClientServices.CLIENT.createItemModel(this, bakingContext);
         }
 
         @Override

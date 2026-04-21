@@ -1,11 +1,8 @@
 package de.cech12.bucketlib.mixin;
 
-import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
-import de.cech12.bucketlib.platform.Services;
+import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -32,11 +29,16 @@ public class NeoforgeUniversalBucketItemMixin extends Item {
     }
 
     @Override
+    public boolean supportsEnchantment(@NotNull ItemStack stack, Holder<Enchantment> enchantment) {
+        if (enchantment.is(Enchantments.INFINITY) && BucketLibUtil.isInfinityEnchantmentAllowed(stack)) {
+            return true;
+        }
+        return super.supportsEnchantment(stack, enchantment);
+    }
+
+    @Override
     public boolean isPrimaryItemFor(@NotNull ItemStack stack, @NotNull Holder<Enchantment> enchantment) {
-        if (enchantment.is(Enchantments.INFINITY)
-                && Services.CONFIG.isInfinityEnchantmentEnabled()
-                && stack.getEnchantmentLevel(VanillaRegistries.createLookup().lookup(Registries.ENCHANTMENT).get().getOrThrow(Enchantments.INFINITY)) <= 0
-                && Services.FLUID.getContainedFluid(stack).defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {
+        if (enchantment.is(Enchantments.INFINITY) && BucketLibUtil.isInfinityEnchantmentAllowed(stack)) {
             return true;
         }
         return super.isPrimaryItemFor(stack, enchantment);

@@ -2,7 +2,7 @@ package de.cech12.bucketlib.platform;
 
 import de.cech12.bucketlib.client.model.NeoforgeUniversalBucketModel;
 import de.cech12.bucketlib.client.model.UniversalBucketModel;
-import de.cech12.bucketlib.platform.services.IClientHelper;
+import de.cech12.bucketlib.client.services.IClientHelper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelDebugName;

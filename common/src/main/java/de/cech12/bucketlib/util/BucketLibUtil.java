@@ -6,10 +6,9 @@ import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.mixin.LivingEntityAccessor;
 import de.cech12.bucketlib.platform.Services;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -120,6 +119,26 @@ public class BucketLibUtil {
      * @return boolean
      */
     public static boolean isAffectedByInfinityEnchantment(@NotNull ItemStack itemStack) {
+        return isInfinityEnchantmentAllowed(itemStack) && hasInfinityEnchantment(itemStack);
+    }
+
+    /**
+     * Checks if the given bucket is enchanted with the Infinity enchantment.
+     * @param itemStack checked item stack
+     * @return boolean
+     */
+    public static boolean hasInfinityEnchantment(@NotNull ItemStack itemStack) {
+        return itemStack.getEnchantments().keySet().stream()
+                .filter(enchantment -> enchantment.is(Enchantments.INFINITY))
+                .anyMatch(enchantment -> EnchantmentHelper.getItemEnchantmentLevel(enchantment, itemStack) > 0);
+    }
+
+    /**
+     * Checks if the given bucket is allowed to be enchanted with Infinity enchantment.
+     * @param itemStack checked item stack
+     * @return boolean
+     */
+    public static boolean isInfinityEnchantmentAllowed(@NotNull ItemStack itemStack) {
         if (!Services.CONFIG.isInfinityEnchantmentEnabled()) {
             return false;
         }
@@ -127,23 +146,19 @@ public class BucketLibUtil {
             Fluid fluid = getFluid(itemStack);
             return fluid != Fluids.EMPTY
                     && fluid.defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)
-                    && EnchantmentHelper.getItemEnchantmentLevel(VanillaRegistries.createLookup().lookup(Registries.ENCHANTMENT).get().getOrThrow(Enchantments.INFINITY), itemStack) > 0
                     && bucket.canHoldFluid(fluid);
         }
         return false;
     }
 
-    private static boolean containsTagContent(ItemStack itemStack, String tagName) {
+    private static boolean containsTagContent(DataComponentHolder itemStack, String tagName) {
         CustomData customdata = itemStack.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
-        return customdata.contains(tagName);
+        return customdata.copyTag().contains(tagName);
     }
 
-    private static String getTagContent(ItemStack itemStack, String tagName) {
+    private static String getTagContent(DataComponentHolder itemStack, String tagName) {
         CustomData customdata = itemStack.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
-        if (customdata.contains(tagName)) {
-            return customdata.copyTag().getString(tagName).orElse(null);
-        }
-        return null;
+        return customdata.copyTag().getString(tagName).orElse(null);
     }
 
     private static ItemStack setTagContent(ItemStack itemStack, String tagName, String tagContent) {
@@ -177,7 +192,7 @@ public class BucketLibUtil {
         return containsTagContent(itemStack, "BucketContent");
     }
 
-    public static ResourceLocation getContent(ItemStack itemStack) {
+    public static ResourceLocation getContent(DataComponentHolder itemStack) {
         String content = getContentString(itemStack);
         if (content != null) {
             return ResourceLocation.parse(content);
@@ -185,7 +200,7 @@ public class BucketLibUtil {
         return null;
     }
 
-    public static String getContentString(ItemStack itemStack) {
+    public static String getContentString(DataComponentHolder itemStack) {
         return getTagContent(itemStack, "BucketContent");
     }
 
@@ -204,15 +219,9 @@ public class BucketLibUtil {
         return emptyStack;
     }
 
-    public static boolean containsMilk(ItemStack itemStack) {
+    public static boolean containsMilk(DataComponentHolder itemStack) {
         ResourceLocation bucketContent = getContent(itemStack);
-        if (bucketContent != null && bucketContent.equals(MILK_LOCATION)) {
-            return true;
-        }
-        if (Services.FLUID.hasMilkFluid()) {
-            return getFluid(itemStack) == Services.FLUID.getMilkFluid();
-        }
-        return false;
+        return bucketContent != null && bucketContent.equals(MILK_LOCATION);
     }
 
     public static ItemStack addMilk(ItemStack itemStack) {
@@ -247,7 +256,7 @@ public class BucketLibUtil {
         return Services.FLUID.removeFluid(resultItemStack.get(), level, player);
     }
 
-    public static boolean containsEntityType(ItemStack itemStack) {
+    public static boolean containsEntityType(DataComponentHolder itemStack) {
         return containsTagContent(itemStack, "EntityType");
     }
 
