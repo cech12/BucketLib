@@ -1,11 +1,7 @@
-package de.cech12.bucketlib.platform;
+package de.cech12.bucketlib.client;
 
 import de.cech12.bucketlib.CommonLoader;
-import de.cech12.bucketlib.platform.services.IBucketHelper;
-import de.cech12.bucketlib.platform.services.IConfigHelper;
-import de.cech12.bucketlib.platform.services.IFluidHelper;
-import de.cech12.bucketlib.platform.services.IPlatformHelper;
-import de.cech12.bucketlib.platform.services.IRegistryHelper;
+import de.cech12.bucketlib.client.services.IClientHelper;
 
 import java.util.ServiceLoader;
 
@@ -14,18 +10,10 @@ import java.util.ServiceLoader;
  * environment to another. In the context of MultiLoader we use this feature to access a mock API in the common code that
  * is swapped out for the platform specific implementation at runtime.
  */
-public class Services {
+public class ClientServices {
 
-    /** bucket helper instance */
-    public static final IBucketHelper BUCKET = load(IBucketHelper.class);
-    /** Config helper instance */
-    public static final IConfigHelper CONFIG = load(IConfigHelper.class);
-    /** Fluid helper instance */
-    public static final IFluidHelper FLUID = load(IFluidHelper.class);
-    /** Platform helper instance */
-    public static final IPlatformHelper PLATFORM = load(IPlatformHelper.class);
-    /** Registry helper instance */
-    public static final IRegistryHelper REGISTRY = load(IRegistryHelper.class);
+    /** Client helper instance */
+    public static final IClientHelper CLIENT = load(IClientHelper.class);
 
     /**
      * This code is used to load a service for the current environment. Your implementation of the service must be defined
@@ -44,6 +32,6 @@ public class Services {
         return loadedService;
     }
 
-    private Services() {}
+    private ClientServices() {}
 
 }

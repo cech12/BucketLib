@@ -1,4 +1,4 @@
-package de.cech12.bucketlib.platform.services;
+package de.cech12.bucketlib.client.services;
 
 import de.cech12.bucketlib.client.model.UniversalBucketModel;
 import net.minecraft.client.renderer.item.ItemModel;

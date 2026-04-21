@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [1.21.7-4.5.0.2] - 2026-04-22
+### Fixed
+- fixed crash when starting a dedicated server
+- lava bucket did not serve as fuel in furnace on dedicated server (Fabric)
+
 ## [1.21.7-4.5.0.1] - 2026-04-18
 ### Changed
 - re-added JEI as optional dependency for NeoForge
