@@ -114,13 +114,15 @@ public class NeoforgeFluidHelper implements IFluidHelper {
         ItemAccess access = ItemAccess.forStack(stack.copy());
         ResourceHandler<FluidResource> handler = access.getCapability(Capabilities.Fluid.ITEM);
         if (handler != null) {
-            try (Transaction transaction = Transaction.open(null)) {
-                FluidResource resource = handler.getResource(0);
-                int extractedAmount = handler.extract(resource, FluidType.BUCKET_VOLUME, transaction);
-                if (extractedAmount == FluidType.BUCKET_VOLUME) {
-                    //damaging is done by fluid handler
-                    transaction.commit();
-                    stack = access.getResource().toStack();
+            FluidResource resource = handler.getResource(0);
+            if (!resource.isEmpty()) {
+                try (Transaction transaction = Transaction.open(null)) {
+                    int extractedAmount = handler.extract(resource, FluidType.BUCKET_VOLUME, transaction);
+                    if (extractedAmount == FluidType.BUCKET_VOLUME) {
+                        //damaging is done by fluid handler
+                        transaction.commit();
+                        stack = access.getResource().toStack();
+                    }
                 }
             }
         }
