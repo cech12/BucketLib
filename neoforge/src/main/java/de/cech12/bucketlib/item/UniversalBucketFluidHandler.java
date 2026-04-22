@@ -1,5 +1,6 @@
 package de.cech12.bucketlib.item;
 
+import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.core.component.DataComponentType;
@@ -105,6 +106,7 @@ public class UniversalBucketFluidHandler extends ItemAccessFluidHandler {
             if (BucketLibUtil.containsContent(previousStackCopy)) { //remove milk content tag
                 BucketLibUtil.removeContentNoCopy(emptiedStackCopy, null, null, false);
             }
+            emptiedStackCopy.remove(BucketLibMod.FLUID_COMPONENT);
             BucketLibUtil.damageByOne(emptiedStackCopy, null); //server level not available here
         }
         //persist changes

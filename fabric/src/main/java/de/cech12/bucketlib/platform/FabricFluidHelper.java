@@ -166,11 +166,7 @@ public class FabricFluidHelper implements IFluidHelper {
                 }
                 transaction.commit();
             }
-            ItemStack resultStack = context.getItemVariant().toStack();
-            if (!resultStack.isEmpty() && FluidStorageData.EMPTY.equals(resultStack.get(BucketLibMod.STORAGE))) {
-                resultStack.remove(BucketLibMod.STORAGE);
-            }
-            return resultStack;
+            return context.getItemVariant().toStack();
         }
         return stack.copy();
     }
