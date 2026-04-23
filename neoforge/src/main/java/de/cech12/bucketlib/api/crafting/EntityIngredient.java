@@ -8,7 +8,7 @@ import de.cech12.bucketlib.util.RegistryUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -33,7 +33,7 @@ public class EntityIngredient implements ICustomIngredient {
         this.tag = tag;
     }
 
-    public EntityIngredient(Optional<ResourceLocation> blockOptional, Optional<TagKey<EntityType<?>>> tagOptional) {
+    public EntityIngredient(Optional<Identifier> blockOptional, Optional<TagKey<EntityType<?>>> tagOptional) {
         this(blockOptional.map(BuiltInRegistries.ENTITY_TYPE::get).filter(Optional::isPresent).map(itemReference -> itemReference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
@@ -120,7 +120,7 @@ public class EntityIngredient implements ICustomIngredient {
 
     public static final MapCodec<EntityIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
             builder.group(
-                    ResourceLocation.CODEC.optionalFieldOf("entity").forGetter(i -> Optional.of(BuiltInRegistries.ENTITY_TYPE.getKey(i.entityType))),
+                    Identifier.CODEC.optionalFieldOf("entity").forGetter(i -> Optional.of(BuiltInRegistries.ENTITY_TYPE.getKey(i.entityType))),
                     TagKey.codec(BuiltInRegistries.ENTITY_TYPE.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
             ).apply(builder, EntityIngredient::new)
     );

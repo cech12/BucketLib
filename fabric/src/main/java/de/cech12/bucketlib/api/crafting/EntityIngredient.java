@@ -13,7 +13,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -37,7 +37,7 @@ public class EntityIngredient implements CustomIngredient {
         this.tag = tag;
     }
 
-    public EntityIngredient(Optional<ResourceLocation> blockOptional, Optional<TagKey<EntityType<?>>> tagOptional) {
+    public EntityIngredient(Optional<Identifier> blockOptional, Optional<TagKey<EntityType<?>>> tagOptional) {
         this(blockOptional.map(BuiltInRegistries.ENTITY_TYPE::get).filter(Optional::isPresent).map(reference -> reference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
@@ -122,11 +122,11 @@ public class EntityIngredient implements CustomIngredient {
     public static final class Serializer implements CustomIngredientSerializer<EntityIngredient> {
 
         public static final Serializer INSTANCE = new Serializer();
-        public static final ResourceLocation NAME = BucketLib.id("entity");
+        public static final Identifier NAME = BucketLib.id("entity");
 
         public static final MapCodec<EntityIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
                 builder.group(
-                        ResourceLocation.CODEC.optionalFieldOf("entity").forGetter(i -> Optional.of(BuiltInRegistries.ENTITY_TYPE.getKey(i.entityType))),
+                        Identifier.CODEC.optionalFieldOf("entity").forGetter(i -> Optional.of(BuiltInRegistries.ENTITY_TYPE.getKey(i.entityType))),
                         TagKey.codec(BuiltInRegistries.ENTITY_TYPE.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
                 ).apply(builder, EntityIngredient::new)
         );
@@ -138,7 +138,7 @@ public class EntityIngredient implements CustomIngredient {
         private Serializer() {}
 
         @Override
-        public ResourceLocation getIdentifier() {
+        public Identifier getIdentifier() {
             return NAME;
         }
 
@@ -157,13 +157,13 @@ public class EntityIngredient implements CustomIngredient {
             String entity = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
-                TagKey<EntityType<?>> tag = TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.parse(tagId));
+                TagKey<EntityType<?>> tag = TagKey.create(Registries.ENTITY_TYPE, Identifier.parse(tagId));
                 return new EntityIngredient(tag);
             }
             if (entity.isEmpty()) {
                 throw new IllegalArgumentException("Cannot create a entity ingredient with no entity or tag.");
             }
-            Optional<Holder.Reference<EntityType<?>>> entityTypeOptional = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(entity));
+            Optional<Holder.Reference<EntityType<?>>> entityTypeOptional = BuiltInRegistries.ENTITY_TYPE.get(Identifier.parse(entity));
             if (entityTypeOptional.isEmpty()) {
                 throw new IllegalArgumentException("Entity type resource location \"" + entity + " \" could not be found.");
             }

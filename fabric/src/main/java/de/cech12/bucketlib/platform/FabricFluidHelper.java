@@ -36,6 +36,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
@@ -222,7 +223,7 @@ public class FabricFluidHelper implements IFluidHelper {
         Fluid fluid = BucketLibUtil.getFluid(stack);
         ServerLevel serverLevel = (level instanceof ServerLevel) ? (ServerLevel) level : null;
         //vaporize
-        if (level.dimensionType().ultraWarm() && fluid.is(FluidTags.WATER)) {
+        if (level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos) && fluid.is(FluidTags.WATER)) {
             int x = pos.getX();
             int y = pos.getY();
             int z = pos.getZ();

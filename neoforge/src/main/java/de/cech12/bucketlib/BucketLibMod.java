@@ -17,7 +17,7 @@ import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -92,7 +92,7 @@ public class BucketLibMod {
         BucketLibTags.init();
     }
 
-    public static void processRegistration(RegisterCapabilitiesEvent event, ResourceLocation bucketLocation) {
+    public static void processRegistration(RegisterCapabilitiesEvent event, Identifier bucketLocation) {
         if (bucketLocation != null) {
             Optional<Item> bucketItem = BuiltInRegistries.ITEM.getOptional(bucketLocation);
             if (bucketItem.isEmpty()) {

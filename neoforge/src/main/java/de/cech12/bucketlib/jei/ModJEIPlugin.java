@@ -14,7 +14,7 @@ import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -34,11 +34,11 @@ import java.util.List;
 @JeiPlugin
 public class ModJEIPlugin implements IModPlugin {
 
-    private static final ResourceLocation ID = BucketLib.id("jei_plugin");
+    private static final Identifier ID = BucketLib.id("jei_plugin");
 
     @NotNull
     @Override
-    public ResourceLocation getPluginUid() {
+    public Identifier getPluginUid() {
         return ID;
     }
 
@@ -73,7 +73,7 @@ public class ModJEIPlugin implements IModPlugin {
             EnchantmentInstance data = new EnchantmentInstance(RegistryUtil.getRegistryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.INFINITY), 1);
             List<IJeiAnvilRecipe> recipes = new ArrayList<>();
             for (UniversalBucketItem bucketItem : Services.REGISTRY.getRegisteredBuckets()) {
-                ResourceLocation itemId = Services.REGISTRY.getItemLocation(bucketItem);
+                Identifier itemId = Services.REGISTRY.getItemLocation(bucketItem);
                 for (Fluid fluid : Services.REGISTRY.getAllFluids()) {
                     if (fluid != Fluids.EMPTY && bucketItem.canHoldFluid(fluid) && fluid.defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)) {
                         ItemStack bucket = BucketLibUtil.addFluid(new ItemStack(bucketItem), fluid);

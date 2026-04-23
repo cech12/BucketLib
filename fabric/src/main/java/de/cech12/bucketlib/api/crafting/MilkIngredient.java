@@ -12,7 +12,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -37,7 +37,7 @@ public class MilkIngredient implements CustomIngredient {
         if (itemStack.getItem() == Items.MILK_BUCKET) {
             return true;
         }
-        ResourceLocation location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+        Identifier location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
         //Mekansim tanks are not compatible: https://github.com/cech12/BucketLib/issues/55 | https://github.com/mekanism/Mekanism/issues/8335
         if ("mekanism".equals(location.getNamespace()) && itemStack.getRecipeRemainder().isEmpty()) {
             return false;
@@ -73,7 +73,7 @@ public class MilkIngredient implements CustomIngredient {
     public static final class Serializer implements CustomIngredientSerializer<MilkIngredient> {
 
         public static final Serializer INSTANCE = new Serializer();
-        public static final ResourceLocation NAME = BucketLib.id("milk");
+        public static final Identifier NAME = BucketLib.id("milk");
 
         public static final MapCodec<MilkIngredient> CODEC = MapCodec.of(Encoder.empty(), Decoder.unit(new MilkIngredient()));
 
@@ -84,7 +84,7 @@ public class MilkIngredient implements CustomIngredient {
         private Serializer() {}
 
         @Override
-        public ResourceLocation getIdentifier() {
+        public Identifier getIdentifier() {
             return NAME;
         }
 

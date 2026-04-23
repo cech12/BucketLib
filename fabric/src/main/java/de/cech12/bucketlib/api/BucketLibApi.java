@@ -6,7 +6,7 @@ import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
@@ -20,10 +20,10 @@ public class BucketLibApi {
 
     private static final Logger LOGGER = LogManager.getLogger(BucketLibApi.class);
 
-    public static void registerBucket(ResourceLocation bucketLocation) {
+    public static void registerBucket(Identifier bucketLocation) {
         Optional<Item> bucketItem = BuiltInRegistries.ITEM.getOptional(bucketLocation);
         if (bucketItem.isEmpty()) {
-            LOGGER.info("Bucket could not be registered. The given ResourceLocation \"{}\" does not match any registered item in Forge registry.", bucketLocation);
+            LOGGER.info("Bucket could not be registered. The given Identifier \"{}\" does not match any registered item in Forge registry.", bucketLocation);
             return;
         }
         if (bucketItem.get() instanceof UniversalBucketItem bucket) {

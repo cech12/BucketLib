@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [1.21.11-4.7.0.0] - 2026-04-23
+### Changed
+- Updated to Minecraft 1.21.11 (Fabric 0.141.3+1.21.11, NeoForge 21.11.42)
+- Updated Cloth Config support (21.11.153) (Fabric/Quilt)
+- Updated ModMenu support (17.0.0) (Fabric/Quilt)
+- Updated JEI support (27.4.0.22) (NeoForge)
+- Updated REI support (21.11.814) (NeoForge, Fabric/Quilt)
+
 ## [1.21.9-4.6.0.2] - 2026-04-22
 ### Fixed
 - emptied buckets were not stackable with freshly crafted buckets (NeoForge)

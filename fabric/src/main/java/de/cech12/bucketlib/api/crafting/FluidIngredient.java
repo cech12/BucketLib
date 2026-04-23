@@ -18,7 +18,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
@@ -43,7 +43,7 @@ public class FluidIngredient implements CustomIngredient {
         this.tag = tag;
     }
 
-    public FluidIngredient(Optional<ResourceLocation> fluidOptional, Optional<TagKey<Fluid>> tagOptional) {
+    public FluidIngredient(Optional<Identifier> fluidOptional, Optional<TagKey<Fluid>> tagOptional) {
         this(fluidOptional.map(BuiltInRegistries.FLUID::get).filter(Optional::isPresent).map(reference -> reference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
@@ -67,7 +67,7 @@ public class FluidIngredient implements CustomIngredient {
         if (itemStack == null || itemStack.isEmpty()) {
             return false;
         }
-        ResourceLocation location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+        Identifier location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
         //Mekansim tanks are not compatible: https://github.com/cech12/BucketLib/issues/55 | https://github.com/mekanism/Mekanism/issues/8335
         if ("mekanism".equals(location.getNamespace()) && itemStack.getRecipeRemainder().isEmpty()) {
             return false;
@@ -129,11 +129,11 @@ public class FluidIngredient implements CustomIngredient {
     public static final class Serializer implements CustomIngredientSerializer<FluidIngredient> {
 
         public static final Serializer INSTANCE = new Serializer();
-        public static final ResourceLocation NAME = BucketLib.id("fluid");
+        public static final Identifier NAME = BucketLib.id("fluid");
 
         private static final MapCodec<FluidIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
                 builder.group(
-                        ResourceLocation.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.of(BuiltInRegistries.FLUID.getKey(i.fluid))),
+                        Identifier.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.of(BuiltInRegistries.FLUID.getKey(i.fluid))),
                         TagKey.codec(BuiltInRegistries.FLUID.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
                 ).apply(builder, FluidIngredient::new)
         );
@@ -145,7 +145,7 @@ public class FluidIngredient implements CustomIngredient {
         private Serializer() {}
 
         @Override
-        public ResourceLocation getIdentifier() {
+        public Identifier getIdentifier() {
             return NAME;
         }
 
@@ -164,13 +164,13 @@ public class FluidIngredient implements CustomIngredient {
             String fluid = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
-                TagKey<Fluid> tag = TagKey.create(Registries.FLUID, ResourceLocation.parse(tagId));
+                TagKey<Fluid> tag = TagKey.create(Registries.FLUID, Identifier.parse(tagId));
                 return new FluidIngredient(tag);
             }
             if (fluid.isEmpty()) {
                 throw new IllegalArgumentException("Cannot create a fluid ingredient with no fluid or tag.");
             }
-            Optional<Holder.Reference<Fluid>> fluidOptional = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluid));
+            Optional<Holder.Reference<Fluid>> fluidOptional = BuiltInRegistries.FLUID.get(Identifier.parse(fluid));
             if (fluidOptional.isEmpty()) {
                 throw new IllegalArgumentException("Fluid resource location \"" + fluid + " \" could not be found.");
             }

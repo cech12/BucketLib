@@ -6,7 +6,7 @@ import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.platform.Services;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
@@ -37,7 +37,7 @@ public class FluidIngredient implements ICustomIngredient {
         this.tag = tag;
     }
 
-    public FluidIngredient(Optional<ResourceLocation> fluidOptional, Optional<TagKey<Fluid>> tagOptional) {
+    public FluidIngredient(Optional<Identifier> fluidOptional, Optional<TagKey<Fluid>> tagOptional) {
         this(fluidOptional.map(BuiltInRegistries.FLUID::get).filter(Optional::isPresent).map(itemReference -> itemReference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
@@ -61,7 +61,7 @@ public class FluidIngredient implements ICustomIngredient {
         if (itemStack.isEmpty()) {
             return false;
         }
-        ResourceLocation location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+        Identifier location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
         //Mekansim tanks are not compatible: https://github.com/cech12/BucketLib/issues/55 | https://github.com/mekanism/Mekanism/issues/8335
         if ("mekanism".equals(location.getNamespace()) && itemStack.getCraftingRemainder().isEmpty()) {
             return false;
@@ -119,7 +119,7 @@ public class FluidIngredient implements ICustomIngredient {
 
     public static final MapCodec<FluidIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
             builder.group(
-                    ResourceLocation.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.of(BuiltInRegistries.FLUID.getKey(i.fluid))),
+                    Identifier.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.of(BuiltInRegistries.FLUID.getKey(i.fluid))),
                     TagKey.codec(BuiltInRegistries.FLUID.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
             ).apply(builder, FluidIngredient::new)
     );

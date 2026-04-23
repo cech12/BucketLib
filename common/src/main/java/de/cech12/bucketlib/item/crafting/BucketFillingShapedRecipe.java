@@ -153,15 +153,15 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
             Optional<Block> block = Optional.empty();
             Optional<EntityType<?>> entityType = Optional.empty();
             if (fillingType == BucketFillingType.BLOCK) {
-                block = Optional.of(Services.REGISTRY.getBlock(buf.readResourceLocation()));
+                block = Optional.of(Services.REGISTRY.getBlock(buf.readIdentifier()));
             } else if (fillingType == BucketFillingType.ENTITY) {
-                entityType = Optional.of(Services.REGISTRY.getEntityType(buf.readResourceLocation()));
-                fluid = Optional.of(Services.REGISTRY.getFluid(buf.readResourceLocation()));
+                entityType = Optional.of(Services.REGISTRY.getEntityType(buf.readIdentifier()));
+                fluid = Optional.of(Services.REGISTRY.getFluid(buf.readIdentifier()));
                 if (fluid.get() == Fluids.EMPTY) {
                     fluid = Optional.empty();
                 }
             } else if (fillingType == BucketFillingType.FLUID) {
-                fluid = Optional.of(Services.REGISTRY.getFluid(buf.readResourceLocation()));
+                fluid = Optional.of(Services.REGISTRY.getFluid(buf.readIdentifier()));
             }
             return new BucketFillingShapedRecipe(group, category, pattern, fillingType, fluid, block, entityType);
         }
@@ -172,12 +172,12 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
             ShapedRecipePattern.STREAM_CODEC.encode(buf, recipe.pattern);
             buf.writeEnum(recipe.fillingType);
             if (recipe.fillingType == BucketFillingType.BLOCK) {
-                buf.writeResourceLocation(Objects.requireNonNull(Services.REGISTRY.getBlockLocation(recipe.block)));
+                buf.writeIdentifier(Objects.requireNonNull(Services.REGISTRY.getBlockLocation(recipe.block)));
             } else if (recipe.fillingType == BucketFillingType.ENTITY) {
-                buf.writeResourceLocation(Objects.requireNonNull(Services.REGISTRY.getEntityTypeLocation(recipe.entityType)));
-                buf.writeResourceLocation(Objects.requireNonNull(Services.REGISTRY.getFluidLocation((recipe.fluid != null ? recipe.fluid : Fluids.EMPTY))));
+                buf.writeIdentifier(Objects.requireNonNull(Services.REGISTRY.getEntityTypeLocation(recipe.entityType)));
+                buf.writeIdentifier(Objects.requireNonNull(Services.REGISTRY.getFluidLocation((recipe.fluid != null ? recipe.fluid : Fluids.EMPTY))));
             } else if (recipe.fillingType == BucketFillingType.FLUID) {
-                buf.writeResourceLocation(Services.REGISTRY.getFluidLocation(recipe.fluid));
+                buf.writeIdentifier(Services.REGISTRY.getFluidLocation(recipe.fluid));
             }
         }
     }

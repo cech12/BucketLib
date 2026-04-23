@@ -7,7 +7,7 @@ import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -32,7 +32,7 @@ public class BlockIngredient implements ICustomIngredient {
         this.tag = tag;
     }
 
-    public BlockIngredient(Optional<ResourceLocation> blockOptional, Optional<TagKey<Block>> tagOptional) {
+    public BlockIngredient(Optional<Identifier> blockOptional, Optional<TagKey<Block>> tagOptional) {
         this(blockOptional.map(BuiltInRegistries.BLOCK::get).filter(Optional::isPresent).map(itemReference -> itemReference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
@@ -112,7 +112,7 @@ public class BlockIngredient implements ICustomIngredient {
 
     public static final MapCodec<BlockIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
             builder.group(
-                    ResourceLocation.CODEC.optionalFieldOf("block").forGetter(i -> Optional.of(BuiltInRegistries.BLOCK.getKey(i.block))),
+                    Identifier.CODEC.optionalFieldOf("block").forGetter(i -> Optional.of(BuiltInRegistries.BLOCK.getKey(i.block))),
                     TagKey.codec(BuiltInRegistries.BLOCK.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
             ).apply(builder, BlockIngredient::new)
     );

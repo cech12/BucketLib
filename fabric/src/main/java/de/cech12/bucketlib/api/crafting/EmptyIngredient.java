@@ -13,7 +13,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -49,7 +49,7 @@ public class EmptyIngredient implements CustomIngredient {
         this((Item) null, null);
     }
 
-    public EmptyIngredient(Optional<ResourceLocation> itemOptional, Optional<TagKey<Item>> tagOptional) {
+    public EmptyIngredient(Optional<Identifier> itemOptional, Optional<TagKey<Item>> tagOptional) {
         this(itemOptional.map(BuiltInRegistries.ITEM::get).filter(Optional::isPresent).map(reference -> reference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
@@ -102,11 +102,11 @@ public class EmptyIngredient implements CustomIngredient {
     public static final class Serializer implements CustomIngredientSerializer<EmptyIngredient> {
 
         public static final Serializer INSTANCE = new Serializer();
-        public static final ResourceLocation NAME = BucketLib.id("empty");
+        public static final Identifier NAME = BucketLib.id("empty");
 
         private static final MapCodec<EmptyIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
                 builder.group(
-                        ResourceLocation.CODEC.optionalFieldOf("item").forGetter(i -> Optional.of(BuiltInRegistries.ITEM.getKey(i.item))),
+                        Identifier.CODEC.optionalFieldOf("item").forGetter(i -> Optional.of(BuiltInRegistries.ITEM.getKey(i.item))),
                         TagKey.codec(BuiltInRegistries.ITEM.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
                 ).apply(builder, EmptyIngredient::new)
         );
@@ -118,7 +118,7 @@ public class EmptyIngredient implements CustomIngredient {
         private Serializer() {}
 
         @Override
-        public ResourceLocation getIdentifier() {
+        public Identifier getIdentifier() {
             return NAME;
         }
 
@@ -137,13 +137,13 @@ public class EmptyIngredient implements CustomIngredient {
             String item = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!item.isEmpty()) {
-                Optional<Holder.Reference<Item>> itemOptional = BuiltInRegistries.ITEM.get(ResourceLocation.parse(item));
+                Optional<Holder.Reference<Item>> itemOptional = BuiltInRegistries.ITEM.get(Identifier.parse(item));
                 if (itemOptional.isPresent()) {
                     return new EmptyIngredient(itemOptional.get().value());
                 }
             }
             if (!tagId.isEmpty()) {
-                TagKey<Item> tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(tagId));
+                TagKey<Item> tag = TagKey.create(Registries.ITEM, Identifier.parse(tagId));
                 return new EmptyIngredient(tag);
             }
             return new EmptyIngredient();

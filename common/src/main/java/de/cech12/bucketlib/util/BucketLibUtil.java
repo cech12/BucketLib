@@ -10,7 +10,7 @@ import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class BucketLibUtil {
 
-    public static final ResourceLocation MILK_LOCATION = ResourceLocation.withDefaultNamespace("milk");
+    public static final Identifier MILK_LOCATION = Identifier.withDefaultNamespace("milk");
 
     private BucketLibUtil() {}
 
@@ -192,10 +192,10 @@ public class BucketLibUtil {
         return containsTagContent(itemStack, "BucketContent");
     }
 
-    public static ResourceLocation getContent(DataComponentHolder itemStack) {
+    public static Identifier getContent(DataComponentHolder itemStack) {
         String content = getContentString(itemStack);
         if (content != null) {
-            return ResourceLocation.parse(content);
+            return Identifier.parse(content);
         }
         return null;
     }
@@ -204,7 +204,7 @@ public class BucketLibUtil {
         return getTagContent(itemStack, "BucketContent");
     }
 
-    public static ItemStack addContent(ItemStack itemStack, ResourceLocation content) {
+    public static ItemStack addContent(ItemStack itemStack, Identifier content) {
         return setTagContent(itemStack, "BucketContent", content.toString());
     }
 
@@ -220,7 +220,7 @@ public class BucketLibUtil {
     }
 
     public static boolean containsMilk(DataComponentHolder itemStack) {
-        ResourceLocation bucketContent = getContent(itemStack);
+        Identifier bucketContent = getContent(itemStack);
         return bucketContent != null && bucketContent.equals(MILK_LOCATION);
     }
 
@@ -263,7 +263,7 @@ public class BucketLibUtil {
     public static EntityType<?> getEntityType(ItemStack itemStack) {
         String content = getEntityTypeString(itemStack);
         if (content != null) {
-            return Services.REGISTRY.getEntityType(ResourceLocation.parse(content));
+            return Services.REGISTRY.getEntityType(Identifier.parse(content));
         }
         return null;
     }
@@ -329,7 +329,7 @@ public class BucketLibUtil {
 
     public static Block getBlock(ItemStack itemStack) {
         if (!containsMilk(itemStack)) {
-            ResourceLocation content = getContent(itemStack);
+            Identifier content = getContent(itemStack);
             if (content != null) {
                 return Services.REGISTRY.getBlock(content);
             }
@@ -338,7 +338,7 @@ public class BucketLibUtil {
     }
 
     public static ItemStack addBlock(ItemStack itemStack, Block block) {
-        ResourceLocation blockLocation = Services.REGISTRY.getBlockLocation(block);
+        Identifier blockLocation = Services.REGISTRY.getBlockLocation(block);
         if (blockLocation != null) {
             return addContent(itemStack, blockLocation);
         }

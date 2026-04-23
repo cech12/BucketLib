@@ -11,7 +11,7 @@ import de.cech12.bucketlib.platform.Services;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bucketable;
@@ -35,7 +35,7 @@ public class RegistryUtil {
     }, new Decoder<>() {
         @Override
         public <T> DataResult<Pair<Fluid, T>> decode(DynamicOps<T> ops, T input) {
-            return DataResult.success(Pair.of(Services.REGISTRY.getFluid(ResourceLocation.parse(ops.getStringValue(input).getOrThrow())), ops.empty()));
+            return DataResult.success(Pair.of(Services.REGISTRY.getFluid(Identifier.parse(ops.getStringValue(input).getOrThrow())), ops.empty()));
         }
     });
 
@@ -47,7 +47,7 @@ public class RegistryUtil {
     }, new Decoder<>() {
         @Override
         public <T> DataResult<Pair<Block, T>> decode(DynamicOps<T> ops, T input) {
-            return DataResult.success(Pair.of(Services.REGISTRY.getBlock(ResourceLocation.parse(ops.getStringValue(input).getOrThrow())), ops.empty()));
+            return DataResult.success(Pair.of(Services.REGISTRY.getBlock(Identifier.parse(ops.getStringValue(input).getOrThrow())), ops.empty()));
         }
     });
 
@@ -59,7 +59,7 @@ public class RegistryUtil {
     }, new Decoder<>() {
         @Override
         public <T> DataResult<Pair<EntityType<?>, T>> decode(DynamicOps<T> ops, T input) {
-            return DataResult.success(Pair.of(Services.REGISTRY.getEntityType(ResourceLocation.parse(ops.getStringValue(input).getOrThrow())), ops.empty()));
+            return DataResult.success(Pair.of(Services.REGISTRY.getEntityType(Identifier.parse(ops.getStringValue(input).getOrThrow())), ops.empty()));
         }
     });
 

@@ -13,7 +13,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -37,7 +37,7 @@ public class BlockIngredient implements CustomIngredient {
         this.tag = tag;
     }
 
-    public BlockIngredient(Optional<ResourceLocation> blockOptional, Optional<TagKey<Block>> tagOptional) {
+    public BlockIngredient(Optional<Identifier> blockOptional, Optional<TagKey<Block>> tagOptional) {
         this(blockOptional.map(BuiltInRegistries.BLOCK::get).filter(Optional::isPresent).map(reference -> reference.get().value()).orElse(null), tagOptional.orElse(null));
     }
 
@@ -115,11 +115,11 @@ public class BlockIngredient implements CustomIngredient {
     public static final class Serializer implements CustomIngredientSerializer<BlockIngredient> {
 
         public static final Serializer INSTANCE = new Serializer();
-        public static final ResourceLocation NAME = BucketLib.id("block");
+        public static final Identifier NAME = BucketLib.id("block");
 
         private static final MapCodec<BlockIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
                 builder.group(
-                        ResourceLocation.CODEC.optionalFieldOf("block").forGetter(i -> Optional.of(BuiltInRegistries.BLOCK.getKey(i.block))),
+                        Identifier.CODEC.optionalFieldOf("block").forGetter(i -> Optional.of(BuiltInRegistries.BLOCK.getKey(i.block))),
                         TagKey.codec(BuiltInRegistries.BLOCK.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
                 ).apply(builder, BlockIngredient::new)
         );
@@ -131,7 +131,7 @@ public class BlockIngredient implements CustomIngredient {
         private Serializer() {}
 
         @Override
-        public ResourceLocation getIdentifier() {
+        public Identifier getIdentifier() {
             return NAME;
         }
 
@@ -149,13 +149,13 @@ public class BlockIngredient implements CustomIngredient {
             String block = buffer.readUtf();
             String tagId = buffer.readUtf();
             if (!tagId.isEmpty()) {
-                TagKey<Block> tag = TagKey.create(Registries.BLOCK, ResourceLocation.parse(tagId));
+                TagKey<Block> tag = TagKey.create(Registries.BLOCK, Identifier.parse(tagId));
                 return new BlockIngredient(tag);
             }
             if (block.isEmpty()) {
                 throw new IllegalArgumentException("Cannot create a block ingredient with no block or tag.");
             }
-            Optional<Holder.Reference<Block>> blockOptional = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(block));
+            Optional<Holder.Reference<Block>> blockOptional = BuiltInRegistries.BLOCK.get(Identifier.parse(block));
             if (blockOptional.isEmpty()) {
                 throw new IllegalArgumentException("Block resource location \"" + block + " \" could not be found.");
             }
