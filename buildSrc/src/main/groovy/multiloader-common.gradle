@@ -131,6 +131,9 @@ publishing {
                     assert dep.parent().remove(dep)
                 }
             }
+            
+            suppressPomMetadataWarningsFor("apiElements")
+            suppressPomMetadataWarningsFor("runtimeElements")
         }
     }
     repositories {
@@ -138,4 +141,8 @@ publishing {
             url "file://" + System.getenv("local_maven")
         }
     }
+}
+
+tasks.withType(GenerateModuleMetadata).configureEach {
+    enabled = false
 }
