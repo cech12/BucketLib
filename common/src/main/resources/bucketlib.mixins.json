@@ -4,11 +4,13 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "${mod_id}.refmap.json",
   "mixins": [
+    "AbstractNautilusMixin",
     "AxolotlMixin",
     "CraftingRecipeMixin",
     "ItemStackMixin",
     "LivingEntityAccessor",
-    "MobBucketItemAccessor"
+    "MobBucketItemAccessor",
+    "NautilusAiMixin"
   ],
   "injectors": {
     "defaultRequire": 1
