@@ -1,13 +1,13 @@
 package de.cech12.bucketlibtest;
-
+/*
 import de.cech12.bucketlib.api.BucketLibApi;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Blocks;
@@ -23,24 +23,24 @@ public class BucketLibTestMod implements ModInitializer {
 
     public static final TagKey<Fluid> WATER_TAG = TagKey.create(Registries.FLUID, location("water"));
 
-    private static final ResourceLocation TEST_BUCKET = location("test_bucket");
-    private static final ResourceLocation TEMPERATURE_BUCKET = location("temperature_bucket");
-    private static final ResourceLocation WATER_ALLOWING_BUCKET = location("water_allowing_bucket");
-    private static final ResourceLocation WATER_ALLOWING_TAG_BUCKET = location("water_allowing_tag_bucket");
-    private static final ResourceLocation WATER_DENYING_BUCKET = location("water_denying_bucket");
-    private static final ResourceLocation WATER_DENYING_TAG_BUCKET = location("water_denying_tag_bucket");
-    private static final ResourceLocation CRACKING_BUCKET = location("cracking_bucket");
-    private static final ResourceLocation COLORED_BUCKET = location("colored_bucket");
-    private static final ResourceLocation ANTI_MILK_BUCKET = location("anti_milk_bucket");
-    private static final ResourceLocation NO_ENTITIES_BUCKET = location("no_entities_bucket");
-    private static final ResourceLocation ANTI_SALMON_BUCKET = location("anti_salmon_bucket");
-    private static final ResourceLocation ONLY_PUFFER_BUCKET = location("only_puffer_bucket");
-    private static final ResourceLocation NO_BLOCKS_BUCKET = location("no_blocks_bucket");
-    private static final ResourceLocation DURABILITY_BUCKET = location("durability_bucket");
-    private static final ResourceLocation BURNING_BUCKET = location("burning_bucket");
-    private static final ResourceLocation FREEZING_BUCKET = location("freezing_bucket");
+    private static final Identifier TEST_BUCKET = location("test_bucket");
+    private static final Identifier TEMPERATURE_BUCKET = location("temperature_bucket");
+    private static final Identifier WATER_ALLOWING_BUCKET = location("water_allowing_bucket");
+    private static final Identifier WATER_ALLOWING_TAG_BUCKET = location("water_allowing_tag_bucket");
+    private static final Identifier WATER_DENYING_BUCKET = location("water_denying_bucket");
+    private static final Identifier WATER_DENYING_TAG_BUCKET = location("water_denying_tag_bucket");
+    private static final Identifier CRACKING_BUCKET = location("cracking_bucket");
+    private static final Identifier COLORED_BUCKET = location("colored_bucket");
+    private static final Identifier ANTI_MILK_BUCKET = location("anti_milk_bucket");
+    private static final Identifier NO_ENTITIES_BUCKET = location("no_entities_bucket");
+    private static final Identifier ANTI_SALMON_BUCKET = location("anti_salmon_bucket");
+    private static final Identifier ONLY_PUFFER_BUCKET = location("only_puffer_bucket");
+    private static final Identifier NO_BLOCKS_BUCKET = location("no_blocks_bucket");
+    private static final Identifier DURABILITY_BUCKET = location("durability_bucket");
+    private static final Identifier BURNING_BUCKET = location("burning_bucket");
+    private static final Identifier FREEZING_BUCKET = location("freezing_bucket");
 
-    private static final List<ResourceLocation> BUCKETS = List.of(
+    private static final List<Identifier> BUCKETS = List.of(
             TEST_BUCKET, TEMPERATURE_BUCKET, WATER_ALLOWING_BUCKET, WATER_ALLOWING_TAG_BUCKET, WATER_DENYING_BUCKET,
             WATER_DENYING_TAG_BUCKET, CRACKING_BUCKET, COLORED_BUCKET, ANTI_MILK_BUCKET, NO_ENTITIES_BUCKET, ANTI_SALMON_BUCKET,
             ONLY_PUFFER_BUCKET, NO_BLOCKS_BUCKET, DURABILITY_BUCKET, BURNING_BUCKET, FREEZING_BUCKET
@@ -65,7 +65,7 @@ public class BucketLibTestMod implements ModInitializer {
         registerBucket(FREEZING_BUCKET, new UniversalBucketItem.Properties().durability(20).freezingTemperature(500).freezingBlocks(Collections.singletonList(Blocks.POWDER_SNOW)));
     }
 
-    private static void registerBucket(ResourceLocation location, UniversalBucketItem.Properties properties) {
+    private static void registerBucket(Identifier location, UniversalBucketItem.Properties properties) {
         Registry.register(BuiltInRegistries.ITEM, location, new UniversalBucketItem(ResourceKey.create(BuiltInRegistries.ITEM.key(), location), properties));
     }
 
@@ -74,8 +74,9 @@ public class BucketLibTestMod implements ModInitializer {
         BUCKETS.forEach(BucketLibApi::registerBucket);
     }
 
-    private static ResourceLocation location(String name) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
+    private static Identifier location(String name) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, name);
     }
 
 }
+ */

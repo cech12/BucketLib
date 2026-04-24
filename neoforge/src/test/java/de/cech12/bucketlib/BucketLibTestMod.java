@@ -1,5 +1,5 @@
 package de.cech12.bucketlib;
-
+/*
 import de.cech12.bucketlib.api.BucketLibApi;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -69,3 +69,4 @@ public class BucketLibTestMod {
     }
 
 }
+ */
