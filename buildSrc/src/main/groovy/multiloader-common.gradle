@@ -133,14 +133,23 @@ processResources {
 
 publishing {
     publications {
-        register('mavenJava', MavenPublication) {
-            artifactId base.archivesName.get()
+        maven(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version "$project.minecraft_version-$project.mod_version"
             from components.java
+
+            // Filter any dependencies from appearing in the pom.xml
+            pom.withXml {
+                asNode().dependencies.dependency.each { dep ->
+                    assert dep.parent().remove(dep)
+                }
+            }
         }
     }
     repositories {
         maven {
-            url System.getenv('local_maven_url')
+            url "file://" + System.getenv("local_maven")
         }
     }
 }
