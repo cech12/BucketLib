@@ -26,8 +26,8 @@
     "modmenu": [
       "de.cech12.bucketlib.compat.ModMenuCompat"
     ],
-    "rei_client": [
-      "de.cech12.bucketlib.rei.BucketLibReiClientPlugin"
+    "jei_mod_plugin": [
+      "de.cech12.bucketlib.jei.ModJEIPlugin"
     ]
   },
   "mixins": [
@@ -43,6 +43,6 @@
   },
   "suggests": {
     "modmenu": ">=${mod_menu_version}",
-    "roughlyenoughitems": ">=${rei_version}"
+    "jei": ">=${jei_version}"
   }
 }

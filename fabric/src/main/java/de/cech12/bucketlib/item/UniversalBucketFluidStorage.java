@@ -12,22 +12,16 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Optional;
-
 public class UniversalBucketFluidStorage extends SingleFluidStorage {
 
     private final ContainerItemContext context;
 
     public UniversalBucketFluidStorage(ContainerItemContext context) {
         this.context = context;
-        Optional<? extends FluidStorageData> optional = context.getItemVariant().getComponents().get(BucketLibMod.STORAGE);
-        if (optional != null) {
-            optional.ifPresent(data -> {
-                if (!data.isEmpty()) {
-                    this.variant = data.fluidVariant();
-                    this.amount = data.amount();
-                }
-            });
+        FluidStorageData data = context.getItemVariant().getComponents().get(BucketLibMod.STORAGE);
+        if (data != null && !data.isEmpty()) {
+            this.variant = data.fluidVariant();
+            this.amount = data.amount();
         }
     }
 

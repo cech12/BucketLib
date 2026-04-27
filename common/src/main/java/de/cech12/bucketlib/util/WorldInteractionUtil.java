@@ -20,20 +20,21 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class WorldInteractionUtil {
 
     private WorldInteractionUtil() {}
 
     public static InteractionResult tryMilkLivingEntity(ItemStack itemStack, LivingEntity entity, Player player, InteractionHand interactionHand) {
-        if (!entity.getType().is(BucketLibTags.EntityTypes.MILKABLE)) {
+        if (!entity.is(BucketLibTags.EntityTypes.MILKABLE)) {
             return InteractionResult.PASS;
         }
         player.setItemInHand(interactionHand, new ItemStack(Items.BUCKET));
         //deactivate instabuild for the fake interaction to avoid side effects like adding additional filled vanilla buckets into inventory
         boolean previousInstabuildValue = player.getAbilities().instabuild;
         player.getAbilities().instabuild = false;
-        InteractionResult result = player.interactOn(entity, interactionHand);
+        InteractionResult result = player.interactOn(entity, interactionHand, Vec3.ZERO);
         player.getAbilities().instabuild = previousInstabuildValue;
         if (result.consumesAction()) {
             itemStack = ItemUtils.createFilledResult(itemStack.copy(), player, BucketLibUtil.addMilk(ItemStackUtil.copyStackWithSize(itemStack, 1)));

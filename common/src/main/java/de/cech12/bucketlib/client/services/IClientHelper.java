@@ -2,15 +2,10 @@ package de.cech12.bucketlib.client.services;
 
 import de.cech12.bucketlib.client.model.UniversalBucketModel;
 import net.minecraft.client.renderer.item.ItemModel;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.ModelDebugName;
-import net.minecraft.client.resources.model.SpriteGetter;
-import net.minecraft.world.level.material.Fluid;
+import org.joml.Matrix4fc;
 
 public interface IClientHelper {
 
-    TextureAtlasSprite getFluidTextureMaterial(SpriteGetter spriteGetter, ModelDebugName debugName, Fluid fluid);
-
-    UniversalBucketModel createItemModel(UniversalBucketModel.Unbaked unbakedModel, ItemModel.BakingContext bakingContext);
+    UniversalBucketModel createItemModel(UniversalBucketModel.Unbaked unbakedModel, ItemModel.BakingContext bakingContext, Matrix4fc transformation);
 
 }

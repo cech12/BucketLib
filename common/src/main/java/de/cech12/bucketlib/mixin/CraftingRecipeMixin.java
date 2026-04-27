@@ -1,19 +1,12 @@
 package de.cech12.bucketlib.mixin;
 
-import de.cech12.bucketlib.api.item.UniversalBucketItem;
-import net.minecraft.core.NonNullList;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.ArmorDyeRecipe;
-import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(CraftingRecipe.class)
 public interface CraftingRecipeMixin {
 
+    /* TODO
     @Inject(at = @At("RETURN"), method = "getRemainingItems", cancellable = true)
     default void getRemainingItems(CraftingInput craftingInput, CallbackInfoReturnable<NonNullList<ItemStack>> cir) {
         if ((Object)this instanceof ArmorDyeRecipe) {
@@ -31,4 +24,5 @@ public interface CraftingRecipeMixin {
             }
         }
     }
+     */
 }

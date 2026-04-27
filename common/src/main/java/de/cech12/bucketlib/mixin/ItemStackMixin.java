@@ -33,11 +33,4 @@ public abstract class ItemStackMixin implements DataComponentHolder {
         }
     }
 
-    @Inject(at = @At("HEAD"), method = "getMaxStackSize", cancellable = true)
-    public void getMaxStackSizeProxy(CallbackInfoReturnable<Integer> cir) {
-        if (this.getItem() instanceof UniversalBucketItem bucketItem) {
-            cir.setReturnValue(bucketItem.getMaxStackSize((ItemStack) (Object) this));
-        }
-    }
-
 }

@@ -12,7 +12,7 @@ public class FabricBucketHelper implements IBucketHelper {
 
     @Override
     public Fluid getFluidOfBucketItem(BucketItem bucket) {
-        return ((BucketItemAccessor) bucket).fabric_getFluid();
+        return ((BucketItemAccessor) bucket).fabric_getContent();
     }
 
 }

@@ -31,6 +31,7 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
@@ -194,7 +195,7 @@ public class UniversalBucketItem extends Item {
             entity.setTicksFrozen(Math.min(entity.getTicksRequiredToFreeze(), ticks));
             //damaging here because, the vanilla mechanic is reducing the freeze ticks below fully freezing
             if (BucketLibUtil.notCreative(entity) && entity.tickCount % 40 == 0 && entity.isFullyFrozen()) {
-                entity.hurtServer(level, level.damageSources().freeze(), entity.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
+                entity.hurtServer(level, level.damageSources().freeze(), entity.is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
                 BucketLibUtil.damageByOne(itemStack, level, (entity instanceof Player) ? (Player) entity : null);
             }
         }
@@ -397,13 +398,13 @@ public class UniversalBucketItem extends Item {
         return !BucketLibUtil.isEmpty(stack) && !this.isCracked(stack);
     }
 
-    //@Override //overrides the (neo)forge implementation
-    public ItemStack getCraftingRemainder(ItemStack itemStack) {
+    //@Override //overrides the (neo)forge and fabric implementation
+    public ItemStackTemplate getCraftingRemainder(ItemStack itemStack) {
         if (!hasCraftingRemainder(itemStack)) {
-            return ItemStack.EMPTY;
+            return null;
         }
         if (BucketLibUtil.isAffectedByInfinityEnchantment(itemStack)) {
-            return itemStack.copy();
+            return ItemStackTemplate.fromNonEmptyStack(itemStack);
         }
         //remove everything from bucket
         ItemStack result = itemStack.copy();
@@ -418,12 +419,7 @@ public class UniversalBucketItem extends Item {
         if (BucketLibUtil.containsFluid(result) || BucketLibUtil.containsMilk(result)) {
             result = BucketLibUtil.removeFluid(result, null, null); //ServerLevel not available here
         }
-        return result;
-    }
-
-    //@Override //overrides the fabric implementation
-    public ItemStack getRecipeRemainder(ItemStack itemStack) {
-        return getCraftingRemainder(itemStack);
+        return ItemStackTemplate.fromNonEmptyStack(result);
     }
 
     private boolean getBooleanProperty(Supplier<Boolean> config, boolean defaultValue) {
@@ -448,7 +444,7 @@ public class UniversalBucketItem extends Item {
             } else if (element instanceof Fluid fluid) {
                 return fluid.defaultFluidState().is((TagKey<Fluid>) tag);
             } else if (element instanceof EntityType<?> entityType) {
-                return entityType.is((TagKey<EntityType<?>>) tag);
+                return entityType.builtInRegistryHolder().is((TagKey<EntityType<?>>) tag);
             }
         }
         return defaultList != null && defaultList.contains(element);

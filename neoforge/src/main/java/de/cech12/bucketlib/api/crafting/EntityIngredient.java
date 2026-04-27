@@ -58,7 +58,7 @@ public class EntityIngredient implements ICustomIngredient {
             }
             bucketEntities = List.of(bucketEntity);
         } else {
-            bucketEntities = RegistryUtil.getBucketEntities().stream().filter(bucketBlock -> bucketBlock.entityType().is(this.tag)).toList();
+            bucketEntities = RegistryUtil.getBucketEntities().stream().filter(bucketBlock -> bucketBlock.entityType().builtInRegistryHolder().is(this.tag)).toList();
         }
         if (bucketEntities.isEmpty()) {
             return false;

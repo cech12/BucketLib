@@ -4,7 +4,7 @@ import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
@@ -39,7 +39,7 @@ public class BucketLibApi {
     }
 
     private static void addItemToTab(UniversalBucketItem bucket) {
-        ItemGroupEvents.modifyEntriesEvent(bucket.getCreativeTab()).register(content -> {
+        CreativeModeTabEvents.modifyOutputEvent(bucket.getCreativeTab()).register(content -> {
             ItemStack emptyBucket = new ItemStack(bucket);
             //add empty bucket
             content.accept(emptyBucket);

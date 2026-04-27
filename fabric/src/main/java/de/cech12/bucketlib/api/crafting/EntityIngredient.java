@@ -62,7 +62,7 @@ public class EntityIngredient implements CustomIngredient {
             }
             bucketEntities = List.of(bucketEntity);
         } else {
-            bucketEntities = RegistryUtil.getBucketEntities().stream().filter(bucketBlock -> bucketBlock.entityType().is(this.tag)).toList();
+            bucketEntities = RegistryUtil.getBucketEntities().stream().filter(bucketBlock -> bucketBlock.entityType().builtInRegistryHolder().is(this.tag)).toList();
         }
         if (bucketEntities.isEmpty()) {
             return false;
@@ -75,7 +75,7 @@ public class EntityIngredient implements CustomIngredient {
     }
 
     @Override
-    public Stream<Holder<Item>> getMatchingItems() {
+    public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
             List<EntityType<?>> entityTypes = new ArrayList<>();
@@ -148,7 +148,7 @@ public class EntityIngredient implements CustomIngredient {
         }
 
         @Override
-        public StreamCodec<RegistryFriendlyByteBuf, EntityIngredient> getPacketCodec() {
+        public StreamCodec<RegistryFriendlyByteBuf, EntityIngredient> getStreamCodec() {
             return PACKET_CODEC;
         }
 

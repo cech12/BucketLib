@@ -1,5 +1,5 @@
 package de.cech12.bucketlib.rei;
-
+/*
 import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.platform.Services;
@@ -67,3 +67,4 @@ public class BucketLibReiClientPlugin implements REIClientPlugin {
     }
 
 }
+ */
