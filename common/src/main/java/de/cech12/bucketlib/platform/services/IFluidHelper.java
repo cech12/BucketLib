@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -27,6 +28,9 @@ public interface IFluidHelper {
 
     default int getFluidTintColor(ItemStack stack) {
         var fluid = getContainedFluid(stack);
+        if (fluid == Fluids.WATER) {
+            return -12618012;
+        }
         BlockTintSource tintSource = Minecraft.getInstance()
                 .getModelManager()
                 .getFluidStateModelSet()
