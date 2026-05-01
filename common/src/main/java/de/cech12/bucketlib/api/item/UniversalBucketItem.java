@@ -166,9 +166,14 @@ public class UniversalBucketItem extends Item {
         return false;
     }
 
-    //@Override //overrides the neoforge implementation //used by mixin
+    //@Override //overrides the neoforge implementation
     public int getMaxStackSize(ItemStack stack) {
-        return BucketLibUtil.isEmpty(stack) ? this.properties.maxStackSize : 1;
+        return getMaxStackSize((ItemInstance)stack);
+    }
+
+    //used by mixin
+    public int getMaxStackSize(ItemInstance itemInstance) {
+        return BucketLibUtil.isEmpty(itemInstance) ? this.properties.maxStackSize : 1;
     }
 
     //used by mixins

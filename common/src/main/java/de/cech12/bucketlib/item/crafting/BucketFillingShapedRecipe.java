@@ -27,7 +27,7 @@ import java.util.Optional;
 
 public class BucketFillingShapedRecipe extends ShapedRecipe {
 
-    public static final MapCodec<BucketFillingShapedRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec((i) -> i.group(
+    public static final MapCodec<BucketFillingShapedRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
             CommonInfo.MAP_CODEC.forGetter((recipe) -> recipe.commonInfo),
             CraftingBookInfo.MAP_CODEC.forGetter((recipe) -> recipe.bookInfo),
             ShapedRecipePattern.MAP_CODEC.forGetter((recipe) -> recipe.pattern),
@@ -35,7 +35,7 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
             RegistryUtil.FLUID_CODEC.optionalFieldOf("fluid").forGetter(recipe -> recipe.fluid != null ? Optional.of(recipe.fluid) : Optional.empty()),
             RegistryUtil.BLOCK_CODEC.optionalFieldOf("block").forGetter(recipe -> recipe.block != null ? Optional.of(recipe.block) : Optional.empty()),
             RegistryUtil.ENTITY_TYPE_CODEC.optionalFieldOf("entity").forGetter(recipe -> recipe.entityType != null ? Optional.of(recipe.entityType) : Optional.empty()))
-            .apply(i, BucketFillingShapedRecipe::new)
+            .apply(instance, BucketFillingShapedRecipe::new)
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, BucketFillingShapedRecipe> STREAM_CODEC = StreamCodec.composite(
             CommonInfo.STREAM_CODEC, (recipe) -> recipe.commonInfo,

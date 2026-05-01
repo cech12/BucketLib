@@ -28,8 +28,8 @@ import java.util.Optional;
 
 public class BucketFillingShapelessRecipe extends ShapelessRecipe {
 
-    private static final MapCodec<BucketFillingShapelessRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec((record) ->
-            record.group(
+    private static final MapCodec<BucketFillingShapelessRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec((instance) ->
+            instance.group(
                     CommonInfo.MAP_CODEC.forGetter((recipe) -> recipe.commonInfo),
                     CraftingBookInfo.MAP_CODEC.forGetter((recipe) -> recipe.bookInfo),
                     Ingredient.CODEC.listOf(1, 9).fieldOf("ingredients").forGetter((o) -> o.ingredients),
@@ -37,7 +37,7 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
                     RegistryUtil.FLUID_CODEC.optionalFieldOf("fluid").forGetter(recipe -> Optional.of(recipe.fluid)),
                     RegistryUtil.BLOCK_CODEC.optionalFieldOf("block").forGetter(recipe -> Optional.of(recipe.block)),
                     RegistryUtil.ENTITY_TYPE_CODEC.optionalFieldOf("entity").forGetter(recipe -> Optional.of(recipe.entityType))
-            ).apply(record, BucketFillingShapelessRecipe::new));
+            ).apply(instance, BucketFillingShapelessRecipe::new));
     public static final StreamCodec<RegistryFriendlyByteBuf, BucketFillingShapelessRecipe> STREAM_CODEC = StreamCodec.composite(
             CommonInfo.STREAM_CODEC, (recipe) -> recipe.commonInfo,
             CraftingBookInfo.STREAM_CODEC, (recipe) -> recipe.bookInfo,

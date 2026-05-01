@@ -30,13 +30,13 @@ import java.util.List;
 
 public class RegistryUtil {
 
-    public static Codec<Holder<Fluid>> FLUID_CODEC = BuiltInRegistries.FLUID.holderByNameCodec().validate((fluid) -> fluid.value().defaultFluidState().is(Fluids.EMPTY) ? DataResult.error(() -> "Fluid must not be fluid:empty") : DataResult.success(fluid));
+    public static final Codec<Holder<Fluid>> FLUID_CODEC = BuiltInRegistries.FLUID.holderByNameCodec().validate((fluid) -> fluid.value().defaultFluidState().is(Fluids.EMPTY) ? DataResult.error(() -> "Fluid must not be fluid:empty") : DataResult.success(fluid));
     public static final StreamCodec<RegistryFriendlyByteBuf, Holder<Fluid>> STREAM_FLUID_CODEC = ByteBufCodecs.holderRegistry(Registries.FLUID);
 
-    public static Codec<Holder<Block>> BLOCK_CODEC = BuiltInRegistries.BLOCK.holderByNameCodec().validate((block) -> block.value() == Blocks.AIR ? DataResult.error(() -> "Block must not be block:air") : DataResult.success(block));
+    public static final Codec<Holder<Block>> BLOCK_CODEC = BuiltInRegistries.BLOCK.holderByNameCodec().validate((block) -> block.value() == Blocks.AIR ? DataResult.error(() -> "Block must not be block:air") : DataResult.success(block));
     public static final StreamCodec<RegistryFriendlyByteBuf, Holder<Block>> STREAM_BLOCK_CODEC = ByteBufCodecs.holderRegistry(Registries.BLOCK);
 
-    public static Codec<Holder<EntityType<?>>> ENTITY_TYPE_CODEC = BuiltInRegistries.ENTITY_TYPE.holderByNameCodec().validate(DataResult::success);
+    public static final Codec<Holder<EntityType<?>>> ENTITY_TYPE_CODEC = BuiltInRegistries.ENTITY_TYPE.holderByNameCodec().validate(DataResult::success);
     public static final StreamCodec<RegistryFriendlyByteBuf, Holder<EntityType<?>>> STREAM_ENTITY_TYPE_CODEC = ByteBufCodecs.holderRegistry(Registries.ENTITY_TYPE);
 
     private static List<BucketBlock> bucketBlocks;
