@@ -5,9 +5,7 @@
     "BB"
   ],
   "key": {
-    "B": {
-      "item": "bucketlibtest:test_bucket"
-    }
+    "B": "bucketlibtest:test_bucket"
   },
   "result": {
     "id": "minecraft:gravel"

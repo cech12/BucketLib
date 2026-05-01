@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "bucketlibtest:test_bucket"
+  ],
+  "result": {
+    "id": "minecraft:gravel"
+  }
+}
