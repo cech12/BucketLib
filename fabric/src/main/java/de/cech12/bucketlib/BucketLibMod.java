@@ -57,7 +57,7 @@ public class BucketLibMod implements ModInitializer {
     public static final Identifier TEST_BUCKET_ID = BucketLib.id("test_bucket");
     public static final Item TEST_BUCKET = Registry.register(BuiltInRegistries.ITEM, TEST_BUCKET_ID, new UniversalBucketItem(
             ResourceKey.create(BuiltInRegistries.ITEM.key(), TEST_BUCKET_ID),
-            new UniversalBucketItem.Properties()));
+            new UniversalBucketItem.Properties().durability(10)));
 
     private static final List<UniversalBucketItem> BUCKETS = new ArrayList<>();
 
@@ -71,7 +71,6 @@ public class BucketLibMod implements ModInitializer {
         CommonLoader.init();
         //Ensure that the tags are initialized
         BucketLibTags.init();
-
 
         //TODO remove!!
         //register bucket

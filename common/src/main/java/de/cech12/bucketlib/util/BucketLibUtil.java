@@ -6,7 +6,7 @@ import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.mixin.LivingEntityAccessor;
 import de.cech12.bucketlib.platform.Services;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.core.component.DataComponentHolder;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -21,10 +21,14 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -46,8 +50,35 @@ public class BucketLibUtil {
         return !(entity instanceof Player player) || !player.getAbilities().instabuild;
     }
 
-    public static boolean isEmpty(ItemStack itemStack) {
-        return !containsFluid(itemStack) && !containsMilk(itemStack) && !containsEntityType(itemStack) && !containsBlock(itemStack);
+    public static Item getItem(ItemInstance itemInstance) {
+        if (itemInstance instanceof ItemStack stack) {
+            return stack.getItem();
+        } else if (itemInstance instanceof ItemStackTemplate template) {
+            return template.item().value();
+        }
+        throw new IllegalArgumentException("Invalid item instance");
+    }
+
+    public static ItemStack getItemStack(ItemInstance itemInstance) {
+        if (itemInstance instanceof ItemStack stack) {
+            return stack;
+        } else if (itemInstance instanceof ItemStackTemplate template) {
+            return template.create();
+        }
+        throw new IllegalArgumentException("Invalid item instance");
+    }
+
+    public static ItemStackTemplate getItemStackTemplate(ItemInstance itemInstance) {
+        if (itemInstance instanceof ItemStack stack) {
+            return ItemStackTemplate.fromNonEmptyStack(stack);
+        } else if (itemInstance instanceof ItemStackTemplate template) {
+            return template;
+        }
+        throw new IllegalArgumentException("Invalid item instance");
+    }
+
+    public static boolean isEmpty(ItemInstance itemInstance) {
+        return !containsFluid(itemInstance) && !containsMilk(itemInstance) && !containsEntityType(itemInstance) && !containsBlock(itemInstance);
     }
 
     public static ItemStack createEmptyResult(ItemStack initialStack, Player player, ItemStack resultStack, InteractionHand hand) {
@@ -115,35 +146,35 @@ public class BucketLibUtil {
 
     /**
      * Checks if the given bucket is affected by Infinity enchantment.
-     * @param itemStack checked item stack
+     * @param itemInstance checked item instance
      * @return boolean
      */
-    public static boolean isAffectedByInfinityEnchantment(@NotNull ItemStack itemStack) {
-        return isInfinityEnchantmentAllowed(itemStack) && hasInfinityEnchantment(itemStack);
+    public static boolean isAffectedByInfinityEnchantment(@NotNull ItemInstance itemInstance) {
+        return isInfinityEnchantmentAllowed(itemInstance) && hasInfinityEnchantment(itemInstance);
     }
 
     /**
      * Checks if the given bucket is enchanted with the Infinity enchantment.
-     * @param itemStack checked item stack
+     * @param itemInstance checked item instance
      * @return boolean
      */
-    public static boolean hasInfinityEnchantment(@NotNull ItemStack itemStack) {
-        return itemStack.getEnchantments().keySet().stream()
+    public static boolean hasInfinityEnchantment(@NotNull ItemInstance itemInstance) {
+        return itemInstance.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).keySet().stream()
                 .filter(enchantment -> enchantment.is(Enchantments.INFINITY))
-                .anyMatch(enchantment -> EnchantmentHelper.getItemEnchantmentLevel(enchantment, itemStack) > 0);
+                .anyMatch(enchantment -> EnchantmentHelper.getItemEnchantmentLevel(enchantment, itemInstance) > 0);
     }
 
     /**
      * Checks if the given bucket is allowed to be enchanted with Infinity enchantment.
-     * @param itemStack checked item stack
+     * @param itemInstance checked item instance
      * @return boolean
      */
-    public static boolean isInfinityEnchantmentAllowed(@NotNull ItemStack itemStack) {
+    public static boolean isInfinityEnchantmentAllowed(@NotNull ItemInstance itemInstance) {
         if (!Services.CONFIG.isInfinityEnchantmentEnabled()) {
             return false;
         }
-        if (itemStack.getItem() instanceof UniversalBucketItem bucket) {
-            Fluid fluid = getFluid(itemStack);
+        if (getItem(itemInstance) instanceof UniversalBucketItem bucket) {
+            Fluid fluid = getFluid(itemInstance);
             return fluid != Fluids.EMPTY
                     && fluid.defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)
                     && bucket.canHoldFluid(fluid);
@@ -151,13 +182,13 @@ public class BucketLibUtil {
         return false;
     }
 
-    private static boolean containsTagContent(DataComponentHolder itemStack, String tagName) {
-        CustomData customdata = itemStack.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
+    private static boolean containsTagContent(DataComponentGetter componentGetter, String tagName) {
+        CustomData customdata = componentGetter.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
         return customdata.copyTag().contains(tagName);
     }
 
-    private static String getTagContent(DataComponentHolder itemStack, String tagName) {
-        CustomData customdata = itemStack.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
+    private static String getTagContent(DataComponentGetter componentGetter, String tagName) {
+        CustomData customdata = componentGetter.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
         return customdata.copyTag().getString(tagName).orElse(null);
     }
 
@@ -188,20 +219,20 @@ public class BucketLibUtil {
         return removeTagContentNoCopy(itemStack.copy(), tagName);
     }
 
-    public static boolean containsContent(ItemStack itemStack) {
-        return containsTagContent(itemStack, "BucketContent");
+    public static boolean containsContent(DataComponentGetter componentGetter) {
+        return containsTagContent(componentGetter, "BucketContent");
     }
 
-    public static Identifier getContent(DataComponentHolder itemStack) {
-        String content = getContentString(itemStack);
+    public static Identifier getContent(DataComponentGetter componentGetter) {
+        String content = getContentString(componentGetter);
         if (content != null) {
             return Identifier.parse(content);
         }
         return null;
     }
 
-    public static String getContentString(DataComponentHolder itemStack) {
-        return getTagContent(itemStack, "BucketContent");
+    public static String getContentString(DataComponentGetter componentGetter) {
+        return getTagContent(componentGetter, "BucketContent");
     }
 
     public static ItemStack addContent(ItemStack itemStack, Identifier content) {
@@ -219,8 +250,8 @@ public class BucketLibUtil {
         return emptyStack;
     }
 
-    public static boolean containsMilk(DataComponentHolder itemStack) {
-        Identifier bucketContent = getContent(itemStack);
+    public static boolean containsMilk(DataComponentGetter componentGetter) {
+        Identifier bucketContent = getContent(componentGetter);
         return bucketContent != null && bucketContent.equals(MILK_LOCATION);
     }
 
@@ -236,12 +267,12 @@ public class BucketLibUtil {
         return removeFluid(itemStack, level, player);
     }
 
-    public static boolean containsFluid(ItemStack itemStack) {
-        return getFluid(itemStack) != Fluids.EMPTY;
+    public static boolean containsFluid(ItemInstance itemInstance) {
+        return getFluid(itemInstance) != Fluids.EMPTY;
     }
 
-    public static Fluid getFluid(ItemStack itemStack) {
-        return Services.FLUID.getContainedFluid(itemStack);
+    public static Fluid getFluid(ItemInstance itemInstance) {
+        return Services.FLUID.getContainedFluid(getItemStack(itemInstance));
     }
 
     public static ItemStack addFluid(ItemStack itemStack, Fluid fluid) {
@@ -256,20 +287,20 @@ public class BucketLibUtil {
         return Services.FLUID.removeFluid(resultItemStack.get(), level, player);
     }
 
-    public static boolean containsEntityType(DataComponentHolder itemStack) {
-        return containsTagContent(itemStack, "EntityType");
+    public static boolean containsEntityType(DataComponentGetter componentGetter) {
+        return containsTagContent(componentGetter, "EntityType");
     }
 
-    public static EntityType<?> getEntityType(ItemStack itemStack) {
-        String content = getEntityTypeString(itemStack);
+    public static EntityType<?> getEntityType(DataComponentGetter componentGetter) {
+        String content = getEntityTypeString(componentGetter);
         if (content != null) {
             return Services.REGISTRY.getEntityType(Identifier.parse(content));
         }
         return null;
     }
 
-    public static String getEntityTypeString(ItemStack itemStack) {
-        return getTagContent(itemStack, "EntityType");
+    public static String getEntityTypeString(DataComponentGetter componentGetter) {
+        return getTagContent(componentGetter, "EntityType");
     }
 
     public static ItemStack addEntityType(ItemStack itemStack, EntityType<?> entityType) {
@@ -323,13 +354,13 @@ public class BucketLibUtil {
         return emptyStack;
     }
 
-    public static boolean containsBlock(ItemStack itemStack) {
-        return containsContent(itemStack) && !containsMilk(itemStack);
+    public static boolean containsBlock(DataComponentGetter componentGetter) {
+        return containsContent(componentGetter) && !containsMilk(componentGetter);
     }
 
-    public static Block getBlock(ItemStack itemStack) {
-        if (!containsMilk(itemStack)) {
-            Identifier content = getContent(itemStack);
+    public static Block getBlock(DataComponentGetter componentGetter) {
+        if (!containsMilk(componentGetter)) {
+            Identifier content = getContent(componentGetter);
             if (content != null) {
                 return Services.REGISTRY.getBlock(content);
             }

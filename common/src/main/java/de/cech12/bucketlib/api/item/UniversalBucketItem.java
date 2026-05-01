@@ -30,6 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.ItemUseAnimation;
@@ -94,8 +95,8 @@ public class UniversalBucketItem extends Item {
         return Component.translatable(descriptionId, argument);
     }
 
-    public boolean isCracked(ItemStack stack) {
-        Fluid fluid = BucketLibUtil.getFluid(stack);
+    public boolean isCracked(ItemInstance itemInstance) {
+        Fluid fluid = BucketLibUtil.getFluid(itemInstance);
         if (fluid != Fluids.EMPTY) {
             int fluidTemperature = Services.FLUID.getFluidTemperature(fluid);
             Integer upperCrackingTemperature = getUpperBreakTemperature();
@@ -103,7 +104,7 @@ public class UniversalBucketItem extends Item {
             return isCrackingFluid(fluid)
                     || (upperCrackingTemperature != null && fluidTemperature >= upperCrackingTemperature)
                     || (lowerCrackingTemperature != null && fluidTemperature <= lowerCrackingTemperature)
-                    && !BucketLibUtil.isAffectedByInfinityEnchantment(stack);
+                    && !BucketLibUtil.isAffectedByInfinityEnchantment(itemInstance);
         }
         return false;
     }
@@ -393,21 +394,21 @@ public class UniversalBucketItem extends Item {
         super.onUseTick(level, livingEntity, itemStack, useRemainingTicks);
     }
 
-    public boolean hasCraftingRemainder(ItemStack stack) {
+    public boolean hasCraftingRemainder(ItemInstance itemInstance) {
         //for using a filled bucket as fuel or in crafting recipes, an empty bucket should remain
-        return !BucketLibUtil.isEmpty(stack) && !this.isCracked(stack);
+        return !BucketLibUtil.isEmpty(itemInstance) && !this.isCracked(itemInstance);
     }
 
-    //@Override //overrides the (neo)forge and fabric implementation
-    public ItemStackTemplate getCraftingRemainder(ItemStack itemStack) {
-        if (!hasCraftingRemainder(itemStack)) {
+    //@Override //overrides the (neo)forge implementation
+    public ItemStackTemplate getCraftingRemainder(ItemInstance itemInstance) {
+        if (!hasCraftingRemainder(itemInstance)) {
             return null;
         }
-        if (BucketLibUtil.isAffectedByInfinityEnchantment(itemStack)) {
-            return ItemStackTemplate.fromNonEmptyStack(itemStack);
+        if (BucketLibUtil.isAffectedByInfinityEnchantment(itemInstance)) {
+            return BucketLibUtil.getItemStackTemplate(itemInstance);
         }
         //remove everything from bucket
-        ItemStack result = itemStack.copy();
+        ItemStack result = BucketLibUtil.getItemStack(itemInstance).copy();
         boolean damaged = BucketLibUtil.containsFluid(result); //damaging is done by fluid handler
         if (BucketLibUtil.containsBlock(result)) {
             result = BucketLibUtil.removeBlock(result, null, null, !damaged); //ServerLevel not available here
@@ -420,6 +421,11 @@ public class UniversalBucketItem extends Item {
             result = BucketLibUtil.removeFluid(result, null, null); //ServerLevel not available here
         }
         return ItemStackTemplate.fromNonEmptyStack(result);
+    }
+
+    //@Override //overrides the fabric implementation
+    public ItemStackTemplate getCraftingRemainder(ItemStack itemStack) {
+        return getCraftingRemainder((ItemInstance) itemStack);
     }
 
     private boolean getBooleanProperty(Supplier<Boolean> config, boolean defaultValue) {
