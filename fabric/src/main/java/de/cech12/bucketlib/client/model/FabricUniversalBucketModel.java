@@ -57,7 +57,7 @@ public class FabricUniversalBucketModel extends UniversalBucketModel {
 
         if (baseSprite != null) {
             QuadCollection quads = baker.compute(new ItemModelGenerator.ItemLayerKey(baseSprite, state, 0));
-            subModels.add(new CuboidItemModelWrapper(List.of(), quads, renderProperties, transformation));
+            subModels.add(new CuboidItemModelWrapper(List.of(bucketTint), quads, renderProperties, transformation));
         }
 
         if (otherContentSprite != null) {
