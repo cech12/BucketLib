@@ -1,5 +1,6 @@
 package de.cech12.bucketlib.util;
 
+import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.api.BucketLibComponents;
 import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
@@ -220,7 +221,7 @@ public class BucketLibUtil {
     }
 
     public static boolean containsContent(DataComponentGetter componentGetter) {
-        return containsTagContent(componentGetter, "BucketContent");
+        return containsTagContent(componentGetter, BucketLib.BUCKET_CONTENT_TAG);
     }
 
     public static Identifier getContent(DataComponentGetter componentGetter) {
@@ -232,20 +233,20 @@ public class BucketLibUtil {
     }
 
     public static String getContentString(DataComponentGetter componentGetter) {
-        return getTagContent(componentGetter, "BucketContent");
+        return getTagContent(componentGetter, BucketLib.BUCKET_CONTENT_TAG);
     }
 
     public static ItemStack addContent(ItemStack itemStack, Identifier content) {
-        return setTagContent(itemStack, "BucketContent", content.toString());
+        return setTagContent(itemStack, BucketLib.BUCKET_CONTENT_TAG, content.toString());
     }
 
     public static void removeContentNoCopy(ItemStack itemStack, ServerLevel level, @Nullable Player player, boolean damage) {
-        ItemStack emptyStack = removeTagContentNoCopy(itemStack, "BucketContent");
+        ItemStack emptyStack = removeTagContentNoCopy(itemStack, BucketLib.BUCKET_CONTENT_TAG);
         if (damage) damageByOne(emptyStack, level, player);
     }
 
     private static ItemStack removeContent(ItemStack itemStack, ServerLevel level, @Nullable Player player, boolean damage) {
-        ItemStack emptyStack = removeTagContent(itemStack, "BucketContent");
+        ItemStack emptyStack = removeTagContent(itemStack, BucketLib.BUCKET_CONTENT_TAG);
         if (damage) damageByOne(emptyStack, level, player);
         return emptyStack;
     }
@@ -288,7 +289,7 @@ public class BucketLibUtil {
     }
 
     public static boolean containsEntityType(DataComponentGetter componentGetter) {
-        return containsTagContent(componentGetter, "EntityType");
+        return containsTagContent(componentGetter, BucketLib.ENTITY_TYPE_TAG);
     }
 
     public static EntityType<?> getEntityType(DataComponentGetter componentGetter) {
@@ -300,11 +301,11 @@ public class BucketLibUtil {
     }
 
     public static String getEntityTypeString(DataComponentGetter componentGetter) {
-        return getTagContent(componentGetter, "EntityType");
+        return getTagContent(componentGetter, BucketLib.ENTITY_TYPE_TAG);
     }
 
     public static ItemStack addEntityType(ItemStack itemStack, EntityType<?> entityType) {
-        return setTagContent(itemStack, "EntityType", Services.REGISTRY.getEntityTypeLocation(entityType).toString());
+        return setTagContent(itemStack, BucketLib.ENTITY_TYPE_TAG, Services.REGISTRY.getEntityTypeLocation(entityType).toString());
     }
 
     public static ItemStack removeEntityData(ItemStack itemStack, ServerLevel level, @Nullable Player player, boolean damage) {
@@ -322,7 +323,7 @@ public class BucketLibUtil {
 
 
     public static ItemStack removeEntityData(ItemStack itemStack, ServerLevel level, @Nullable Player player, @Nullable Entity entity, boolean damage) {
-        ItemStack emptyStack = removeTagContent(itemStack, "EntityType");
+        ItemStack emptyStack = removeTagContent(itemStack, BucketLib.ENTITY_TYPE_TAG);
         Set<DataComponentType<?>> types = new HashSet<>();
         types.add(DataComponents.BUCKET_ENTITY_DATA);
         //support custom item stack data components
