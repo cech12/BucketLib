@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class UniversalBucketFluidStorage extends SingleFluidStorage {
 
@@ -26,12 +27,12 @@ public class UniversalBucketFluidStorage extends SingleFluidStorage {
     }
 
     @Override
-    protected long getCapacity(FluidVariant variant) {
+    protected long getCapacity(@NotNull FluidVariant variant) {
         return FluidConstants.BUCKET;
     }
 
     @Override
-    protected boolean canInsert(FluidVariant variant) {
+    protected boolean canInsert(@NotNull FluidVariant variant) {
         ItemStack stack = context.getItemVariant().toStack();
         return this.variant.isBlank() && BucketLibUtil.isEmpty(stack)
                 && (context.getItemVariant().getItem() instanceof UniversalBucketItem universalBucketItem
@@ -45,7 +46,7 @@ public class UniversalBucketFluidStorage extends SingleFluidStorage {
     }
 
     @Override
-    public long insert(FluidVariant insertedVariant, long maxAmount, TransactionContext transaction) {
+    public long insert(@NotNull FluidVariant insertedVariant, long maxAmount, @NotNull TransactionContext transaction) {
         StoragePreconditions.notBlankNotNegative(insertedVariant, maxAmount);
         if (maxAmount >= getCapacity() && (insertedVariant.equals(variant) || variant.isBlank()) && canInsert(insertedVariant)) {
             ItemStack stack = context.getItemVariant().toStack();
@@ -58,7 +59,7 @@ public class UniversalBucketFluidStorage extends SingleFluidStorage {
     }
 
     @Override
-    public long extract(FluidVariant extractedVariant, long maxAmount, TransactionContext transaction) {
+    public long extract(@NotNull FluidVariant extractedVariant, long maxAmount, @NotNull TransactionContext transaction) {
         StoragePreconditions.notBlankNotNegative(extractedVariant, maxAmount);
         if (maxAmount >= amount && (extractedVariant.equals(variant)) && canExtract(extractedVariant)) {
             ItemStack stack = context.getItemVariant().toStack();
