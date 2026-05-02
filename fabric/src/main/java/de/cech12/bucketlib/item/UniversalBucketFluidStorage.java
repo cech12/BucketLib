@@ -76,7 +76,7 @@ public class UniversalBucketFluidStorage extends SingleFluidStorage {
                 BucketLibUtil.removeContentNoCopy(stack, null, null, false);
             }
             stack.remove(BucketLibMod.STORAGE);
-            BucketLibUtil.damageByOne(stack, null);
+            BucketLibUtil.damageByOne(stack, null); //server level not available here
         } else {
             stack.shrink(1);
         }

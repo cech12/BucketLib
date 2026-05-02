@@ -7,6 +7,7 @@ import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.mixin.LivingEntityAccessor;
 import de.cech12.bucketlib.platform.Services;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -14,7 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -93,11 +94,12 @@ public class BucketLibUtil {
             }
             return initialStack;
         }
-        if (resultStack.isEmpty()) {
-            //player.broadcastBreakEvent(hand); //does not work here to play the sound, because the hand is empty until this event gotten
+        if (resultStack.isEmpty() && !initialStack.isEmpty()) {
+            //player.onEquippedItemBroken(initialStack.getItem(), hand.asEquipmentSlot()); //does not work here to play the sound, because the hand is empty until this event gotten
             if (!initialStack.isEmpty()) {
-                if (!player.isSilent()) {
-                    player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK.value(), player.getSoundSource(), 0.8F, 0.8F + player.getRandom().nextFloat() * 0.4F, false);
+                Holder<SoundEvent> breakSound = initialStack.get(DataComponents.BREAK_SOUND);
+                if (breakSound != null && !player.isSilent()) {
+                    player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), breakSound.value(), player.getSoundSource(), 0.8F, 0.8F + player.getRandom().nextFloat() * 0.4F, false);
                 }
                 ((LivingEntityAccessor) player).bucketlib_spawnItemParticles(initialStack, 5);
             }
