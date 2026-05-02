@@ -11,4 +11,8 @@ public class BucketLibComponents {
 
     public static final DataComponentType<CustomData> BUCKET_CONTENT = new DataComponentType.Builder<CustomData>().persistent(CustomData.CODEC).networkSynchronized(CustomData.STREAM_CODEC).build();
 
+    private BucketLibComponents() {
+        //avoid instantiating this class
+    }
+
 }
