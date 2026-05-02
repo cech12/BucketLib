@@ -97,7 +97,7 @@ public class BucketLibUtil {
             //player.broadcastBreakEvent(hand); //does not work here to play the sound, because the hand is empty until this event gotten
             if (!initialStack.isEmpty()) {
                 if (!player.isSilent()) {
-                    player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK.value(), player.getSoundSource(), 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F, false);
+                    player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK.value(), player.getSoundSource(), 0.8F, 0.8F + player.getRandom().nextFloat() * 0.4F, false);
                 }
                 ((LivingEntityAccessor) player).bucketlib_spawnItemParticles(initialStack, 5);
             }
@@ -130,7 +130,7 @@ public class BucketLibUtil {
      * It is recommended to use {@link #damageByOne(ItemStack, ServerLevel, Player)}
      * @param stack item stack which gets damage
      */
-    @Deprecated //TODO find a way to get server level access in all calling contexts
+    @Deprecated //find a way to get server level access in all calling contexts
     public static void damageByOne(ItemStack stack, @Nullable ServerPlayer player) {
         if (!stack.isEmpty() && stack.isDamageableItem() && !BucketLibUtil.isAffectedByInfinityEnchantment(stack)) {
             int newDamageValue = stack.getDamageValue() + 1;

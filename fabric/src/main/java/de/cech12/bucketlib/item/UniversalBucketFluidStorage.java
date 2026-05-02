@@ -61,25 +61,27 @@ public class UniversalBucketFluidStorage extends SingleFluidStorage {
     @Override
     public long extract(@NotNull FluidVariant extractedVariant, long maxAmount, @NotNull TransactionContext transaction) {
         StoragePreconditions.notBlankNotNegative(extractedVariant, maxAmount);
-        if (maxAmount >= amount && (extractedVariant.equals(variant)) && canExtract(extractedVariant)) {
-            ItemStack stack = context.getItemVariant().toStack();
-            if (stack.getItem() instanceof UniversalBucketItem bucketItem) {
-                if (BucketLibUtil.isAffectedByInfinityEnchantment(stack)) {
-                    return amount;
-                }
-                if (!bucketItem.isCracked(stack)) {
-                    if (BucketLibUtil.containsContent(stack)) { //remove milk content tag
-                        BucketLibUtil.removeContentNoCopy(stack, null, null, false);
-                    }
-                    stack.remove(BucketLibMod.STORAGE);
-                    BucketLibUtil.damageByOne(stack, null); //TODO get ServerLevel!
-                } else {
-                    stack.shrink(1);
-                }
-                if (exchangeOrRemove(ItemVariant.of(stack), transaction)) {
-                    return amount;
-                }
+        if (maxAmount < amount || !extractedVariant.equals(variant) || !canExtract(extractedVariant)) {
+            return 0;
+        }
+        ItemStack stack = context.getItemVariant().toStack();
+        if (!(stack.getItem() instanceof UniversalBucketItem bucketItem)) {
+            return 0;
+        }
+        if (BucketLibUtil.isAffectedByInfinityEnchantment(stack)) {
+            return amount;
+        }
+        if (!bucketItem.isCracked(stack)) {
+            if (BucketLibUtil.containsContent(stack)) { //remove milk content tag
+                BucketLibUtil.removeContentNoCopy(stack, null, null, false);
             }
+            stack.remove(BucketLibMod.STORAGE);
+            BucketLibUtil.damageByOne(stack, null);
+        } else {
+            stack.shrink(1);
+        }
+        if (exchangeOrRemove(ItemVariant.of(stack), transaction)) {
+            return amount;
         }
         return 0;
     }
