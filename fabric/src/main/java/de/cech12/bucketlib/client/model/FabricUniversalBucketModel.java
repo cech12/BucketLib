@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.cuboid.ItemModelGenerator;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.resources.model.geometry.QuadCollection;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.world.level.material.Fluid;
@@ -32,11 +33,12 @@ import java.util.List;
 
 public class FabricUniversalBucketModel extends UniversalBucketModel {
 
-    // Depth offsets to prevent Z-fighting
-    private static final Transformation DEPTH_OFFSET_TRANSFORM = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(1.001f, 1.001f, 1.002f), new Quaternionf());
+    //workaround for https://github.com/neoforged/NeoForge/issues/3058
+    public static final RenderType BLOCK_ITEM_UNSORTED_TRANSLUCENT = RenderType.create("bucketlib_entity_unsorted_translucent", RenderSetup.builder(RenderPipelines.ENTITY_TRANSLUCENT).withTexture("Sampler0", TextureAtlas.LOCATION_BLOCKS).useLightmap().useOverlay().setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).affectsCrumbling().createRenderSetup());
 
-    private static final RenderType UNSORTED_TRANSLUCENT_BLOCK = RenderType.create("bucketlib_entity_unsorted_translucent_item", RenderSetup.builder(RenderPipelines.ENTITY_TRANSLUCENT).withTexture("Sampler0", TextureAtlas.LOCATION_BLOCKS).useLightmap().useOverlay().setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).affectsCrumbling().createRenderSetup());
-    private static final RenderType UNSORTED_TRANSLUCENT_ITEM = RenderType.create("bucketlib_entity_unsorted_translucent_block", RenderSetup.builder(RenderPipelines.ENTITY_TRANSLUCENT).withTexture("Sampler0", TextureAtlas.LOCATION_ITEMS).useLightmap().useOverlay().setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).affectsCrumbling().createRenderSetup());
+    // Depth offsets to prevent Z-fighting
+    private static final Transformation DEPTH_OFFSET_TRANSFORM_FLUID = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(1f, 1f, 1.002f), new Quaternionf());
+    private static final Transformation DEPTH_OFFSET_TRANSFORM_OTHER_CONTENT = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(1.001f, 1.001f, 1.002f), new Quaternionf());
 
     public FabricUniversalBucketModel(UniversalBucketModel.Unbaked unbakedModel, BakingContext bakingContext, Matrix4fc transformation) {
         super(unbakedModel, bakingContext, transformation);
@@ -61,16 +63,26 @@ public class FabricUniversalBucketModel extends UniversalBucketModel {
         }
 
         if (otherContentSprite != null) {
-            var transformedState = new ComposedModelState(state, DEPTH_OFFSET_TRANSFORM);
+            var transformedState = new ComposedModelState(state, DEPTH_OFFSET_TRANSFORM_OTHER_CONTENT);
             QuadCollection quads = baker.compute(new ItemModelGenerator.ItemLayerKey(otherContentSprite, transformedState, 0));
             subModels.add(new CuboidItemModelWrapper(List.of(), quads, renderProperties, transformation));
         } else if (fluidSprite != null && fluidMaskSprite != null) {
-            var transformedState = new ComposedModelState(state, DEPTH_OFFSET_TRANSFORM);
-            QuadCollection quads = UnbakedElementsHelper.bakeItemMaskQuads(baker, 0, fluidMaskSprite, fluidSprite, transformedState); // Use template as mask
+            var transformedState = new ComposedModelState(state, DEPTH_OFFSET_TRANSFORM_FLUID);
+            QuadCollection quads = UnbakedElementsHelper.bakeItemMaskQuads(baker, 0, fluidMaskSprite, fluidSprite, transformedState, FabricUniversalBucketModel::noEmissivity); // Use template as mask
             subModels.add(new CuboidItemModelWrapper(List.of(BucketFluidTint.INSTANCE), quads, renderProperties, transformation));
         }
 
         return subModels;
+    }
+
+    private static BakedQuad.MaterialInfo noEmissivity(BakedQuad.MaterialInfo materialInfo) {
+        return new BakedQuad.MaterialInfo(
+                materialInfo.sprite(),
+                materialInfo.layer(),
+                BLOCK_ITEM_UNSORTED_TRANSLUCENT,
+                materialInfo.tintIndex(),
+                materialInfo.shade(),
+                materialInfo.lightEmission());
     }
 
 }
