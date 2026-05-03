@@ -13,13 +13,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.MobBucketItem;
 import net.minecraft.world.item.SolidBucketItem;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
@@ -48,7 +45,6 @@ public class RegistryUtil {
     private static void readRegistry() {
         bucketBlocks = new ArrayList<>();
         bucketEntities = new ArrayList<>();
-        Level level = Services.PLATFORM.getCurrentLevel();
         for (Item item : Services.REGISTRY.getAllItems()) {
             if (item instanceof SolidBucketItem bucket) {
                 if (bucketBlocks.stream().noneMatch(bucketBlock -> bucketBlock.block == bucket.getBlock())) {
@@ -57,10 +53,8 @@ public class RegistryUtil {
             }
             if (item instanceof MobBucketItem bucket) {
                 EntityType<?> entityType = ((MobBucketItemAccessor) bucket).bucketlib_getEntityType();
-                if (entityType != null && level != null && entityType.create(level, EntitySpawnReason.LOAD) instanceof Bucketable) {
-                    if (bucketEntities.stream().noneMatch(bucketEntity -> bucketEntity.entityType == entityType)) {
-                        bucketEntities.add(new BucketEntity(entityType, Services.BUCKET.getFluidOfBucketItem(bucket), bucket));
-                    }
+                if (entityType != null && bucketEntities.stream().noneMatch(bucketEntity -> bucketEntity.entityType == entityType)) {
+                    bucketEntities.add(new BucketEntity(entityType, Services.BUCKET.getFluidOfBucketItem(bucket), bucket));
                 }
             }
         }

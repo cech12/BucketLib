@@ -16,7 +16,6 @@ import de.cech12.bucketlib.item.UniversalBucketFluidStorage;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapedRecipe;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapelessRecipe;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.minecraft.core.Registry;
@@ -24,9 +23,7 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 
 import java.util.ArrayList;
@@ -34,8 +31,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class BucketLibMod implements ModInitializer {
-
-    public static ServerLevel SERVER_LEVEL;
 
     public static DataComponentType<FluidStorageData> STORAGE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, BucketLibComponents.FLUID_LOCATION,
             new DataComponentType.Builder<FluidStorageData>().persistent(FluidStorageData.CODEC).networkSynchronized(FluidStorageData.STREAM_CODEC).build()
@@ -60,11 +55,6 @@ public class BucketLibMod implements ModInitializer {
             new UniversalBucketItem.Properties().durability(10)));
 
     private static final List<UniversalBucketItem> BUCKETS = new ArrayList<>();
-
-    public BucketLibMod() {
-        //remember server level to have an easy getter
-        ServerTickEvents.END_SERVER_TICK.register(server -> SERVER_LEVEL = server.getLevel(Level.OVERWORLD));
-    }
 
     @Override
     public void onInitialize() {
