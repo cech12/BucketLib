@@ -1,7 +1,6 @@
 package de.cech12.bucketlib;
 
 import de.cech12.bucketlib.api.BucketLib;
-import de.cech12.bucketlib.api.BucketLibApi;
 import de.cech12.bucketlib.api.BucketLibComponents;
 import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.crafting.BlockIngredient;
@@ -19,7 +18,6 @@ import de.cech12.bucketlib.util.RegistryUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -67,14 +65,6 @@ public class BucketLibMod {
         INGREDIENT_TYPES.register("milk", () -> MilkIngredient.TYPE);
     }
 
-    //TODO remove test
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, BucketLib.MOD_ID);
-    public static final DeferredHolder<Item, ?> TEST_BUCKET = ITEMS.register("test_bucket", () -> new UniversalBucketItem(ResourceKey.create(BuiltInRegistries.ITEM.key(), BucketLib.id("test_bucket")), new UniversalBucketItem.Properties().durability(10)));
-
-    private void register(RegisterCapabilitiesEvent evt) {
-        BucketLibApi.registerBucket(evt, TEST_BUCKET.getId());
-    }
-
     private static final Logger LOGGER = LogManager.getLogger();
 
     private static final List<UniversalBucketItem> buckets = new ArrayList<>();
@@ -91,10 +81,6 @@ public class BucketLibMod {
         RECIPE_SERIALIZERS.register(eventBus);
         //ingredient serializer
         INGREDIENT_TYPES.register(eventBus);
-
-        //TODO remove test
-        ITEMS.register(eventBus);
-        eventBus.addListener(this::register);
     }
 
     public static List<UniversalBucketItem> getRegisteredBuckets() {
