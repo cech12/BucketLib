@@ -1,19 +1,21 @@
 package de.cech12.bucketlib.util;
 
+import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.api.BucketLibComponents;
 import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.mixin.LivingEntityAccessor;
 import de.cech12.bucketlib.platform.Services;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.core.component.DataComponentHolder;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -21,10 +23,14 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -46,8 +52,35 @@ public class BucketLibUtil {
         return !(entity instanceof Player player) || !player.getAbilities().instabuild;
     }
 
-    public static boolean isEmpty(ItemStack itemStack) {
-        return !containsFluid(itemStack) && !containsMilk(itemStack) && !containsEntityType(itemStack) && !containsBlock(itemStack);
+    public static Item getItem(ItemInstance itemInstance) {
+        if (itemInstance instanceof ItemStack stack) {
+            return stack.getItem();
+        } else if (itemInstance instanceof ItemStackTemplate template) {
+            return template.item().value();
+        }
+        throw new IllegalArgumentException("Invalid item instance");
+    }
+
+    public static ItemStack getItemStack(ItemInstance itemInstance) {
+        if (itemInstance instanceof ItemStack stack) {
+            return stack;
+        } else if (itemInstance instanceof ItemStackTemplate template) {
+            return template.create();
+        }
+        throw new IllegalArgumentException("Invalid item instance");
+    }
+
+    public static ItemStackTemplate getItemStackTemplate(ItemInstance itemInstance) {
+        if (itemInstance instanceof ItemStack stack) {
+            return ItemStackTemplate.fromNonEmptyStack(stack);
+        } else if (itemInstance instanceof ItemStackTemplate template) {
+            return template;
+        }
+        throw new IllegalArgumentException("Invalid item instance");
+    }
+
+    public static boolean isEmpty(ItemInstance itemInstance) {
+        return !containsFluid(itemInstance) && !containsMilk(itemInstance) && !containsEntityType(itemInstance) && !containsBlock(itemInstance);
     }
 
     public static ItemStack createEmptyResult(ItemStack initialStack, Player player, ItemStack resultStack, InteractionHand hand) {
@@ -61,11 +94,12 @@ public class BucketLibUtil {
             }
             return initialStack;
         }
-        if (resultStack.isEmpty()) {
-            //player.broadcastBreakEvent(hand); //does not work here to play the sound, because the hand is empty until this event gotten
+        if (resultStack.isEmpty() && !initialStack.isEmpty()) {
+            //player.onEquippedItemBroken(initialStack.getItem(), hand.asEquipmentSlot()); //does not work here to play the sound, because the hand is empty until this event gotten
             if (!initialStack.isEmpty()) {
-                if (!player.isSilent()) {
-                    player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK.value(), player.getSoundSource(), 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F, false);
+                Holder<SoundEvent> breakSound = initialStack.get(DataComponents.BREAK_SOUND);
+                if (breakSound != null && !player.isSilent()) {
+                    player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), breakSound.value(), player.getSoundSource(), 0.8F, 0.8F + player.getRandom().nextFloat() * 0.4F, false);
                 }
                 ((LivingEntityAccessor) player).bucketlib_spawnItemParticles(initialStack, 5);
             }
@@ -98,7 +132,7 @@ public class BucketLibUtil {
      * It is recommended to use {@link #damageByOne(ItemStack, ServerLevel, Player)}
      * @param stack item stack which gets damage
      */
-    @Deprecated //TODO find a way to get server level access in all calling contexts
+    @Deprecated //find a way to get server level access in all calling contexts
     public static void damageByOne(ItemStack stack, @Nullable ServerPlayer player) {
         if (!stack.isEmpty() && stack.isDamageableItem() && !BucketLibUtil.isAffectedByInfinityEnchantment(stack)) {
             int newDamageValue = stack.getDamageValue() + 1;
@@ -115,35 +149,35 @@ public class BucketLibUtil {
 
     /**
      * Checks if the given bucket is affected by Infinity enchantment.
-     * @param itemStack checked item stack
+     * @param itemInstance checked item instance
      * @return boolean
      */
-    public static boolean isAffectedByInfinityEnchantment(@NotNull ItemStack itemStack) {
-        return isInfinityEnchantmentAllowed(itemStack) && hasInfinityEnchantment(itemStack);
+    public static boolean isAffectedByInfinityEnchantment(@NotNull ItemInstance itemInstance) {
+        return isInfinityEnchantmentAllowed(itemInstance) && hasInfinityEnchantment(itemInstance);
     }
 
     /**
      * Checks if the given bucket is enchanted with the Infinity enchantment.
-     * @param itemStack checked item stack
+     * @param itemInstance checked item instance
      * @return boolean
      */
-    public static boolean hasInfinityEnchantment(@NotNull ItemStack itemStack) {
-        return itemStack.getEnchantments().keySet().stream()
+    public static boolean hasInfinityEnchantment(@NotNull ItemInstance itemInstance) {
+        return itemInstance.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).keySet().stream()
                 .filter(enchantment -> enchantment.is(Enchantments.INFINITY))
-                .anyMatch(enchantment -> EnchantmentHelper.getItemEnchantmentLevel(enchantment, itemStack) > 0);
+                .anyMatch(enchantment -> EnchantmentHelper.getItemEnchantmentLevel(enchantment, itemInstance) > 0);
     }
 
     /**
      * Checks if the given bucket is allowed to be enchanted with Infinity enchantment.
-     * @param itemStack checked item stack
+     * @param itemInstance checked item instance
      * @return boolean
      */
-    public static boolean isInfinityEnchantmentAllowed(@NotNull ItemStack itemStack) {
+    public static boolean isInfinityEnchantmentAllowed(@NotNull ItemInstance itemInstance) {
         if (!Services.CONFIG.isInfinityEnchantmentEnabled()) {
             return false;
         }
-        if (itemStack.getItem() instanceof UniversalBucketItem bucket) {
-            Fluid fluid = getFluid(itemStack);
+        if (getItem(itemInstance) instanceof UniversalBucketItem bucket) {
+            Fluid fluid = getFluid(itemInstance);
             return fluid != Fluids.EMPTY
                     && fluid.defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)
                     && bucket.canHoldFluid(fluid);
@@ -151,13 +185,13 @@ public class BucketLibUtil {
         return false;
     }
 
-    private static boolean containsTagContent(DataComponentHolder itemStack, String tagName) {
-        CustomData customdata = itemStack.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
+    private static boolean containsTagContent(DataComponentGetter componentGetter, String tagName) {
+        CustomData customdata = componentGetter.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
         return customdata.copyTag().contains(tagName);
     }
 
-    private static String getTagContent(DataComponentHolder itemStack, String tagName) {
-        CustomData customdata = itemStack.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
+    private static String getTagContent(DataComponentGetter componentGetter, String tagName) {
+        CustomData customdata = componentGetter.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY);
         return customdata.copyTag().getString(tagName).orElse(null);
     }
 
@@ -188,39 +222,39 @@ public class BucketLibUtil {
         return removeTagContentNoCopy(itemStack.copy(), tagName);
     }
 
-    public static boolean containsContent(ItemStack itemStack) {
-        return containsTagContent(itemStack, "BucketContent");
+    public static boolean containsContent(DataComponentGetter componentGetter) {
+        return containsTagContent(componentGetter, BucketLib.BUCKET_CONTENT_TAG);
     }
 
-    public static Identifier getContent(DataComponentHolder itemStack) {
-        String content = getContentString(itemStack);
+    public static Identifier getContent(DataComponentGetter componentGetter) {
+        String content = getContentString(componentGetter);
         if (content != null) {
             return Identifier.parse(content);
         }
         return null;
     }
 
-    public static String getContentString(DataComponentHolder itemStack) {
-        return getTagContent(itemStack, "BucketContent");
+    public static String getContentString(DataComponentGetter componentGetter) {
+        return getTagContent(componentGetter, BucketLib.BUCKET_CONTENT_TAG);
     }
 
     public static ItemStack addContent(ItemStack itemStack, Identifier content) {
-        return setTagContent(itemStack, "BucketContent", content.toString());
+        return setTagContent(itemStack, BucketLib.BUCKET_CONTENT_TAG, content.toString());
     }
 
     public static void removeContentNoCopy(ItemStack itemStack, ServerLevel level, @Nullable Player player, boolean damage) {
-        ItemStack emptyStack = removeTagContentNoCopy(itemStack, "BucketContent");
+        ItemStack emptyStack = removeTagContentNoCopy(itemStack, BucketLib.BUCKET_CONTENT_TAG);
         if (damage) damageByOne(emptyStack, level, player);
     }
 
     private static ItemStack removeContent(ItemStack itemStack, ServerLevel level, @Nullable Player player, boolean damage) {
-        ItemStack emptyStack = removeTagContent(itemStack, "BucketContent");
+        ItemStack emptyStack = removeTagContent(itemStack, BucketLib.BUCKET_CONTENT_TAG);
         if (damage) damageByOne(emptyStack, level, player);
         return emptyStack;
     }
 
-    public static boolean containsMilk(DataComponentHolder itemStack) {
-        Identifier bucketContent = getContent(itemStack);
+    public static boolean containsMilk(DataComponentGetter componentGetter) {
+        Identifier bucketContent = getContent(componentGetter);
         return bucketContent != null && bucketContent.equals(MILK_LOCATION);
     }
 
@@ -236,12 +270,12 @@ public class BucketLibUtil {
         return removeFluid(itemStack, level, player);
     }
 
-    public static boolean containsFluid(ItemStack itemStack) {
-        return getFluid(itemStack) != Fluids.EMPTY;
+    public static boolean containsFluid(ItemInstance itemInstance) {
+        return getFluid(itemInstance) != Fluids.EMPTY;
     }
 
-    public static Fluid getFluid(ItemStack itemStack) {
-        return Services.FLUID.getContainedFluid(itemStack);
+    public static Fluid getFluid(ItemInstance itemInstance) {
+        return Services.FLUID.getContainedFluid(getItemStack(itemInstance));
     }
 
     public static ItemStack addFluid(ItemStack itemStack, Fluid fluid) {
@@ -256,24 +290,24 @@ public class BucketLibUtil {
         return Services.FLUID.removeFluid(resultItemStack.get(), level, player);
     }
 
-    public static boolean containsEntityType(DataComponentHolder itemStack) {
-        return containsTagContent(itemStack, "EntityType");
+    public static boolean containsEntityType(DataComponentGetter componentGetter) {
+        return containsTagContent(componentGetter, BucketLib.ENTITY_TYPE_TAG);
     }
 
-    public static EntityType<?> getEntityType(ItemStack itemStack) {
-        String content = getEntityTypeString(itemStack);
+    public static EntityType<?> getEntityType(DataComponentGetter componentGetter) {
+        String content = getEntityTypeString(componentGetter);
         if (content != null) {
             return Services.REGISTRY.getEntityType(Identifier.parse(content));
         }
         return null;
     }
 
-    public static String getEntityTypeString(ItemStack itemStack) {
-        return getTagContent(itemStack, "EntityType");
+    public static String getEntityTypeString(DataComponentGetter componentGetter) {
+        return getTagContent(componentGetter, BucketLib.ENTITY_TYPE_TAG);
     }
 
     public static ItemStack addEntityType(ItemStack itemStack, EntityType<?> entityType) {
-        return setTagContent(itemStack, "EntityType", Services.REGISTRY.getEntityTypeLocation(entityType).toString());
+        return setTagContent(itemStack, BucketLib.ENTITY_TYPE_TAG, Services.REGISTRY.getEntityTypeLocation(entityType).toString());
     }
 
     public static ItemStack removeEntityData(ItemStack itemStack, ServerLevel level, @Nullable Player player, boolean damage) {
@@ -291,7 +325,7 @@ public class BucketLibUtil {
 
 
     public static ItemStack removeEntityData(ItemStack itemStack, ServerLevel level, @Nullable Player player, @Nullable Entity entity, boolean damage) {
-        ItemStack emptyStack = removeTagContent(itemStack, "EntityType");
+        ItemStack emptyStack = removeTagContent(itemStack, BucketLib.ENTITY_TYPE_TAG);
         Set<DataComponentType<?>> types = new HashSet<>();
         types.add(DataComponents.BUCKET_ENTITY_DATA);
         //support custom item stack data components
@@ -323,13 +357,13 @@ public class BucketLibUtil {
         return emptyStack;
     }
 
-    public static boolean containsBlock(ItemStack itemStack) {
-        return containsContent(itemStack) && !containsMilk(itemStack);
+    public static boolean containsBlock(DataComponentGetter componentGetter) {
+        return containsContent(componentGetter) && !containsMilk(componentGetter);
     }
 
-    public static Block getBlock(ItemStack itemStack) {
-        if (!containsMilk(itemStack)) {
-            Identifier content = getContent(itemStack);
+    public static Block getBlock(DataComponentGetter componentGetter) {
+        if (!containsMilk(componentGetter)) {
+            Identifier content = getContent(componentGetter);
             if (content != null) {
                 return Services.REGISTRY.getBlock(content);
             }

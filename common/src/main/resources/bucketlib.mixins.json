@@ -7,6 +7,7 @@
     "AbstractNautilusMixin",
     "AxolotlMixin",
     "CraftingRecipeMixin",
+    "ItemInstanceMixin",
     "ItemStackMixin",
     "LivingEntityAccessor",
     "MobBucketItemAccessor",

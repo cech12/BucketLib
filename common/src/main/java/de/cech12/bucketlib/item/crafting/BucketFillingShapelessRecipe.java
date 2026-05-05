@@ -1,45 +1,74 @@
 package de.cech12.bucketlib.item.crafting;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
-import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
+import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class BucketFillingShapelessRecipe extends ShapelessRecipe {
 
-    private final CraftingBookCategory category;
+    private static final MapCodec<BucketFillingShapelessRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec((instance) ->
+            instance.group(
+                    CommonInfo.MAP_CODEC.forGetter((recipe) -> recipe.commonInfo),
+                    CraftingBookInfo.MAP_CODEC.forGetter((recipe) -> recipe.bookInfo),
+                    Ingredient.CODEC.listOf(1, 9).fieldOf("ingredients").forGetter((o) -> o.ingredients),
+                    BucketFillingType.CODEC.fieldOf("filling_type").forGetter((recipe) -> recipe.fillingType),
+                    RegistryUtil.FLUID_CODEC.optionalFieldOf("fluid").forGetter(recipe -> Optional.of(recipe.fluid)),
+                    RegistryUtil.BLOCK_CODEC.optionalFieldOf("block").forGetter(recipe -> Optional.of(recipe.block)),
+                    RegistryUtil.ENTITY_TYPE_CODEC.optionalFieldOf("entity").forGetter(recipe -> Optional.of(recipe.entityType))
+            ).apply(instance, BucketFillingShapelessRecipe::new));
+    public static final StreamCodec<RegistryFriendlyByteBuf, BucketFillingShapelessRecipe> STREAM_CODEC = StreamCodec.composite(
+            CommonInfo.STREAM_CODEC, (recipe) -> recipe.commonInfo,
+            CraftingBookInfo.STREAM_CODEC, (recipe) -> recipe.bookInfo,
+            Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()), (o) -> o.ingredients,
+            BucketFillingType.STREAM_CODEC, (recipe) -> recipe.fillingType,
+            RegistryUtil.STREAM_FLUID_CODEC, (recipe) -> recipe.fluid,
+            RegistryUtil.STREAM_BLOCK_CODEC, (recipe) -> recipe.block,
+            RegistryUtil.STREAM_ENTITY_TYPE_CODEC, (recipe) -> recipe.entityType,
+            BucketFillingShapelessRecipe::createFromNetwork
+    );
+    public static final RecipeSerializer<BucketFillingShapelessRecipe> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
+
+    private final Recipe.CommonInfo commonInfo;
+    private final CraftingRecipe.CraftingBookInfo bookInfo;
     private final List<Ingredient> ingredients;
     private final BucketFillingType fillingType;
-    private final Fluid fluid;
-    private final Block block;
-    private final EntityType<?> entityType;
+    private final Holder<Fluid> fluid;
+    private final Holder<Block> block;
+    private final Holder<EntityType<?>> entityType;
 
-    public BucketFillingShapelessRecipe(String group, CraftingBookCategory category, List<Ingredient> ingredients, BucketFillingType fillingType, Optional<Fluid> fluid, Optional<Block> block, Optional<EntityType<?>> entityType) {
-        super(group, category, getAssembledBucket(fillingType, fluid.orElse(null), block.orElse(null), entityType.orElse(null), ingredients.stream().map(ingredient -> ingredient.items().map(itemHolder -> new ItemStack(itemHolder.value())).toList()).flatMap(List::stream).toList()), ingredients);
-        this.category = category;
+    private static BucketFillingShapelessRecipe createFromNetwork(Recipe.CommonInfo commonInfo, CraftingRecipe.CraftingBookInfo bookInfo, List<Ingredient> ingredients, BucketFillingType fillingType, Holder<Fluid> fluid, Holder<Block> block, Holder<EntityType<?>> entityType) {
+        return new BucketFillingShapelessRecipe(commonInfo, bookInfo, ingredients, fillingType,
+                fluid != null ? Optional.of(fluid) : Optional.empty(),
+                block != null ? Optional.of(block) : Optional.empty(),
+                entityType != null ? Optional.of(entityType) : Optional.empty());
+    }
+
+    public BucketFillingShapelessRecipe(Recipe.CommonInfo commonInfo, CraftingRecipe.CraftingBookInfo bookInfo, List<Ingredient> ingredients, BucketFillingType fillingType, Optional<Holder<Fluid>> fluid, Optional<Holder<Block>> block, Optional<Holder<EntityType<?>>> entityType) {
+        super(commonInfo, bookInfo, ItemStackTemplate.fromNonEmptyStack(getAssembledBucket(fillingType, fluid.orElse(null), block.orElse(null), entityType.orElse(null), ingredients.stream().map(ingredient -> ingredient.items().map(itemHolder -> new ItemStack(itemHolder.value())).toList()).flatMap(List::stream).toList())), ingredients);
+        this.commonInfo = commonInfo;
+        this.bookInfo = bookInfo;
         this.ingredients = ingredients;
         this.fillingType = fillingType;
         this.fluid = fluid.orElse(null);
@@ -58,23 +87,23 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
         return ItemStack.EMPTY;
     }
 
-    private static ItemStack getAssembledBucket(BucketFillingType fillingType, Fluid fluid, Block block, EntityType<?> entityType, List<ItemStack> itemStacks) {
+    private static ItemStack getAssembledBucket(BucketFillingType fillingType, Holder<Fluid> fluid, Holder<Block> block, Holder<EntityType<?>> entityType, List<ItemStack> itemStacks) {
         ItemStack bucket = getAffectedBucket(itemStacks);
         if (bucket.getItem() instanceof UniversalBucketItem universalBucketItem) {
-            if (fillingType == BucketFillingType.BLOCK && universalBucketItem.canHoldBlock(block)) {
-                return BucketLibUtil.addBlock(bucket, block);
-            } else if (fillingType == BucketFillingType.ENTITY && universalBucketItem.canHoldEntity(entityType) && (fluid == null || universalBucketItem.canHoldFluid(fluid))) {
+            if (fillingType == BucketFillingType.BLOCK && universalBucketItem.canHoldBlock(block.value())) {
+                return BucketLibUtil.addBlock(bucket, block.value());
+            } else if (fillingType == BucketFillingType.ENTITY && universalBucketItem.canHoldEntity(entityType.value()) && (fluid == null || universalBucketItem.canHoldFluid(fluid.value()))) {
                 if (fluid != null) {
-                    bucket = BucketLibUtil.addFluid(bucket, fluid);
+                    bucket = BucketLibUtil.addFluid(bucket, fluid.value());
                 }
-                return BucketLibUtil.addEntityType(bucket, entityType);
-            } else if (fillingType == BucketFillingType.FLUID && universalBucketItem.canHoldFluid(fluid)) {
-                return BucketLibUtil.addFluid(bucket, fluid);
+                return BucketLibUtil.addEntityType(bucket, entityType.value());
+            } else if (fillingType == BucketFillingType.FLUID && universalBucketItem.canHoldFluid(fluid.value())) {
+                return BucketLibUtil.addFluid(bucket, fluid.value());
             } else if (fillingType == BucketFillingType.MILK && universalBucketItem.canMilkEntities()) {
                 return BucketLibUtil.addMilk(bucket);
             }
         }
-        return ItemStack.EMPTY;
+        throw new IllegalStateException("BucketFillingShapelessRecipe was used for a non UniversalBucketItem. This is not supported!");
     }
 
     /**
@@ -88,9 +117,9 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
         }
         UniversalBucketItem universalBucketItem = ((UniversalBucketItem)bucket.getItem());
         return super.matches(input, level)
-                && (this.fillingType != BucketFillingType.BLOCK || universalBucketItem.canHoldBlock(this.block))
-                && (this.fillingType != BucketFillingType.ENTITY || (universalBucketItem.canHoldEntity(this.entityType) && (this.fluid == null || universalBucketItem.canHoldFluid(this.fluid))))
-                && (this.fillingType != BucketFillingType.FLUID || universalBucketItem.canHoldFluid(this.fluid))
+                && (this.fillingType != BucketFillingType.BLOCK || universalBucketItem.canHoldBlock(this.block.value()))
+                && (this.fillingType != BucketFillingType.ENTITY || (universalBucketItem.canHoldEntity(this.entityType.value()) && (this.fluid == null || universalBucketItem.canHoldFluid(this.fluid.value()))))
+                && (this.fillingType != BucketFillingType.FLUID || universalBucketItem.canHoldFluid(this.fluid.value()))
                 && (this.fillingType != BucketFillingType.MILK || universalBucketItem.canMilkEntities());
     }
 
@@ -99,92 +128,14 @@ public class BucketFillingShapelessRecipe extends ShapelessRecipe {
      */
     @Override
     @NotNull
-    public ItemStack assemble(CraftingInput input, @NotNull HolderLookup.Provider provider) {
+    public ItemStack assemble(CraftingInput input) {
         return getAssembledBucket(this.fillingType, this.fluid, this.block, this.entityType, input.items());
     }
 
     @Override
     @NotNull
     public RecipeSerializer<ShapelessRecipe> getSerializer() {
-        return (RecipeSerializer<ShapelessRecipe>) (Object) Serializer.INSTANCE;
-    }
-
-    public static class Serializer implements RecipeSerializer<BucketFillingShapelessRecipe> {
-
-        public static final Serializer INSTANCE = new Serializer();
-
-        private static final MapCodec<BucketFillingShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec((record) ->
-                record.group(
-                        Codec.STRING.optionalFieldOf("group", "").forGetter(ShapelessRecipe::group),
-                        CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter((recipe) -> recipe.category),
-                        Ingredient.CODEC.listOf(1, 9).fieldOf("ingredients").forGetter((recipe) -> recipe.ingredients),
-                        BucketFillingType.CODEC.fieldOf("filling_type").forGetter((recipe) -> recipe.fillingType),
-                        RegistryUtil.FLUID_CODEC.optionalFieldOf("fluid").forGetter(recipe -> Optional.of(recipe.fluid)),
-                        RegistryUtil.BLOCK_CODEC.optionalFieldOf("block").forGetter(recipe -> Optional.of(recipe.block)),
-                        RegistryUtil.ENTITY_TYPE_CODEC.optionalFieldOf("entity").forGetter(recipe -> Optional.of(recipe.entityType))
-                ).apply(record, BucketFillingShapelessRecipe::new));
-
-        private static final StreamCodec<RegistryFriendlyByteBuf, BucketFillingShapelessRecipe> STREAM_CODEC = StreamCodec.of(
-                BucketFillingShapelessRecipe.Serializer::toNetwork,
-                BucketFillingShapelessRecipe.Serializer::fromNetwork);
-
-        private Serializer() {
-        }
-
-        @Override
-        @NotNull
-        public MapCodec<BucketFillingShapelessRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        @NotNull
-        public StreamCodec<RegistryFriendlyByteBuf, BucketFillingShapelessRecipe> streamCodec() {
-            return STREAM_CODEC;
-        }
-
-        @NotNull
-        private static BucketFillingShapelessRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
-            String group = buf.readUtf();
-            CraftingBookCategory category = buf.readEnum(CraftingBookCategory.class);
-            int i = buf.readVarInt();
-            NonNullList<Ingredient> ingredients = NonNullList.withSize(i, Ingredient.of());
-            ingredients.replaceAll(ignored -> Ingredient.CONTENTS_STREAM_CODEC.decode(buf));
-            BucketFillingType fillingType = buf.readEnum(BucketFillingType.class);
-            Optional<Fluid> fluid = Optional.empty();
-            Optional<Block> block = Optional.empty();
-            Optional<EntityType<?>> entityType = Optional.empty();
-            if (fillingType == BucketFillingType.BLOCK) {
-                block = Optional.of(Services.REGISTRY.getBlock(buf.readIdentifier()));
-            } else if (fillingType == BucketFillingType.ENTITY) {
-                entityType = Optional.of(Services.REGISTRY.getEntityType(buf.readIdentifier()));
-                fluid = Optional.of(Services.REGISTRY.getFluid(buf.readIdentifier()));
-                if (fluid.get() == Fluids.EMPTY) {
-                    fluid = Optional.empty();
-                }
-            } else if (fillingType == BucketFillingType.FLUID) {
-                fluid = Optional.of(Services.REGISTRY.getFluid(buf.readIdentifier()));
-            }
-            return new BucketFillingShapelessRecipe(group, category, ingredients, fillingType, fluid, block, entityType);
-        }
-
-        private static void toNetwork(RegistryFriendlyByteBuf buf, BucketFillingShapelessRecipe recipe) {
-            buf.writeUtf(recipe.group());
-            buf.writeEnum(recipe.category);
-            buf.writeVarInt(recipe.ingredients.size());
-            for (Ingredient ingredient : recipe.ingredients) {
-                Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient);
-            }
-            buf.writeEnum(recipe.fillingType);
-            if (recipe.fillingType == BucketFillingType.BLOCK) {
-                buf.writeIdentifier(Objects.requireNonNull(Services.REGISTRY.getBlockLocation(recipe.block)));
-            } else if (recipe.fillingType == BucketFillingType.ENTITY) {
-                buf.writeIdentifier(Objects.requireNonNull(Services.REGISTRY.getEntityTypeLocation(recipe.entityType)));
-                buf.writeIdentifier(Objects.requireNonNull(Services.REGISTRY.getFluidLocation((recipe.fluid != null ? recipe.fluid : Fluids.EMPTY))));
-            } else if (recipe.fillingType == BucketFillingType.FLUID) {
-                buf.writeIdentifier(Services.REGISTRY.getFluidLocation(recipe.fluid));
-            }
-        }
+        return (RecipeSerializer<ShapelessRecipe>) (Object) SERIALIZER;
     }
 
 }

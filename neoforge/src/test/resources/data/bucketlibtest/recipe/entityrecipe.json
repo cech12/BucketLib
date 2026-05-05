@@ -3,13 +3,11 @@
   "category": "misc",
   "ingredients": [
     {
-      "type": "bucketlib:milk"
-    },
-    {
-      "item": "minecraft:sugar"
+      "neoforge:ingredient_type": "bucketlib:entity",
+      "entity": "minecraft:salmon"
     }
   ],
   "result": {
-    "item": "minecraft:cake"
+    "id": "minecraft:salmon"
   }
 }

@@ -16,6 +16,9 @@ public class BucketLib {
     /** mod name*/
     public static final String MOD_NAME = "BucketLib";
 
+    public static final String BUCKET_CONTENT_TAG = "BucketContent";
+    public static final String ENTITY_TYPE_TAG = "EntityType";
+
     private BucketLib() {}
 
     public static Identifier id(String name) {

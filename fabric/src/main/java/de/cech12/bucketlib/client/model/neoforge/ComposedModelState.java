@@ -12,7 +12,7 @@
 package de.cech12.bucketlib.client.model.neoforge;
 
 import com.mojang.math.Transformation;
-import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4fc;

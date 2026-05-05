@@ -70,7 +70,7 @@ public class EmptyIngredient implements CustomIngredient {
     }
 
     @Override
-    public Stream<Holder<Item>> getMatchingItems() {
+    public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
             if (this.item == null && this.tag == null) {
@@ -128,7 +128,7 @@ public class EmptyIngredient implements CustomIngredient {
         }
 
         @Override
-        public StreamCodec<RegistryFriendlyByteBuf, EmptyIngredient> getPacketCodec() {
+        public StreamCodec<RegistryFriendlyByteBuf, EmptyIngredient> getStreamCodec() {
             return PACKET_CODEC;
         }
 

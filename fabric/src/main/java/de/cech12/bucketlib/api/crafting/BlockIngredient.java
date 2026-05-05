@@ -75,7 +75,7 @@ public class BlockIngredient implements CustomIngredient {
     }
 
     @Override
-    public Stream<Holder<Item>> getMatchingItems() {
+    public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
             List<Block> blocks = new ArrayList<>();
@@ -141,7 +141,7 @@ public class BlockIngredient implements CustomIngredient {
         }
 
         @Override
-        public StreamCodec<RegistryFriendlyByteBuf, BlockIngredient> getPacketCodec() {
+        public StreamCodec<RegistryFriendlyByteBuf, BlockIngredient> getStreamCodec() {
             return PACKET_CODEC;
         }
 

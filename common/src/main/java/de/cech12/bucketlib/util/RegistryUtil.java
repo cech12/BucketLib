@@ -1,67 +1,40 @@
 package de.cech12.bucketlib.util;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Decoder;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.Encoder;
 import de.cech12.bucketlib.mixin.MobBucketItemAccessor;
 import de.cech12.bucketlib.platform.Services;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.MobBucketItem;
 import net.minecraft.world.item.SolidBucketItem;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RegistryUtil {
 
-    public static Codec<Fluid> FLUID_CODEC = Codec.of(new Encoder<>() {
-        @Override
-        public <T> DataResult<T> encode(Fluid input, DynamicOps<T> ops, T prefix) {
-            return ops.mergeToPrimitive(prefix, ops.createString(Services.REGISTRY.getFluidLocation(input).toString()));
-        }
-    }, new Decoder<>() {
-        @Override
-        public <T> DataResult<Pair<Fluid, T>> decode(DynamicOps<T> ops, T input) {
-            return DataResult.success(Pair.of(Services.REGISTRY.getFluid(Identifier.parse(ops.getStringValue(input).getOrThrow())), ops.empty()));
-        }
-    });
+    public static final Codec<Holder<Fluid>> FLUID_CODEC = BuiltInRegistries.FLUID.holderByNameCodec().validate((fluid) -> fluid.value().defaultFluidState().is(Fluids.EMPTY) ? DataResult.error(() -> "Fluid must not be fluid:empty") : DataResult.success(fluid));
+    public static final StreamCodec<RegistryFriendlyByteBuf, Holder<Fluid>> STREAM_FLUID_CODEC = ByteBufCodecs.holderRegistry(Registries.FLUID);
 
-    public static Codec<Block> BLOCK_CODEC = Codec.of(new Encoder<>() {
-        @Override
-        public <T> DataResult<T> encode(Block input, DynamicOps<T> ops, T prefix) {
-            return ops.mergeToPrimitive(prefix, ops.createString(Services.REGISTRY.getBlockLocation(input).toString()));
-        }
-    }, new Decoder<>() {
-        @Override
-        public <T> DataResult<Pair<Block, T>> decode(DynamicOps<T> ops, T input) {
-            return DataResult.success(Pair.of(Services.REGISTRY.getBlock(Identifier.parse(ops.getStringValue(input).getOrThrow())), ops.empty()));
-        }
-    });
+    public static final Codec<Holder<Block>> BLOCK_CODEC = BuiltInRegistries.BLOCK.holderByNameCodec().validate((block) -> block.value() == Blocks.AIR ? DataResult.error(() -> "Block must not be block:air") : DataResult.success(block));
+    public static final StreamCodec<RegistryFriendlyByteBuf, Holder<Block>> STREAM_BLOCK_CODEC = ByteBufCodecs.holderRegistry(Registries.BLOCK);
 
-    public static Codec<EntityType<?>> ENTITY_TYPE_CODEC = Codec.of(new Encoder<>() {
-        @Override
-        public <T> DataResult<T> encode(EntityType<?> input, DynamicOps<T> ops, T prefix) {
-            return ops.mergeToPrimitive(prefix, ops.createString(Services.REGISTRY.getEntityTypeLocation(input).toString()));
-        }
-    }, new Decoder<>() {
-        @Override
-        public <T> DataResult<Pair<EntityType<?>, T>> decode(DynamicOps<T> ops, T input) {
-            return DataResult.success(Pair.of(Services.REGISTRY.getEntityType(Identifier.parse(ops.getStringValue(input).getOrThrow())), ops.empty()));
-        }
-    });
+    public static final Codec<Holder<EntityType<?>>> ENTITY_TYPE_CODEC = BuiltInRegistries.ENTITY_TYPE.holderByNameCodec().validate(DataResult::success);
+    public static final StreamCodec<RegistryFriendlyByteBuf, Holder<EntityType<?>>> STREAM_ENTITY_TYPE_CODEC = ByteBufCodecs.holderRegistry(Registries.ENTITY_TYPE);
 
     private static List<BucketBlock> bucketBlocks;
     private static List<BucketEntity> bucketEntities;
@@ -72,7 +45,6 @@ public class RegistryUtil {
     private static void readRegistry() {
         bucketBlocks = new ArrayList<>();
         bucketEntities = new ArrayList<>();
-        Level level = Services.PLATFORM.getCurrentLevel();
         for (Item item : Services.REGISTRY.getAllItems()) {
             if (item instanceof SolidBucketItem bucket) {
                 if (bucketBlocks.stream().noneMatch(bucketBlock -> bucketBlock.block == bucket.getBlock())) {
@@ -81,10 +53,8 @@ public class RegistryUtil {
             }
             if (item instanceof MobBucketItem bucket) {
                 EntityType<?> entityType = ((MobBucketItemAccessor) bucket).bucketlib_getEntityType();
-                if (entityType != null && level != null && entityType.create(level, EntitySpawnReason.LOAD) instanceof Bucketable) {
-                    if (bucketEntities.stream().noneMatch(bucketEntity -> bucketEntity.entityType == entityType)) {
-                        bucketEntities.add(new BucketEntity(entityType, Services.BUCKET.getFluidOfBucketItem(bucket), bucket));
-                    }
+                if (entityType != null && bucketEntities.stream().noneMatch(bucketEntity -> bucketEntity.entityType == entityType)) {
+                    bucketEntities.add(new BucketEntity(entityType, Services.BUCKET.getFluidOfBucketItem(bucket), bucket));
                 }
             }
         }

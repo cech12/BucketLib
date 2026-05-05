@@ -3,13 +3,11 @@
   "category": "misc",
   "ingredients": [
     {
-      "fabric:type": "bucketlib:milk"
-    },
-    {
-      "item": "minecraft:sugar"
+      "fabric:type": "bucketlib:block",
+      "block": "minecraft:powder_snow"
     }
   ],
   "result": {
-    "id": "minecraft:cake"
+    "id": "minecraft:snowball"
   }
 }

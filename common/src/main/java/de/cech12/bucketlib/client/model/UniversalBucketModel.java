@@ -9,20 +9,22 @@ import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.client.ClientServices;
 import de.cech12.bucketlib.util.BucketLibUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.client.renderer.item.CompositeModel;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelDebugName;
+import net.minecraft.client.resources.model.cuboid.ItemTransforms;
+import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.client.resources.model.sprite.MaterialBaker;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ItemOwner;
@@ -32,6 +34,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4fc;
 
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -54,43 +57,50 @@ public abstract class UniversalBucketModel implements ItemModel {
 
     private static final ModelDebugName DEBUG_NAME = () -> "UniversalBucketModel";
 
-    private final Unbaked unbakedModel;
+    protected final Unbaked unbakedModel;
     private final Map<String, ItemModel> cache = new IdentityHashMap<>(); // contains all the baked models since they'll never change
 
     private Integer upperBreakTemperature = null;
     private Integer lowerBreakTemperature = null;
 
     protected final BakingContext bakingContext;
+    protected final Matrix4fc transformation;
     protected final ItemTransforms itemTransforms;
 
-    protected UniversalBucketModel(UniversalBucketModel.Unbaked unbakedModel, BakingContext bakingContext) {
+    protected UniversalBucketModel(UniversalBucketModel.Unbaked unbakedModel, BakingContext bakingContext, Matrix4fc transformation) {
         this.unbakedModel = unbakedModel;
         this.bakingContext = bakingContext;
+        this.transformation = transformation;
         this.itemTransforms = bakingContext.blockModelBaker().getModel(ITEM_GENERATED_ID).getTopTransforms();
     }
 
     private static Material getItemMaterial(Identifier id) {
-        return new Material(TextureAtlas.LOCATION_ITEMS, id);
+        return new Material(id);
     }
 
     private ItemModel bakeModelForFluid(Fluid fluid, Identifier otherContent, boolean isCracked, boolean isLower) {
-        var sprites = bakingContext.blockModelBaker().sprites();
+        ModelBaker baker = bakingContext.blockModelBaker();
+        MaterialBaker materials = baker.materials();
+        FluidModel fluidModel = Minecraft.getInstance()
+                .getModelManager()
+                .getFluidStateModelSet()
+                .get(fluid.defaultFluidState());
 
         ItemTintSource bucketTint = (!unbakedModel.tints().isEmpty()) ? unbakedModel.tints().getFirst() : new Constant(-1);
-        Material particleLocation = unbakedModel.textures().particle().map(UniversalBucketModel::getItemMaterial).orElse(null);
+        Material particleLocation = unbakedModel.textures().particle().orElse(null);
 
         Material baseLocation;
         if (isLower) {
             if (isCracked) {
-                baseLocation = unbakedModel.textures().crackedLowerBase().map(UniversalBucketModel::getItemMaterial).orElse(UNIVERSAL_BUCKET_CRACKED_LOWER_BASE);
+                baseLocation = unbakedModel.textures().crackedLowerBase().orElse(UNIVERSAL_BUCKET_CRACKED_LOWER_BASE);
             } else {
-                baseLocation = unbakedModel.textures().lowerBase().map(UniversalBucketModel::getItemMaterial).orElse(UNIVERSAL_BUCKET_LOWER_BASE);
+                baseLocation = unbakedModel.textures().lowerBase().orElse(UNIVERSAL_BUCKET_LOWER_BASE);
             }
         } else {
             if (isCracked) {
-                baseLocation = unbakedModel.textures().crackedBase().map(UniversalBucketModel::getItemMaterial).orElse(UNIVERSAL_BUCKET_CRACKED_BASE);
+                baseLocation = unbakedModel.textures().crackedBase().orElse(UNIVERSAL_BUCKET_CRACKED_BASE);
             } else {
-                baseLocation = unbakedModel.textures().base().map(UniversalBucketModel::getItemMaterial).orElse(UNIVERSAL_BUCKET_BASE);
+                baseLocation = unbakedModel.textures().base().orElse(UNIVERSAL_BUCKET_BASE);
             }
         }
 
@@ -103,29 +113,29 @@ public abstract class UniversalBucketModel implements ItemModel {
         if (fluid != Fluids.EMPTY) {
             fluidLocation = UniversalBucketModel.getItemMaterial(getContentTexture(BuiltInRegistries.FLUID.getKey(fluid)));
             if (isCracked) {
-                fluidMaskLocation = unbakedModel.textures().crackedFluidMask().map(UniversalBucketModel::getItemMaterial).orElse(DEFAULT_FLUID_MASK);
+                fluidMaskLocation = unbakedModel.textures().crackedFluidMask().orElse(DEFAULT_FLUID_MASK);
             } else {
-                fluidMaskLocation = unbakedModel.textures().fluidMask().map(UniversalBucketModel::getItemMaterial).orElse(DEFAULT_FLUID_MASK);
+                fluidMaskLocation = unbakedModel.textures().fluidMask().orElse(DEFAULT_FLUID_MASK);
             }
         }
         //oversteer fluid texture if available
-        if (otherContentLocation == null && fluidLocation != null && !MissingTextureAtlasSprite.getLocation().equals(sprites.get(fluidLocation, DEBUG_NAME).contents().name())) {
+        if (otherContentLocation == null && fluidLocation != null && !MissingTextureAtlasSprite.getLocation().equals(materials.get(fluidLocation, DEBUG_NAME).sprite().contents().name())) {
             otherContentLocation = fluidLocation;
         }
 
-        TextureAtlasSprite baseSprite = sprites.get(baseLocation, DEBUG_NAME);
-        TextureAtlasSprite otherContentSprite = null;
+        Material.Baked baseSprite = materials.get(baseLocation, DEBUG_NAME);
+        Material.Baked otherContentSprite = null;
         if (otherContentLocation != null) {
-            otherContentSprite = sprites.get(otherContentLocation, DEBUG_NAME);
+            otherContentSprite = materials.get(otherContentLocation, DEBUG_NAME);
             //if content texture is missing - fallback to pink content texture
-            if (MissingTextureAtlasSprite.getLocation().equals(otherContentSprite.contents().name())) {
-                otherContentSprite = sprites.get(MISSING_LOWER_CONTENT_MATERIAL, DEBUG_NAME);
+            if (MissingTextureAtlasSprite.getLocation().equals(otherContentSprite.sprite().contents().name())) {
+                otherContentSprite = materials.get(MISSING_LOWER_CONTENT_MATERIAL, DEBUG_NAME);
             }
         }
-        TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? ClientServices.CLIENT.getFluidTextureMaterial(sprites, DEBUG_NAME, fluid) : null;
-        TextureAtlasSprite fluidMaskSprite = (fluidMaskLocation != null && fluidSprite != null) ? sprites.get(fluidMaskLocation, DEBUG_NAME) : null;
+        Material.Baked fluidSprite = fluid != Fluids.EMPTY ? fluidModel.stillMaterial() : null;
+        Material.Baked fluidMaskSprite = (fluidMaskLocation != null && fluidSprite != null) ? materials.get(fluidMaskLocation, DEBUG_NAME) : null;
 
-        TextureAtlasSprite particleSprite = particleLocation != null ? sprites.get(particleLocation, DEBUG_NAME) : null;
+        Material.Baked particleSprite = particleLocation != null ? materials.get(particleLocation, DEBUG_NAME) : null;
         if (particleSprite == null){
             particleSprite = baseSprite;
         }
@@ -135,7 +145,7 @@ public abstract class UniversalBucketModel implements ItemModel {
         return new CompositeModel(itemModels);
     }
 
-    abstract List<ItemModel> specialBaking(Fluid fluid, ItemTintSource bucketTint, TextureAtlasSprite baseSprite, TextureAtlasSprite otherContentSprite, TextureAtlasSprite fluidSprite, TextureAtlasSprite fluidMaskSprite, TextureAtlasSprite particleSprite);
+    abstract List<ItemModel> specialBaking(Fluid fluid, ItemTintSource bucketTint, Material.Baked baseSprite, Material.Baked otherContentSprite, Material.Baked fluidSprite, Material.Baked fluidMaskSprite, Material.Baked particleSprite);
 
     @Override
     public void update(@NotNull ItemStackRenderState renderState, ItemStack stack, @NotNull ItemModelResolver modelResolver, @NotNull ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable ItemOwner itemOwner, int integer) {
@@ -197,8 +207,8 @@ public abstract class UniversalBucketModel implements ItemModel {
 
         @Override
         @NotNull
-        public ItemModel bake(@NotNull ItemModel.BakingContext bakingContext) {
-            return ClientServices.CLIENT.createItemModel(this, bakingContext);
+        public ItemModel bake(@NotNull BakingContext bakingContext, @NotNull Matrix4fc transformation) {
+            return ClientServices.CLIENT.createItemModel(this, bakingContext, transformation);
         }
 
         @Override
@@ -207,23 +217,23 @@ public abstract class UniversalBucketModel implements ItemModel {
         }
 
         public record Textures(
-                Optional<Identifier> particle,
-                Optional<Identifier> base,
-                Optional<Identifier> lowerBase,
-                Optional<Identifier> fluidMask,
-                Optional<Identifier> crackedBase,
-                Optional<Identifier> crackedLowerBase,
-                Optional<Identifier> crackedFluidMask) {
+                Optional<Material> particle,
+                Optional<Material> base,
+                Optional<Material> lowerBase,
+                Optional<Material> fluidMask,
+                Optional<Material> crackedBase,
+                Optional<Material> crackedLowerBase,
+                Optional<Material> crackedFluidMask) {
             public static final Codec<Textures> CODEC = RecordCodecBuilder.<Textures>create(
                             instance -> instance
                                     .group(
-                                            Identifier.CODEC.optionalFieldOf("particle").forGetter(Textures::particle),
-                                            Identifier.CODEC.optionalFieldOf("base").forGetter(Textures::base),
-                                            Identifier.CODEC.optionalFieldOf("lowerBase").forGetter(Textures::lowerBase),
-                                            Identifier.CODEC.optionalFieldOf("fluidMask").forGetter(Textures::fluidMask),
-                                            Identifier.CODEC.optionalFieldOf("crackedBase").forGetter(Textures::crackedBase),
-                                            Identifier.CODEC.optionalFieldOf("crackedLowerBase").forGetter(Textures::crackedLowerBase),
-                                            Identifier.CODEC.optionalFieldOf("crackedFluidMask").forGetter(Textures::crackedFluidMask))
+                                            Material.CODEC.optionalFieldOf("particle").forGetter(Textures::particle),
+                                            Material.CODEC.optionalFieldOf("base").forGetter(Textures::base),
+                                            Material.CODEC.optionalFieldOf("lowerBase").forGetter(Textures::lowerBase),
+                                            Material.CODEC.optionalFieldOf("fluidMask").forGetter(Textures::fluidMask),
+                                            Material.CODEC.optionalFieldOf("crackedBase").forGetter(Textures::crackedBase),
+                                            Material.CODEC.optionalFieldOf("crackedLowerBase").forGetter(Textures::crackedLowerBase),
+                                            Material.CODEC.optionalFieldOf("crackedFluidMask").forGetter(Textures::crackedFluidMask))
                                     .apply(instance, Textures::new))
                     .validate(textures -> {
                         if (textures.base.isPresent()) {

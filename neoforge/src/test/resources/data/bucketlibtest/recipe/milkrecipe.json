@@ -3,10 +3,11 @@
   "category": "misc",
   "ingredients": [
     {
-      "item": "bucketlibtest:test_bucket"
-    }
+      "neoforge:ingredient_type": "bucketlib:milk"
+    },
+    "minecraft:sugar"
   ],
   "result": {
-    "item": "minecraft:gravel"
+    "id": "minecraft:cake"
   }
 }

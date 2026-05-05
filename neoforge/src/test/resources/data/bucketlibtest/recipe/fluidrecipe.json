@@ -3,15 +3,15 @@
   "category": "misc",
   "ingredients": [
     {
-      "type": "bucketlib:fluid",
+      "neoforge:ingredient_type": "bucketlib:fluid",
       "tag": "minecraft:water"
     },
     {
-      "type": "bucketlib:fluid",
+      "neoforge:ingredient_type": "bucketlib:fluid",
       "fluid": "minecraft:lava"
     }
   ],
   "result": {
-    "item": "minecraft:obsidian"
+    "id": "minecraft:obsidian"
   }
 }

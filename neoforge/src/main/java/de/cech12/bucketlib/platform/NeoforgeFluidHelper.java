@@ -1,6 +1,7 @@
 package de.cech12.bucketlib.platform;
 
 import de.cech12.bucketlib.platform.services.IFluidHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
@@ -15,7 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.client.fluid.FluidTintSource;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
@@ -46,16 +47,13 @@ public class NeoforgeFluidHelper implements IFluidHelper {
 
     @Override
     public int getFluidTintColor(ItemStack stack) {
-        ResourceHandler<FluidResource> handler = ItemAccess.forStack(stack).getCapability(Capabilities.Fluid.ITEM);
-        if (handler != null) {
-            FluidResource resource = handler.getResource(0);
-            Fluid fluid = resource.getFluid();
-            if (fluid != Fluids.EMPTY) {
-                FluidStack fluidStack = resource.toStack(FluidType.BUCKET_VOLUME);
-                return IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack);
-            }
-        }
-        return 0xFFFFFFFF;
+        var fluid = FluidUtil.getFirstStackContained(stack);
+        FluidTintSource tintSource = Minecraft.getInstance()
+                .getModelManager()
+                .getFluidStateModelSet()
+                .get(fluid.getFluid().defaultFluidState())
+                .fluidTintSource();
+        return tintSource != null ? tintSource.colorAsStack(fluid) : -1;
     }
 
     @Override

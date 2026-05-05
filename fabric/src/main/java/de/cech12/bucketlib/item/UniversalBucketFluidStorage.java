@@ -11,8 +11,7 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.world.item.ItemStack;
-
-import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 public class UniversalBucketFluidStorage extends SingleFluidStorage {
 
@@ -20,24 +19,20 @@ public class UniversalBucketFluidStorage extends SingleFluidStorage {
 
     public UniversalBucketFluidStorage(ContainerItemContext context) {
         this.context = context;
-        Optional<? extends FluidStorageData> optional = context.getItemVariant().getComponents().get(BucketLibMod.STORAGE);
-        if (optional != null) {
-            optional.ifPresent(data -> {
-                if (!data.isEmpty()) {
-                    this.variant = data.fluidVariant();
-                    this.amount = data.amount();
-                }
-            });
+        FluidStorageData data = context.getItemVariant().getComponents().get(BucketLibMod.STORAGE);
+        if (data != null && !data.isEmpty()) {
+            this.variant = data.fluidVariant();
+            this.amount = data.amount();
         }
     }
 
     @Override
-    protected long getCapacity(FluidVariant variant) {
+    protected long getCapacity(@NotNull FluidVariant variant) {
         return FluidConstants.BUCKET;
     }
 
     @Override
-    protected boolean canInsert(FluidVariant variant) {
+    protected boolean canInsert(@NotNull FluidVariant variant) {
         ItemStack stack = context.getItemVariant().toStack();
         return this.variant.isBlank() && BucketLibUtil.isEmpty(stack)
                 && (context.getItemVariant().getItem() instanceof UniversalBucketItem universalBucketItem
@@ -51,7 +46,7 @@ public class UniversalBucketFluidStorage extends SingleFluidStorage {
     }
 
     @Override
-    public long insert(FluidVariant insertedVariant, long maxAmount, TransactionContext transaction) {
+    public long insert(@NotNull FluidVariant insertedVariant, long maxAmount, @NotNull TransactionContext transaction) {
         StoragePreconditions.notBlankNotNegative(insertedVariant, maxAmount);
         if (maxAmount >= getCapacity() && (insertedVariant.equals(variant) || variant.isBlank()) && canInsert(insertedVariant)) {
             ItemStack stack = context.getItemVariant().toStack();
@@ -64,27 +59,29 @@ public class UniversalBucketFluidStorage extends SingleFluidStorage {
     }
 
     @Override
-    public long extract(FluidVariant extractedVariant, long maxAmount, TransactionContext transaction) {
+    public long extract(@NotNull FluidVariant extractedVariant, long maxAmount, @NotNull TransactionContext transaction) {
         StoragePreconditions.notBlankNotNegative(extractedVariant, maxAmount);
-        if (maxAmount >= amount && (extractedVariant.equals(variant)) && canExtract(extractedVariant)) {
-            ItemStack stack = context.getItemVariant().toStack();
-            if (stack.getItem() instanceof UniversalBucketItem bucketItem) {
-                if (BucketLibUtil.isAffectedByInfinityEnchantment(stack)) {
-                    return amount;
-                }
-                if (!bucketItem.isCracked(stack)) {
-                    if (BucketLibUtil.containsContent(stack)) { //remove milk content tag
-                        BucketLibUtil.removeContentNoCopy(stack, null, null, false);
-                    }
-                    stack.remove(BucketLibMod.STORAGE);
-                    BucketLibUtil.damageByOne(stack, null); //TODO get ServerLevel!
-                } else {
-                    stack.shrink(1);
-                }
-                if (exchangeOrRemove(ItemVariant.of(stack), transaction)) {
-                    return amount;
-                }
+        if (maxAmount < amount || !extractedVariant.equals(variant) || !canExtract(extractedVariant)) {
+            return 0;
+        }
+        ItemStack stack = context.getItemVariant().toStack();
+        if (!(stack.getItem() instanceof UniversalBucketItem bucketItem)) {
+            return 0;
+        }
+        if (BucketLibUtil.isAffectedByInfinityEnchantment(stack)) {
+            return amount;
+        }
+        if (!bucketItem.isCracked(stack)) {
+            if (BucketLibUtil.containsContent(stack)) { //remove milk content tag
+                BucketLibUtil.removeContentNoCopy(stack, null, null, false);
             }
+            stack.remove(BucketLibMod.STORAGE);
+            BucketLibUtil.damageByOne(stack, null); //server level not available here
+        } else {
+            stack.shrink(1);
+        }
+        if (exchangeOrRemove(ItemVariant.of(stack), transaction)) {
+            return amount;
         }
         return 0;
     }

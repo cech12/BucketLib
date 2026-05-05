@@ -39,14 +39,14 @@ public class MilkIngredient implements CustomIngredient {
         }
         Identifier location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
         //Mekansim tanks are not compatible: https://github.com/cech12/BucketLib/issues/55 | https://github.com/mekanism/Mekanism/issues/8335
-        if ("mekanism".equals(location.getNamespace()) && itemStack.getRecipeRemainder().isEmpty()) {
+        if ("mekanism".equals(location.getNamespace()) && (itemStack.getCraftingRemainder() == null || itemStack.getCraftingRemainder().count() < 1)) {
             return false;
         }
         return BucketLibUtil.containsMilk(itemStack.copy());
     }
 
     @Override
-    public Stream<Holder<Item>> getMatchingItems() {
+    public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
             this.matchingStacks.add(Holder.direct(Items.MILK_BUCKET));
@@ -94,7 +94,7 @@ public class MilkIngredient implements CustomIngredient {
         }
 
         @Override
-        public StreamCodec<RegistryFriendlyByteBuf, MilkIngredient> getPacketCodec() {
+        public StreamCodec<RegistryFriendlyByteBuf, MilkIngredient> getStreamCodec() {
             return PACKET_CODEC;
         }
 

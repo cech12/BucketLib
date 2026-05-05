@@ -1,5 +1,7 @@
 package de.cech12.bucketlib.platform.services;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
@@ -12,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -23,7 +26,18 @@ public interface IFluidHelper {
 
     int getFluidTemperature(Fluid fluid);
 
-    int getFluidTintColor(ItemStack stack);
+    default int getFluidTintColor(ItemStack stack) {
+        var fluid = getContainedFluid(stack);
+        if (fluid == Fluids.WATER) {
+            return -12618012;
+        }
+        BlockTintSource tintSource = Minecraft.getInstance()
+                .getModelManager()
+                .getFluidStateModelSet()
+                .get(fluid.defaultFluidState())
+                .tintSource();
+        return tintSource != null ? tintSource.color(fluid.defaultFluidState().createLegacyBlock()) : -1;
+    }
 
     int getFluidLightLevel(Fluid fluid);
 

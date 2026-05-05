@@ -29,11 +29,11 @@ public abstract class AbstractNautilusMixin extends TamableAnimal {
 	}
 
 	@Inject(at = @At("RETURN"), method = "isFood", cancellable = true)
-	private void isFoodProxy(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-		if (!cir.getReturnValue() && stack.getItem() instanceof UniversalBucketItem) {
+	private void isFoodProxy(ItemStack itemStack, CallbackInfoReturnable<Boolean> cir) {
+		if (!cir.getReturnValue() && itemStack.getItem() instanceof UniversalBucketItem) {
 			EntityType<?> entityType;
 			RegistryUtil.BucketEntity bucketEntity;
-			if ((entityType = BucketLibUtil.getEntityType(stack)) != null
+			if ((entityType = BucketLibUtil.getEntityType(itemStack)) != null
 					&& (bucketEntity = RegistryUtil.getBucketEntity(entityType)) != null) {
 				TagKey<Item> checkTag = !this.isTame() && !this.isBaby() ? ItemTags.NAUTILUS_TAMING_ITEMS : ItemTags.NAUTILUS_FOOD;
 				cir.setReturnValue(new ItemStack(bucketEntity.bucketItem()).is(checkTag));
@@ -42,10 +42,10 @@ public abstract class AbstractNautilusMixin extends TamableAnimal {
 	}
 
 	@Inject(at = @At("HEAD"), method = "usePlayerItem", cancellable = true)
-	private void usePlayerItemProxy(Player player, InteractionHand hand, ItemStack stack, CallbackInfo ci) {
-		if (this.isFood(stack) && stack.getItem() instanceof UniversalBucketItem) {
+	private void usePlayerItemProxy(Player player, InteractionHand hand, ItemStack itemStack, CallbackInfo ci) {
+		if (this.isFood(itemStack) && itemStack.getItem() instanceof UniversalBucketItem) {
 			ServerLevel serverLevel = (player.level() instanceof ServerLevel) ? (ServerLevel) player.level() : null;
-			player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, BucketLibUtil.removeEntityData(stack, serverLevel, player, true)));
+			player.setItemInHand(hand, ItemUtils.createFilledResult(itemStack, player, BucketLibUtil.removeEntityData(itemStack, serverLevel, player, true)));
 			ci.cancel();
 		}
 	}

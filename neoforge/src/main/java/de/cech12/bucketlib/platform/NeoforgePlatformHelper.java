@@ -7,10 +7,8 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.Objects;
 
@@ -32,14 +30,6 @@ public class NeoforgePlatformHelper implements IPlatformHelper {
     @Override
     public boolean isDevelopmentEnvironment() {
         return !FMLLoader.getCurrent().isProduction();
-    }
-
-    @Override
-    public Level getCurrentLevel() {
-        if (ServerLifecycleHooks.getCurrentServer() != null) {
-            return ServerLifecycleHooks.getCurrentServer().overworld();
-        }
-        return null;
     }
 
     @Override

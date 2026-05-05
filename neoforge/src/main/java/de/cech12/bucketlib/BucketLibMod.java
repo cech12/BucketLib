@@ -56,8 +56,8 @@ public class BucketLibMod {
     static {
         DATA_COMPONENT_TYPES.register(BucketLibComponents.BUCKET_CONTENT_LOCATION.getPath(), () -> BucketLibComponents.BUCKET_CONTENT);
 
-        RECIPE_SERIALIZERS.register("bucket_filling_shaped", () -> BucketFillingShapedRecipe.Serializer.INSTANCE);
-        RECIPE_SERIALIZERS.register("bucket_filling_shapeless", () -> BucketFillingShapelessRecipe.Serializer.INSTANCE);
+        RECIPE_SERIALIZERS.register("bucket_filling_shaped", () -> BucketFillingShapedRecipe.SERIALIZER);
+        RECIPE_SERIALIZERS.register("bucket_filling_shapeless", () -> BucketFillingShapelessRecipe.SERIALIZER);
         INGREDIENT_TYPES.register("block", () -> BlockIngredient.TYPE);
         INGREDIENT_TYPES.register("empty", () -> EmptyIngredient.TYPE);
         INGREDIENT_TYPES.register("entity", () -> EntityIngredient.TYPE);

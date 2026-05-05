@@ -30,7 +30,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
@@ -93,8 +95,8 @@ public class UniversalBucketItem extends Item {
         return Component.translatable(descriptionId, argument);
     }
 
-    public boolean isCracked(ItemStack stack) {
-        Fluid fluid = BucketLibUtil.getFluid(stack);
+    public boolean isCracked(ItemInstance itemInstance) {
+        Fluid fluid = BucketLibUtil.getFluid(itemInstance);
         if (fluid != Fluids.EMPTY) {
             int fluidTemperature = Services.FLUID.getFluidTemperature(fluid);
             Integer upperCrackingTemperature = getUpperBreakTemperature();
@@ -102,7 +104,7 @@ public class UniversalBucketItem extends Item {
             return isCrackingFluid(fluid)
                     || (upperCrackingTemperature != null && fluidTemperature >= upperCrackingTemperature)
                     || (lowerCrackingTemperature != null && fluidTemperature <= lowerCrackingTemperature)
-                    && !BucketLibUtil.isAffectedByInfinityEnchantment(stack);
+                    && !BucketLibUtil.isAffectedByInfinityEnchantment(itemInstance);
         }
         return false;
     }
@@ -164,9 +166,14 @@ public class UniversalBucketItem extends Item {
         return false;
     }
 
-    //@Override //overrides the neoforge implementation //used by mixin
+    //@Override //overrides the neoforge implementation
     public int getMaxStackSize(ItemStack stack) {
-        return BucketLibUtil.isEmpty(stack) ? this.properties.maxStackSize : 1;
+        return getMaxStackSize((ItemInstance)stack);
+    }
+
+    //used by mixin
+    public int getMaxStackSize(ItemInstance itemInstance) {
+        return BucketLibUtil.isEmpty(itemInstance) ? this.properties.maxStackSize : 1;
     }
 
     //used by mixins
@@ -194,7 +201,7 @@ public class UniversalBucketItem extends Item {
             entity.setTicksFrozen(Math.min(entity.getTicksRequiredToFreeze(), ticks));
             //damaging here because, the vanilla mechanic is reducing the freeze ticks below fully freezing
             if (BucketLibUtil.notCreative(entity) && entity.tickCount % 40 == 0 && entity.isFullyFrozen()) {
-                entity.hurtServer(level, level.damageSources().freeze(), entity.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
+                entity.hurtServer(level, level.damageSources().freeze(), entity.is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) ? 5 : 1);
                 BucketLibUtil.damageByOne(itemStack, level, (entity instanceof Player) ? (Player) entity : null);
             }
         }
@@ -392,21 +399,21 @@ public class UniversalBucketItem extends Item {
         super.onUseTick(level, livingEntity, itemStack, useRemainingTicks);
     }
 
-    public boolean hasCraftingRemainder(ItemStack stack) {
+    public boolean hasCraftingRemainder(ItemInstance itemInstance) {
         //for using a filled bucket as fuel or in crafting recipes, an empty bucket should remain
-        return !BucketLibUtil.isEmpty(stack) && !this.isCracked(stack);
+        return !BucketLibUtil.isEmpty(itemInstance) && !this.isCracked(itemInstance);
     }
 
     //@Override //overrides the (neo)forge implementation
-    public ItemStack getCraftingRemainder(ItemStack itemStack) {
-        if (!hasCraftingRemainder(itemStack)) {
-            return ItemStack.EMPTY;
+    public ItemStackTemplate getCraftingRemainder(ItemInstance itemInstance) {
+        if (!hasCraftingRemainder(itemInstance)) {
+            return null;
         }
-        if (BucketLibUtil.isAffectedByInfinityEnchantment(itemStack)) {
-            return itemStack.copy();
+        if (BucketLibUtil.isAffectedByInfinityEnchantment(itemInstance)) {
+            return BucketLibUtil.getItemStackTemplate(itemInstance);
         }
         //remove everything from bucket
-        ItemStack result = itemStack.copy();
+        ItemStack result = BucketLibUtil.getItemStack(itemInstance).copy();
         boolean damaged = BucketLibUtil.containsFluid(result); //damaging is done by fluid handler
         if (BucketLibUtil.containsBlock(result)) {
             result = BucketLibUtil.removeBlock(result, null, null, !damaged); //ServerLevel not available here
@@ -418,12 +425,12 @@ public class UniversalBucketItem extends Item {
         if (BucketLibUtil.containsFluid(result) || BucketLibUtil.containsMilk(result)) {
             result = BucketLibUtil.removeFluid(result, null, null); //ServerLevel not available here
         }
-        return result;
+        return ItemStackTemplate.fromNonEmptyStack(result);
     }
 
     //@Override //overrides the fabric implementation
-    public ItemStack getRecipeRemainder(ItemStack itemStack) {
-        return getCraftingRemainder(itemStack);
+    public ItemStackTemplate getCraftingRemainder(ItemStack itemStack) {
+        return getCraftingRemainder((ItemInstance) itemStack);
     }
 
     private boolean getBooleanProperty(Supplier<Boolean> config, boolean defaultValue) {
@@ -448,7 +455,7 @@ public class UniversalBucketItem extends Item {
             } else if (element instanceof Fluid fluid) {
                 return fluid.defaultFluidState().is((TagKey<Fluid>) tag);
             } else if (element instanceof EntityType<?> entityType) {
-                return entityType.is((TagKey<EntityType<?>>) tag);
+                return entityType.builtInRegistryHolder().is((TagKey<EntityType<?>>) tag);
             }
         }
         return defaultList != null && defaultList.contains(element);

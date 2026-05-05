@@ -1,5 +1,6 @@
-accessWidener v2 named
+accessWidener v2 official
 
-accessible method net/minecraft/client/renderer/block/model/ItemModelGenerator processFrames (ILjava/lang/String;Lnet/minecraft/client/renderer/texture/SpriteContents;)Ljava/util/List;
-accessible method net/minecraft/client/renderer/block/model/FaceBakery defaultFaceUV (Lorg/joml/Vector3fc;Lorg/joml/Vector3fc;Lnet/minecraft/core/Direction;)Lnet/minecraft/client/renderer/block/model/BlockElementFace$UVs;
-accessible method net/minecraft/client/renderer/item/BlockModelWrapper <init> (Ljava/util/List;Ljava/util/List;Lnet/minecraft/client/renderer/item/ModelRenderProperties;Ljava/util/function/Function;)V
+accessible method net/minecraft/client/renderer/item/CuboidItemModelWrapper <init> (Ljava/util/List;Lnet/minecraft/client/resources/model/geometry/QuadCollection;Lnet/minecraft/client/renderer/item/ModelRenderProperties;Lorg/joml/Matrix4fc;)V
+accessible method net/minecraft/client/resources/model/cuboid/FaceBakery defaultFaceUV (Lorg/joml/Vector3fc;Lorg/joml/Vector3fc;Lnet/minecraft/core/Direction;)Lnet/minecraft/client/resources/model/cuboid/CuboidFace$UVs;
+accessible method net/minecraft/client/resources/model/cuboid/ItemModelGenerator bakeSideFaces (Lnet/minecraft/client/resources/model/geometry/QuadCollection$Builder;Lnet/minecraft/client/resources/model/ModelBaker$Interner;Lnet/minecraft/client/renderer/block/dispatch/ModelState;Lnet/minecraft/client/resources/model/geometry/BakedQuad$MaterialInfo;)V
+accessible class net/minecraft/client/resources/model/cuboid/ItemModelGenerator$ItemLayerKey

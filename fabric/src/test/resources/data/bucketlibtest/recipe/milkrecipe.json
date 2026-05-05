@@ -3,10 +3,11 @@
   "category": "misc",
   "ingredients": [
     {
-      "item": "bucketlibtest:test_bucket"
-    }
+      "fabric:type": "bucketlib:milk"
+    },
+    "minecraft:sugar"
   ],
   "result": {
-    "id": "minecraft:gravel"
+    "id": "minecraft:cake"
   }
 }
