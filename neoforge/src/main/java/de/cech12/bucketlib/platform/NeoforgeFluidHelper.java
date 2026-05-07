@@ -131,7 +131,7 @@ public class NeoforgeFluidHelper implements IFluidHelper {
 
     @Override
     public Tuple<Boolean, ItemStack> tryPickUpFluid(ItemStack stack, Player player, Level level, InteractionHand interactionHand, BlockPos pos, Direction direction) {
-        ItemAccess access = ItemAccess.forStack(stack.copy());
+        ItemAccess access = ItemAccess.forStack(stack.copyWithCount(1));
         ResourceHandler<FluidResource> handler = access.getCapability(Capabilities.Fluid.ITEM);
         FluidStack pickedFluidStack = FluidUtil.tryPickupFluid(handler, player, level, pos, direction);
         return new Tuple<>(!pickedFluidStack.isEmpty(), access.getResource().toStack());
