@@ -2,11 +2,13 @@ package de.cech12.bucketlib.mixin;
 
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import net.minecraft.core.component.DataComponentHolder;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,31 +17,43 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(DataComponentHolder.class)
 public interface DataComponentHolderMixin {
 
+    @Shadow
+    DataComponentMap getComponents();
+
     @Unique
-    default Item getItem() {
+    default Item bucketLib$getItem() {
         if ((Object) this instanceof ItemStack stack) {
             return stack.getItem();
         }
         return null;
     }
 
-    @Inject(at = @At("HEAD"), method = "get", cancellable = true)
+    @Inject(at = @At("RETURN"), method = "get", cancellable = true)
     default <T> void getProxy(DataComponentType<? extends T> type, CallbackInfoReturnable<T> cir) {
-        if (type == DataComponents.MAX_DAMAGE && this.getItem() instanceof UniversalBucketItem bucketItem && bucketItem.getDurability() > 0) {
-            cir.setReturnValue((T) Integer.valueOf(bucketItem.getDurability()));
+        if (cir.getReturnValue() == null && this.bucketLib$getItem() instanceof UniversalBucketItem bucketItem && bucketItem.getDurability() > 0) {
+            if (type == DataComponents.MAX_DAMAGE) {
+                cir.setReturnValue((T) Integer.valueOf(bucketItem.getDurability()));
+            } else if (type == DataComponents.DAMAGE) {
+                cir.setReturnValue((T) Integer.valueOf(0)); //avoid returning null if "has" method returns true
+            }
         }
     }
 
     @Inject(at = @At("HEAD"), method = "getOrDefault", cancellable = true)
     default <T> void getOrDefaultProxy(DataComponentType<? extends T> type, T defaultValue, CallbackInfoReturnable<T> cir) {
-        if (type == DataComponents.MAX_DAMAGE && this.getItem() instanceof UniversalBucketItem bucketItem && bucketItem.getDurability() > 0) {
-            cir.setReturnValue((T) Integer.valueOf(bucketItem.getDurability()));
+        if ((type == DataComponents.MAX_DAMAGE || type == DataComponents.DAMAGE) && this.bucketLib$getItem() instanceof UniversalBucketItem bucketItem && bucketItem.getDurability() > 0) {
+            T value = getComponents().get(type);
+            if (type == DataComponents.MAX_DAMAGE) {
+                cir.setReturnValue(value != null ? value : (T) Integer.valueOf(bucketItem.getDurability()));
+            } else { //type == DataComponents.DAMAGE
+                cir.setReturnValue(value != null ? value : defaultValue);
+            }
         }
     }
 
     @Inject(at = @At("HEAD"), method = "has", cancellable = true)
     default void hasProxy(DataComponentType<?> type, CallbackInfoReturnable<Boolean> cir) {
-        if ((type == DataComponents.MAX_DAMAGE || type == DataComponents.DAMAGE) && this.getItem() instanceof UniversalBucketItem bucketItem) {
+        if ((type == DataComponents.MAX_DAMAGE || type == DataComponents.DAMAGE) && this.bucketLib$getItem() instanceof UniversalBucketItem bucketItem) {
             cir.setReturnValue(bucketItem.getDurability() > 0);
         }
     }
