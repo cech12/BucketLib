@@ -7,11 +7,12 @@
     "AbstractNautilusMixin",
     "AxolotlMixin",
     "CraftingRecipeMixin",
+    "DataComponentHolderMixin",
     "ItemInstanceMixin",
-    "ItemStackMixin",
     "LivingEntityAccessor",
     "MobBucketItemAccessor",
-    "NautilusAiMixin"
+    "NautilusAiMixin",
+    "RepairItemRecipeMixin"
   ],
   "injectors": {
     "defaultRequire": 1
