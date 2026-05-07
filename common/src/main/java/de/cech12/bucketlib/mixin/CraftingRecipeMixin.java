@@ -6,6 +6,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.ArmorDyeRecipe;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RepairItemRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,7 +17,7 @@ public interface CraftingRecipeMixin {
 
     @Inject(at = @At("RETURN"), method = "getRemainingItems", cancellable = true)
     default void getRemainingItems(CraftingInput craftingInput, CallbackInfoReturnable<NonNullList<ItemStack>> cir) {
-        if ((Object)this instanceof ArmorDyeRecipe) {
+        if ((Object)this instanceof ArmorDyeRecipe || (Object)this instanceof RepairItemRecipe) {
             NonNullList<ItemStack> list = cir.getReturnValue();
             boolean changed = false;
             for (int i = 0; i < list.size(); i++) {
