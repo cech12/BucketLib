@@ -9,6 +9,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface LivingEntityAccessor {
 
     @Invoker("spawnItemParticles")
-    void bucketlib_spawnItemParticles(ItemStack stack, int i);
+    void bucketlib$spawnItemParticles(ItemStack stack, int i);
 
 }

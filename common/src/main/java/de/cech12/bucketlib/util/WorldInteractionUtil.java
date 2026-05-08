@@ -37,7 +37,7 @@ public class WorldInteractionUtil {
         InteractionResult result = player.interactOn(entity, interactionHand, Vec3.ZERO);
         player.getAbilities().instabuild = previousInstabuildValue;
         if (result.consumesAction()) {
-            itemStack = ItemUtils.createFilledResult(itemStack.copy(), player, BucketLibUtil.addMilk(ItemStackUtil.copyStackWithSize(itemStack, 1)));
+            itemStack = ItemUtils.createFilledResult(itemStack.copy(), player, BucketLibUtil.addMilk(itemStack.copyWithCount(1)));
         }
         player.setItemInHand(interactionHand, itemStack);
         return result;
@@ -53,27 +53,28 @@ public class WorldInteractionUtil {
         Block hitBlock = hitBlockState.getBlock();
         if (hitBlock instanceof AbstractCauldronBlock cauldronBlock
                 && itemstack.getItem() instanceof UniversalBucketItem bucketItem
-                && BucketLibUtil.isEmpty(itemstack)) {
-            //check if bucket can hold cauldron content
-            if (cauldronBlock == Blocks.LAVA_CAULDRON && bucketItem.canHoldFluid(Fluids.LAVA)
-                    || cauldronBlock == Blocks.WATER_CAULDRON && bucketItem.canHoldFluid(Fluids.WATER)
-                    || cauldronBlock == Blocks.POWDER_SNOW_CAULDRON && bucketItem.canHoldBlock(Blocks.POWDER_SNOW)) {
-                //fake vanilla bucket using on cauldron
-                ItemStack stack = new ItemStack(Items.BUCKET);
-                player.setItemInHand(interactionHand, stack);
-                //deactivate instabuild for the fake interaction to avoid side effects like adding additional filled vanilla buckets into inventory
-                boolean previousInstabuildValue = player.getAbilities().instabuild;
-                player.getAbilities().instabuild = false;
-                InteractionResult interactionResult = hitBlockState.useItemOn(stack, level, player, interactionHand, blockHitResult);
-                player.getAbilities().instabuild = previousInstabuildValue;
-                ItemStack resultItemStack = player.getItemInHand(interactionHand);
-                player.setItemInHand(interactionHand, itemstack);
-                if (interactionResult.consumesAction()) {
-                    if (resultItemStack.getItem() == Items.POWDER_SNOW_BUCKET) {
-                        return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addBlock(ItemStackUtil.copyStackWithSize(itemstack, 1), Blocks.POWDER_SNOW)));
-                    } else {
-                        return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addFluid(ItemStackUtil.copyStackWithSize(itemstack, 1), Services.FLUID.getContainedFluid(resultItemStack))));
-                    }
+                && BucketLibUtil.isEmpty(itemstack)
+                //check if bucket can hold cauldron content
+                && (cauldronBlock == Blocks.LAVA_CAULDRON && bucketItem.canHoldFluid(Fluids.LAVA)
+                        || cauldronBlock == Blocks.WATER_CAULDRON && bucketItem.canHoldFluid(Fluids.WATER)
+                        || cauldronBlock == Blocks.POWDER_SNOW_CAULDRON && bucketItem.canHoldBlock(Blocks.POWDER_SNOW)
+                )
+        ) {
+            //fake vanilla bucket using on cauldron
+            ItemStack stack = new ItemStack(Items.BUCKET);
+            player.setItemInHand(interactionHand, stack);
+            //deactivate instabuild for the fake interaction to avoid side effects like adding additional filled vanilla buckets into inventory
+            boolean previousInstabuildValue = player.getAbilities().instabuild;
+            player.getAbilities().instabuild = false;
+            InteractionResult interactionResult = hitBlockState.useItemOn(stack, level, player, interactionHand, blockHitResult);
+            player.getAbilities().instabuild = previousInstabuildValue;
+            ItemStack resultItemStack = player.getItemInHand(interactionHand);
+            player.setItemInHand(interactionHand, itemstack);
+            if (interactionResult.consumesAction()) {
+                if (resultItemStack.getItem() == Items.POWDER_SNOW_BUCKET) {
+                    return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addBlock(itemstack.copyWithCount(1), Blocks.POWDER_SNOW)));
+                } else {
+                    return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(itemstack, player, BucketLibUtil.addFluid(itemstack.copyWithCount(1), Services.FLUID.getContainedFluid(resultItemStack))));
                 }
             }
         }

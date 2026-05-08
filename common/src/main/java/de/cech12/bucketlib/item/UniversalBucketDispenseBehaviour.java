@@ -47,31 +47,29 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
         BlockPos pickupPosition = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
         BlockState blockState = level.getBlockState(pickupPosition);
         RegistryUtil.BucketBlock bucketBlock = RegistryUtil.getBucketBlock(blockState.getBlock());
-        if (bucketBlock != null) {
+        if (bucketBlock != null
+                && stack.getItem() instanceof UniversalBucketItem universalBucketItem
+                && universalBucketItem.canHoldBlock(bucketBlock.block())
+                && bucketBlock.block() instanceof BucketPickup bucketPickup
+        ) {
             //pickup block
-            if (stack.getItem() instanceof UniversalBucketItem universalBucketItem
-                    && universalBucketItem.canHoldBlock(bucketBlock.block())
-                    && bucketBlock.block() instanceof BucketPickup bucketPickup
-            ) {
-                ItemStack vanillaStack = bucketPickup.pickupBlock(null, level, pickupPosition, blockState);
-                if (!vanillaStack.isEmpty()) {
-                    if (stack.getCount() == 1) {
-                        return BucketLibUtil.addBlock(stack, bucketBlock.block());
-                    }
-                    ItemStack usedStack = stack.copy();
-                    usedStack.setCount(1);
-                    ItemStack resultStack = BucketLibUtil.addBlock(usedStack, bucketBlock.block());
-                    if (stack.getCount() == 1) {
-                        return resultStack;
-                    }
-                    if (!(source.blockEntity()).insertItem(resultStack).isEmpty()) {
-                        this.dispenseBehavior.dispense(source, resultStack);
-                    }
-                    ItemStack stackCopy = stack.copy();
-                    stackCopy.shrink(1);
-                    return stackCopy;
+            ItemStack vanillaStack = bucketPickup.pickupBlock(null, level, pickupPosition, blockState);
+            if (!vanillaStack.isEmpty()) {
+                if (stack.getCount() == 1) {
+                    return BucketLibUtil.addBlock(stack, bucketBlock.block());
                 }
-
+                ItemStack usedStack = stack.copy();
+                usedStack.setCount(1);
+                ItemStack resultStack = BucketLibUtil.addBlock(usedStack, bucketBlock.block());
+                if (stack.getCount() == 1) {
+                    return resultStack;
+                }
+                if (!(source.blockEntity()).insertItem(resultStack).isEmpty()) {
+                    this.dispenseBehavior.dispense(source, resultStack);
+                }
+                ItemStack stackCopy = stack.copy();
+                stackCopy.shrink(1);
+                return stackCopy;
             }
         }
         return Services.FLUID.dispenseFluidContainer(source, stack);
@@ -83,23 +81,24 @@ public class UniversalBucketDispenseBehaviour extends DefaultDispenseItemBehavio
         if (BucketLibUtil.containsBlock(stack)) {
             //place block
             Block placeBlock = BucketLibUtil.getBlock(stack);
-            if (placeBlock != null && placeBlock.asItem() instanceof DispensibleContainerItem dispensibleContainerItem) {
-                if (dispensibleContainerItem.emptyContents(null, level, placePosition, null)) {
-                    return BucketLibUtil.removeBlock(stack, level, null, true);
-                }
+            if (placeBlock != null
+                    && placeBlock.asItem() instanceof DispensibleContainerItem dispensibleContainerItem
+                    && dispensibleContainerItem.emptyContents(null, level, placePosition, null)
+            ) {
+                return BucketLibUtil.removeBlock(stack, level, null, true);
             }
-        } else if (BucketLibUtil.containsEntityType(stack)) {
+        } else if (BucketLibUtil.containsEntityType(stack)
+                && stack.getItem() instanceof UniversalBucketItem bucketItem
+        ) {
             //place entity
-            if (stack.getItem() instanceof UniversalBucketItem bucketItem) {
-                if (BucketLibUtil.containsFluid(stack)) {
-                    //fluid can only be placed correctly if the entity is not inside
-                    ItemStack stackWithoutEntity = BucketLibUtil.removeEntityData(stack.copy(), level, null, false);
-                    ItemStack fluidResult = Services.FLUID.dispenseFluidContainer(source, stackWithoutEntity);
-                    bucketItem.spawnEntityFromBucket(null, source.level(), stack, placePosition, false);
-                    return fluidResult;
-                } else {
-                    return bucketItem.spawnEntityFromBucket(null, source.level(), stack, placePosition, true);
-                }
+            if (BucketLibUtil.containsFluid(stack)) {
+                //fluid can only be placed correctly if the entity is not inside
+                ItemStack stackWithoutEntity = BucketLibUtil.removeEntityData(stack.copy(), level, null, false);
+                ItemStack fluidResult = Services.FLUID.dispenseFluidContainer(source, stackWithoutEntity);
+                bucketItem.spawnEntityFromBucket(null, source.level(), stack, placePosition, false);
+                return fluidResult;
+            } else {
+                return bucketItem.spawnEntityFromBucket(null, source.level(), stack, placePosition, true);
             }
         }
         return Services.FLUID.dispenseFluidContainer(source, stack);

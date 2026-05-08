@@ -101,7 +101,7 @@ public class BucketLibUtil {
                 if (breakSound != null && !player.isSilent()) {
                     player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), breakSound.value(), player.getSoundSource(), 0.8F, 0.8F + player.getRandom().nextFloat() * 0.4F, false);
                 }
-                ((LivingEntityAccessor) player).bucketlib_spawnItemParticles(initialStack, 5);
+                ((LivingEntityAccessor) player).bucketlib$spawnItemParticles(initialStack, 5);
             }
             player.awardStat(Stats.ITEM_BROKEN.get(initialStack.getItem()));
         }
@@ -129,7 +129,7 @@ public class BucketLibUtil {
     /**
      * Adds damage to the bucket if damaging is enabled. This method should only be used if there is no ServerLevel in the calling context.
      * Enchantments have no effect here!
-     * It is recommended to use {@link #damageByOne(ItemStack, ServerLevel, Player)}
+     * @deprecated It is recommended to use {@link #damageByOne(ItemStack, ServerLevel, Player)} instead.
      * @param stack item stack which gets damage
      */
     @Deprecated //find a way to get server level access in all calling contexts

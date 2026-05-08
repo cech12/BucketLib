@@ -3,7 +3,6 @@ package de.cech12.bucketlib.api.item;
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
-import de.cech12.bucketlib.util.ItemStackUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
 import de.cech12.bucketlib.util.WorldInteractionUtil;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -253,7 +252,7 @@ public class UniversalBucketItem extends Item {
                     InteractionResult interactionResult = fakeStack.use(level, player, interactionHand);
                     player.setItemInHand(interactionHand, itemstack);
                     if (interactionResult.consumesAction()) {
-                        return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(itemstack.copy(), player, BucketLibUtil.addBlock(ItemStackUtil.copyStackWithSize(itemstack, 1), bucketBlock.block())));
+                        return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(itemstack.copy(), player, BucketLibUtil.addBlock(itemstack.copyWithCount(1), bucketBlock.block())));
                     }
                 }
             } else {

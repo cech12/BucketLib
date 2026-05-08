@@ -24,6 +24,10 @@ public class BucketLibTags {
 
         public static final TagKey<EntityType<?>> MILKABLE = tag("milkable");
 
+        private EntityTypes() {
+            //avoid instantiating this class
+        }
+
         private static void init() {
             //empty method to be called to initialize the static fields
         }
@@ -38,6 +42,10 @@ public class BucketLibTags {
 
         public static final TagKey<Fluid> INFINITY_ENCHANTABLE = tag("infinity_enchantable");
         public static final TagKey<Fluid> NO_FLIPPING = tag("no_flipping");
+
+        private Fluids() {
+            //avoid instantiating this class
+        }
 
         private static void init() {
             //empty method to be called to initialize the static fields

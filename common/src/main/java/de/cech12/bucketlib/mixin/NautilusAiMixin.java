@@ -18,6 +18,10 @@ import java.util.function.Predicate;
 @Mixin({NautilusAi.class})
 public class NautilusAiMixin {
 
+	private NautilusAiMixin() {
+		//avoid instantiating this class
+	}
+
 	@Unique
 	private static final Predicate<ItemStack> BUCKETLIB_NAUTILUS_TEMPTATION = stack -> {
 		EntityType<?> entityType;

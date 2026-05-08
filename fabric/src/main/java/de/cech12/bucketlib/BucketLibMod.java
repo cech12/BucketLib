@@ -28,7 +28,7 @@ import java.util.List;
 
 public class BucketLibMod implements ModInitializer {
 
-    public static DataComponentType<FluidStorageData> STORAGE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, BucketLibComponents.FLUID_LOCATION,
+    public static final DataComponentType<FluidStorageData> STORAGE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, BucketLibComponents.FLUID_LOCATION,
             new DataComponentType.Builder<FluidStorageData>().persistent(FluidStorageData.CODEC).networkSynchronized(FluidStorageData.STREAM_CODEC).build()
     );
 

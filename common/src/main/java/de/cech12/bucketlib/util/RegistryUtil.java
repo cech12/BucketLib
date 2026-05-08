@@ -46,13 +46,13 @@ public class RegistryUtil {
         bucketBlocks = new ArrayList<>();
         bucketEntities = new ArrayList<>();
         for (Item item : Services.REGISTRY.getAllItems()) {
-            if (item instanceof SolidBucketItem bucket) {
-                if (bucketBlocks.stream().noneMatch(bucketBlock -> bucketBlock.block == bucket.getBlock())) {
-                    bucketBlocks.add(new BucketBlock(bucket.getBlock(), bucket));
-                }
+            if (item instanceof SolidBucketItem bucket
+                    && bucketBlocks.stream().noneMatch(bucketBlock -> bucketBlock.block == bucket.getBlock())
+            ) {
+                bucketBlocks.add(new BucketBlock(bucket.getBlock(), bucket));
             }
             if (item instanceof MobBucketItem bucket) {
-                EntityType<?> entityType = ((MobBucketItemAccessor) bucket).bucketlib_getEntityType();
+                EntityType<?> entityType = ((MobBucketItemAccessor) bucket).bucketlib$getEntityType();
                 if (entityType != null && bucketEntities.stream().noneMatch(bucketEntity -> bucketEntity.entityType == entityType)) {
                     bucketEntities.add(new BucketEntity(entityType, Services.BUCKET.getFluidOfBucketItem(bucket), bucket));
                 }

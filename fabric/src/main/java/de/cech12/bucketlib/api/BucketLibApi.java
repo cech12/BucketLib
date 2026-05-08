@@ -20,6 +20,10 @@ public class BucketLibApi {
 
     private static final Logger LOGGER = LogManager.getLogger(BucketLibApi.class);
 
+    private BucketLibApi() {
+        //avoid instantiating this class
+    }
+
     public static void registerBucket(Identifier bucketLocation) {
         Optional<Item> bucketItem = BuiltInRegistries.ITEM.getOptional(bucketLocation);
         if (bucketItem.isEmpty()) {
