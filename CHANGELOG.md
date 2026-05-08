@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [1.21.6-4.4.999.0] - 2026-05-08
+### Changed
+- downgraded to Minecraft 1.21.6 (Fabric 0.128.2+1.21.6, NeoForge 21.6.20-beta)
+- removed JEI support, because there is no version for 1.21.6
+
 ## [1.21.7-4.5.0.2] - 2026-04-22
 ### Fixed
 - fixed crash when starting a dedicated server
