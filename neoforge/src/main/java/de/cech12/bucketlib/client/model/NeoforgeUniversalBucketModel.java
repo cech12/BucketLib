@@ -35,6 +35,7 @@ import java.util.function.UnaryOperator;
 public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
 
     //workaround for https://github.com/neoforged/NeoForge/issues/3058
+    public static final RenderType BLOCK_ITEM_UNSORTED_TRANSLUCENT = NeoForgeRenderTypes.getUnsortedTranslucent(TextureAtlas.LOCATION_BLOCKS);
     public static final RenderType BLOCK_ITEM_UNSORTED_UNLIT_TRANSLUCENT = NeoForgeRenderTypes.getUnlitUnsortedTranslucent(TextureAtlas.LOCATION_BLOCKS);
 
     // Depth offsets to prevent Z-fighting
@@ -92,7 +93,7 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
         return new BakedQuad.MaterialInfo(
                 materialInfo.sprite(),
                 materialInfo.layer(),
-                BLOCK_ITEM_UNSORTED_UNLIT_TRANSLUCENT,
+                BLOCK_ITEM_UNSORTED_TRANSLUCENT,
                 materialInfo.tintIndex(),
                 materialInfo.shade(),
                 materialInfo.lightEmission(),

@@ -23,6 +23,7 @@ public class ClientEvents {
     //workaround for https://github.com/neoforged/NeoForge/issues/3058
     @SubscribeEvent
     static void registerRenderTypes(RegisterRenderBuffersEvent event) {
+        event.registerRenderBuffer(NeoforgeUniversalBucketModel.BLOCK_ITEM_UNSORTED_TRANSLUCENT);
         event.registerRenderBuffer(NeoforgeUniversalBucketModel.BLOCK_ITEM_UNSORTED_UNLIT_TRANSLUCENT);
     }
 
