@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "fabric:type": "bucketlib:entity",
+      "entity": "minecraft:salmon"
+    }
+  ],
+  "result": {
+    "id": "minecraft:salmon"
+  }
+}
