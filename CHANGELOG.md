@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [1.21.3-4.2.5.2] - 2026-05-09
+### Fixed
+- feeding Axolotls with a tropical fish from a modded bucket in creative mode removed the fish from the bucket (all loaders)
+- the infinity enchantment had major issues that were fixed (all loaders)
+- "bucketlib:entity" ingredient type initializing was broken (all loaders)
+
+### Changed
+- some small optimizations in the Fabric fluid handling (Fabric)
+
 ## [1.21.3-4.2.5.1] - 2026-04-22
 ### Fixed
 - lava bucket did not serve as fuel in furnace on dedicated server (Fabric)
