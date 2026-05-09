@@ -21,6 +21,7 @@ import net.minecraft.world.level.material.Fluids;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 @SuppressWarnings("unused")
 @REIPluginClient
@@ -55,7 +56,8 @@ public class BucketLibReiClientPlugin implements REIClientPlugin {
                         registry.add(new DefaultAnvilDisplay(
                                 List.of(EntryIngredients.of(bucket), EntryIngredients.of(EnchantedBookItem.createForEnchantment(data))),
                                 List.of(EntryIngredients.of(enchantedBucket)),
-                                Optional.empty()));
+                                Optional.empty(),
+                                OptionalInt.of(4)));
                     }
                 }
             }

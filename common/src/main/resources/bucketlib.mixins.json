@@ -6,6 +6,7 @@
   "mixins": [
     "AxolotlAiMixin",
     "AxolotlMixin",
+    "EnchantmentMixin",
     "ItemStackMixin",
     "LivingEntityAccessor",
     "MobBucketItemAccessor"
