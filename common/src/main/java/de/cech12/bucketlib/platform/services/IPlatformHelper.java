@@ -4,7 +4,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.Level;
 
 /**
  * Common platform helper service interface.
@@ -41,13 +40,6 @@ public interface IPlatformHelper {
     default String getEnvironmentName() {
         return isDevelopmentEnvironment() ? "development" : "production";
     }
-
-    /**
-     * Gets the current level.
-     *
-     * @return the current level.
-     */
-    Level getCurrentLevel();
 
     /**
      * Gets the TOOLS_AND_UTILITIES creative tab.
