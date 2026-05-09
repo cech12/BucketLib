@@ -11,6 +11,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,7 +42,7 @@ public abstract class AxolotlMixin extends Animal {
 	private void usePlayerItemProxy(Player player, InteractionHand hand, ItemStack stack, CallbackInfo ci) {
 		if (this.isFood(stack) && stack.getItem() instanceof UniversalBucketItem) {
 			ServerLevel serverLevel = (player.level() instanceof ServerLevel) ? (ServerLevel) player.level() : null;
-			player.setItemInHand(hand, BucketLibUtil.removeEntityData(stack, serverLevel, player, true));
+			player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, BucketLibUtil.removeEntityData(stack, serverLevel, player, true)));
 			ci.cancel();
 		}
 	}
