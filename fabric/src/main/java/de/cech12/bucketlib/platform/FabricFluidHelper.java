@@ -1,9 +1,7 @@
 package de.cech12.bucketlib.platform;
 
-import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
-import de.cech12.bucketlib.item.FluidStorageData;
 import de.cech12.bucketlib.item.StackItemContext;
 import de.cech12.bucketlib.item.UniversalBucketFluidStorage;
 import de.cech12.bucketlib.platform.services.IFluidHelper;
@@ -121,11 +119,7 @@ public class FabricFluidHelper implements IFluidHelper {
                     transaction.commit();
                 }
             }
-            ItemStack resultStack = context.getItemVariant().toStack();
-            if (!resultStack.isEmpty()) {
-                resultStack.set(BucketLibMod.STORAGE, new FluidStorageData(FluidVariant.of(fluid), FluidConstants.BUCKET));
-            }
-            return resultStack;
+            return context.getItemVariant().toStack();
         }
         return stack.copy();
     }
@@ -141,11 +135,7 @@ public class FabricFluidHelper implements IFluidHelper {
                 }
                 transaction.commit();
             }
-            ItemStack resultStack = context.getItemVariant().toStack();
-            if (!resultStack.isEmpty()) {
-                resultStack.remove(BucketLibMod.STORAGE);
-            }
-            return resultStack;
+            return context.getItemVariant().toStack();
         }
         return stack.copy();
     }
