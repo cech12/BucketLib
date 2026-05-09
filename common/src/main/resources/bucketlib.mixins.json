@@ -7,6 +7,7 @@
     "AxolotlAiMixin",
     "AxolotlMixin",
     "CraftingRecipeMixin",
+    "EnchantmentMixin",
     "ItemStackMixin",
     "LivingEntityAccessor",
     "MobBucketItemAccessor"

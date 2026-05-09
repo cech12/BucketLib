@@ -8,8 +8,6 @@ import de.cech12.bucketlib.platform.Services;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -120,6 +118,26 @@ public class BucketLibUtil {
      * @return boolean
      */
     public static boolean isAffectedByInfinityEnchantment(@NotNull ItemStack itemStack) {
+        return isInfinityEnchantmentAllowed(itemStack) && hasInfinityEnchantment(itemStack);
+    }
+
+    /**
+     * Checks if the given bucket is enchanted with the Infinity enchantment.
+     * @param itemStack checked item stack
+     * @return boolean
+     */
+    public static boolean hasInfinityEnchantment(@NotNull ItemStack itemStack) {
+        return itemStack.getEnchantments().keySet().stream()
+                .filter(enchantment -> enchantment.is(Enchantments.INFINITY))
+                .anyMatch(enchantment -> EnchantmentHelper.getItemEnchantmentLevel(enchantment, itemStack) > 0);
+    }
+
+    /**
+     * Checks if the given bucket is allowed to be enchanted with Infinity enchantment.
+     * @param itemStack checked item stack
+     * @return boolean
+     */
+    public static boolean isInfinityEnchantmentAllowed(@NotNull ItemStack itemStack) {
         if (!Services.CONFIG.isInfinityEnchantmentEnabled()) {
             return false;
         }
@@ -127,7 +145,6 @@ public class BucketLibUtil {
             Fluid fluid = getFluid(itemStack);
             return fluid != Fluids.EMPTY
                     && fluid.defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)
-                    && EnchantmentHelper.getItemEnchantmentLevel(VanillaRegistries.createLookup().lookup(Registries.ENCHANTMENT).get().getOrThrow(Enchantments.INFINITY), itemStack) > 0
                     && bucket.canHoldFluid(fluid);
         }
         return false;
