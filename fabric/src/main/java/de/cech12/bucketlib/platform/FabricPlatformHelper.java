@@ -1,6 +1,5 @@
 package de.cech12.bucketlib.platform;
 
-import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.platform.services.IPlatformHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
@@ -9,7 +8,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.Level;
 
 import java.util.Objects;
 
@@ -31,11 +29,6 @@ public class FabricPlatformHelper implements IPlatformHelper {
     @Override
     public boolean isDevelopmentEnvironment() {
         return FabricLoader.getInstance().isDevelopmentEnvironment();
-    }
-
-    @Override
-    public Level getCurrentLevel() {
-        return BucketLibMod.SERVER_LEVEL;
     }
 
     @Override
