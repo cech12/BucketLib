@@ -69,6 +69,9 @@ public class UniversalBucketFluidStorage extends SingleFluidStorage {
         if (maxAmount >= amount && (extractedVariant.equals(variant)) && canExtract(extractedVariant)) {
             ItemStack stack = context.getItemVariant().toStack();
             if (stack.getItem() instanceof UniversalBucketItem bucketItem) {
+                if (BucketLibUtil.isAffectedByInfinityEnchantment(stack)) {
+                    return amount;
+                }
                 if (!bucketItem.isCracked(stack)) {
                     if (BucketLibUtil.containsContent(stack)) { //remove milk content tag
                         BucketLibUtil.removeContentNoCopy(stack, null, null, false);
