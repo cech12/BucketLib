@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [1.21.6-4.4.999.1] - 2026-05-10
+### Fixed
+- feeding Axolotls with a tropical fish from a modded bucket in creative mode removed the fish from the bucket (all loaders)
+- the infinity enchantment functionality had major issues that were fixed (all loaders)
+- "bucketlib:entity" ingredient type initializing was broken (all loaders)
+
+### Changed
+- some small optimizations in the Fabric fluid handling (Fabric)
+
 ## [1.21.6-4.4.999.0] - 2026-05-08
 ### Changed
 - downgraded to Minecraft 1.21.6 (Fabric 0.128.2+1.21.6, NeoForge 21.6.20-beta)
