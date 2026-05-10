@@ -22,7 +22,7 @@ dependencies {
     }
     modImplementation("com.terraformersmc:modmenu:${mod_menu_version}")
 
-    //modCompileOnlyApi("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+    modCompileOnlyApi("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
     //modRuntimeOnly("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}")
 
     modCompileOnlyApi("me.shedaniel:RoughlyEnoughItems-api-fabric:$rei_version")
