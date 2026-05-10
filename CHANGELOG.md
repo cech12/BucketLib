@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [1.21.11-4.7.2.0] - 2026-05-10
+### Added
+- re-added JEI support for Fabric (27.4.0.22) (Fabric)
+
+### Fixed
+- "bucketlib:entity" ingredient type initializing was broken (all loaders)
+
+### Changed
+- some small optimizations in the Fabric fluid handling (Fabric)
+
 ## [1.21.11-4.7.1.0] - 2026-05-07
 ### Added
 - added the possibility to repair a damaged bucket with another bucket (all loaders) (thanks to bixqa for the idea) https://github.com/cech12/WoodenBucket/issues/34
