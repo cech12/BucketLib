@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [26.1-5.0.1.4] - 2026-05-23
+### Fixed
+- fixed startup warning about missing mixin refmap (all loaders)
+
 ## [26.1-5.0.1.3] - 2026-05-10
 ### Changed
 - some small optimizations in the Fabric fluid handling (Fabric)
