@@ -1,5 +1,5 @@
 package de.cech12.bucketlibtest;
-/*
+
 import de.cech12.bucketlib.api.BucketLibApi;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import net.fabricmc.api.ModInitializer;
@@ -79,4 +79,3 @@ public class BucketLibTestMod implements ModInitializer {
     }
 
 }
- */

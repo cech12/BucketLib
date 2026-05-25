@@ -18,6 +18,12 @@ dependencies {
             attribute(loaderAttribute, 'common')
         }
     }
+    testCompileOnly(project(':common')) {
+        def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
+        attributes {
+            attribute(loaderAttribute, 'common')
+        }
+    }
     commonJava project(path: ':common', configuration: 'commonJava')
     commonResources project(path: ':common', configuration: 'commonResources')
 }

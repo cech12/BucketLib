@@ -13,7 +13,6 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-
     implementation("me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
@@ -39,7 +38,7 @@ loom {
             setConfigName('Fabric Client')
             ideConfigGenerated(true)
             runDir('runs/client')
-            //source sourceSets.test
+            source sourceSets.test
         }
         server {
             server()

@@ -1,10 +1,10 @@
-package de.cech12.bucketlib;
-/*
+package de.cech12.bucketlibtest;
+
 import de.cech12.bucketlib.api.BucketLibApi;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -29,7 +29,7 @@ public class BucketLibTestMod {
     public static final String MOD_ID = "bucketlibtest";
     public static final boolean MILK_ENABLED = Boolean.parseBoolean(System.getProperty("bucketlibtest.milkEnabled", "false"));
 
-    public static final TagKey<Fluid> WATER_TAG = TagKey.create(BuiltInRegistries.FLUID.key(), ResourceLocation.fromNamespaceAndPath(MOD_ID, "water"));
+    public static final TagKey<Fluid> WATER_TAG = TagKey.create(BuiltInRegistries.FLUID.key(), Identifier.fromNamespaceAndPath(MOD_ID, "water"));
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, MOD_ID);
 
@@ -51,7 +51,7 @@ public class BucketLibTestMod {
     public static final DeferredHolder<Item, ?> FREEZING_BUCKET = registerBucket("freezing_bucket", new UniversalBucketItem.Properties().durability(20).freezingTemperature(500).freezingBlocks(Collections.singletonList(Blocks.POWDER_SNOW)));
 
     private static DeferredHolder<Item, ?> registerBucket(String name, UniversalBucketItem.Properties properties) {
-        return ITEMS.register(name, () -> new UniversalBucketItem(ResourceKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.fromNamespaceAndPath(MOD_ID, name)), properties));
+        return ITEMS.register(name, () -> new UniversalBucketItem(ResourceKey.create(BuiltInRegistries.ITEM.key(), Identifier.fromNamespaceAndPath(MOD_ID, name)), properties));
     }
 
     public BucketLibTestMod(IEventBus modEventBus) {
@@ -69,4 +69,3 @@ public class BucketLibTestMod {
     }
 
 }
- */
