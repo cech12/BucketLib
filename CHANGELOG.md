@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [26.1-5.0.2.1] - 2026-05-31
+### Fixed
+- fixed that empty buckets that could not be filled with water could be placed in the fuel slot of furnaces (all loaders)
+
 ## [26.1-5.0.2.0] - 2026-05-25
 ### Added
 - added the possibility to fill empty buckets with water from wet sponges in furnaces (all loaders) (thanks to bixqa for the idea) #79

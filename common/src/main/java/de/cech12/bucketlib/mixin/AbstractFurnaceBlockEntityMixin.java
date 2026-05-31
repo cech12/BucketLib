@@ -40,8 +40,8 @@ public abstract class AbstractFurnaceBlockEntityMixin {
 
     @Inject(at = @At("RETURN"), method = "canPlaceItem", cancellable = true)
     public void canPlaceItemProxy(final int slot, final ItemStack itemStack, CallbackInfoReturnable<Boolean> cir) {
-        if (!cir.getReturnValue() && slot == 1 && !itemStack.isEmpty() && itemStack.getItem() instanceof UniversalBucketItem
-                && BucketLibUtil.isEmpty(itemStack) && getItems().get(1).getItem() != itemStack.getItem()
+        if (!cir.getReturnValue() && slot == 1 && !itemStack.isEmpty() && itemStack.getItem() instanceof UniversalBucketItem bucketItem
+                && BucketLibUtil.isEmpty(itemStack) && bucketItem.canHoldFluid(Fluids.WATER) && getItems().get(1).getItem() != itemStack.getItem()
         ) {
             cir.setReturnValue(true);
         }
