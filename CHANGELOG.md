@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [26.1-5.0.3.0] - 2026-06-05
+### Added
+- all bucketable entity textures of Aquaculture 2 mod (all loaders)
+
 ## [26.1-5.0.2.1] - 2026-05-31
 ### Fixed
 - fixed that empty buckets that could not be filled with water could be placed in the fuel slot of furnaces (all loaders)
