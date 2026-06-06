@@ -279,6 +279,9 @@ public class BucketLibUtil {
     }
 
     public static ItemStack addFluid(ItemStack itemStack, Fluid fluid) {
+        if (fluid == Fluids.EMPTY) {
+            return itemStack.copy();
+        }
         return Services.FLUID.addFluid(itemStack, fluid);
     }
 
