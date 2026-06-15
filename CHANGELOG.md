@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [26.1.2-5.1.0.0] - 2026-06-15
+### Changed
+- Updated to Minecraft 26.1.2 (Fabric 0.150.0+26.1.2, NeoForge 26.1.2.71)
+- Updated Cloth Config support (26.1.154) (Fabric/Quilt)
+- Updated ModMenu support (18.0.0-beta.1) (Fabric/Quilt)
+- Updated JEI support (29.6.2.31) (NeoForge, Fabric/Quilt)
+- Re-added REI support (26.1.818) (NeoForge, Fabric/Quilt) #81
+
 ## [26.1-5.0.4.1] - 2026-06-06
 ### Fixed
 - fixed crash in creative mode if a mod has bucketable entities without a fluid like Alex's Mobs Cosmic Cod (all loaders)

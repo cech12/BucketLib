@@ -24,17 +24,6 @@ pluginManagement {
                 includeGroupAndSubgroups("org.spongepowered")
             }
         }
-        //exclusiveContent {
-        //    forRepository {
-        maven {
-            name = 'Forge'
-            url = uri('https://maven.minecraftforge.net')
-        }
-        //    }
-        //    filter {
-        //        includeGroupAndSubgroups('net.minecraftforge')
-        //    }
-        //}
         maven {
             // location of the maven that hosts JEI files since January 2023
             name = "Jared's maven"
@@ -44,6 +33,11 @@ pluginManagement {
             // location of a maven mirror for JEI files, as a fallback
             name = "ModMaven"
             url = "https://modmaven.dev"
+        }
+        maven {
+            // REI & Architectury
+            name = "SheDaniel's maven"
+            url = "https://maven.shedaniel.me/"
         }
         mavenLocal()
     }
