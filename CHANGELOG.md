@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [26.1.2-5.1.0.1] - 2026-09-03
 ### Fixed
 - fixed that burn duration of buckets could not be calculated on clients when connected to servers (thanks to Fressikus and benbenlaw for the report) #86 https://github.com/cech12/CeramicBucket/issues/100
+- buckets and entities like sulfur cubes could be duplicated when interacting with a stack of multiple empty buckets (all loaders)
 
 ## [26.1.2-5.1.0.0] - 2026-06-15
 ### Changed

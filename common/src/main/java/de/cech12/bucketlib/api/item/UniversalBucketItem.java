@@ -345,7 +345,7 @@ public class UniversalBucketItem extends Item {
                 && entity.isAlive()
                 && entityBucketFluid == containedFluid) {
             entity.playSound(entity.getPickupSound(), 1.0F, 1.0F);
-            ItemStack filledItemStack = BucketLibUtil.addEntityType(itemStack, entity.getType());
+            ItemStack filledItemStack = BucketLibUtil.addEntityType(itemStack.copyWithCount(1), entity.getType());
             entity.saveToBucketTag(filledItemStack);
             ItemStack handItemStack = ItemUtils.createFilledResult(itemStack, player, filledItemStack, false);
             player.setItemInHand(interactionHand, handItemStack);
