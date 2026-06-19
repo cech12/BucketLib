@@ -30,7 +30,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.LivingEntity;
@@ -89,22 +88,22 @@ public class FabricFluidHelper implements IFluidHelper {
         Direction dispenserFacing = source.state().getValue(DispenserBlock.FACING);
         BlockPos pos = source.pos().relative(dispenserFacing);
         if (BucketLibUtil.isEmpty(stack)) {
-            Tuple<Boolean, ItemStack> result = tryPickUpFluid(stack, null, level, null, pos, dispenserFacing);
-            if (result.getA()) {
+            FluidInteractionResult result = tryPickUpFluid(stack, null, level, null, pos, dispenserFacing);
+            if (result.success()) {
                 if (stack.getCount() == 1) {
-                    return result.getB();
+                    return result.stack();
                 }
-                if (!(source.blockEntity()).insertItem(result.getB()).isEmpty()) {
-                    new DefaultDispenseItemBehavior().dispense(source, result.getB());
+                if (!(source.blockEntity()).insertItem(result.stack()).isEmpty()) {
+                    new DefaultDispenseItemBehavior().dispense(source, result.stack());
                 }
                 ItemStack stackCopy = stack.copy();
                 stackCopy.shrink(1);
                 return stackCopy;
             }
         } else {
-            Tuple<Boolean, ItemStack> result = tryPlaceFluid(stack, null, level, null, pos);
-            if (result.getA()) {
-                return result.getB();
+            FluidInteractionResult result = tryPlaceFluid(stack, null, level, null, pos);
+            if (result.success()) {
+                return result.stack();
             }
         }
         return stack;
@@ -155,11 +154,11 @@ public class FabricFluidHelper implements IFluidHelper {
     }
 
     @Override
-    public Tuple<Boolean, ItemStack> tryPickUpFluid(ItemStack stack, @Nullable Player player, Level level, InteractionHand interactionHand, BlockPos pos, Direction direction) {
+    public FluidInteractionResult tryPickUpFluid(ItemStack stack, @Nullable Player player, Level level, InteractionHand interactionHand, BlockPos pos, Direction direction) {
         //Fluid Storage interaction
         Storage<FluidVariant> storage = FluidStorage.SIDED.find(level, pos, direction.getOpposite());
         if (storage != null && player != null && FluidStorageUtil.interactWithFluidStorage(storage, player, interactionHand)) {
-            return new Tuple<>(true, player.getItemInHand(interactionHand).copy());
+            return new FluidInteractionResult(true, player.getItemInHand(interactionHand).copy());
         }
         //Fluid Source / Waterlogged Block interaction
         BlockState state = level.getBlockState(pos);
@@ -174,13 +173,13 @@ public class FabricFluidHelper implements IFluidHelper {
                     ItemStack usedStack = stack.copy();
                     usedStack.setCount(1);
                     usedStack = BucketLibUtil.addFluid(usedStack, fluid);
-                    return new Tuple<>(true, usedStack);
+                    return new FluidInteractionResult(true, usedStack);
                 }
                 if (!level.isClientSide() && player != null) {
                     ((ServerPlayer) player).connection.send(new ClientboundSetActionBarTextPacket(Component.literal("This fluid cannot be hold by the used fluid container.")));
                 }
                 level.setBlock(pos, state, 3);
-                return new Tuple<>(false, stack);
+                return new FluidInteractionResult(false, stack);
             }
             //show incompatibility message and reset the block state
             if (!fullVanillaBucket.isEmpty()) {
@@ -189,18 +188,18 @@ public class FabricFluidHelper implements IFluidHelper {
                     BucketLib.LOG.warn("{} is not an instance of BucketItem and is incompatible with BucketLib.", fullVanillaBucket.getItem());
                 }
                 level.setBlock(pos, state, 3);
-                return new Tuple<>(false, stack);
+                return new FluidInteractionResult(false, stack);
             }
         }
-        return new Tuple<>(false, stack);
+        return new FluidInteractionResult(false, stack);
     }
 
     @Override
-    public Tuple<Boolean, ItemStack> tryPlaceFluid(ItemStack stack, @Nullable Player player, Level level, InteractionHand interactionHand, BlockPos pos) {
+    public FluidInteractionResult tryPlaceFluid(ItemStack stack, @Nullable Player player, Level level, InteractionHand interactionHand, BlockPos pos) {
         //Fluid Storage interaction
         Storage<FluidVariant> storage = FluidStorage.SIDED.find(level, pos, null);
         if (storage != null && player != null && FluidStorageUtil.interactWithFluidStorage(storage, player, interactionHand)) {
-            return new Tuple<>(true, player.getItemInHand(interactionHand).copy());
+            return new FluidInteractionResult(true, player.getItemInHand(interactionHand).copy());
         }
         Fluid fluid = BucketLibUtil.getFluid(stack);
         ServerLevel serverLevel = (level instanceof ServerLevel) ? (ServerLevel) level : null;
@@ -213,7 +212,7 @@ public class FabricFluidHelper implements IFluidHelper {
             for (int i = 0; i < 8; ++i) {
                 level.addParticle(ParticleTypes.LARGE_SMOKE, (double) x + level.getRandom().nextDouble(), (double) y + level.getRandom().nextDouble(), (double) z + level.getRandom().nextDouble(), 0.0, 0.0, 0.0);
             }
-            return new Tuple<>(true, BucketLibUtil.removeFluid(stack, serverLevel, player));
+            return new FluidInteractionResult(true, BucketLibUtil.removeFluid(stack, serverLevel, player));
         }
         //waterlogged Block interaction
         BlockState state = level.getBlockState(pos);
@@ -221,16 +220,16 @@ public class FabricFluidHelper implements IFluidHelper {
         if (block instanceof LiquidBlockContainer liquidBlockContainer && liquidBlockContainer.canPlaceLiquid(player, level, pos, state, fluid)) {
             liquidBlockContainer.placeLiquid(level, pos, state, fluid.defaultFluidState());
             level.playSound(player, pos, FluidVariantAttributes.getEmptySound(FluidVariant.of(fluid)), SoundSource.BLOCKS, 1.0F, 1.0F);
-            return new Tuple<>(true, BucketLibUtil.removeFluid(stack, serverLevel, player));
+            return new FluidInteractionResult(true, BucketLibUtil.removeFluid(stack, serverLevel, player));
         }
         //air / replaceable block interaction
         if (state.isAir() || state.canBeReplaced(fluid) || (!state.getFluidState().isEmpty() && !(block instanceof LiquidBlockContainer))) {
             if (level.setBlock(pos, fluid.defaultFluidState().createLegacyBlock(), 11) || state.getFluidState().isSource()) {
                 level.playSound(player, pos, FluidVariantAttributes.getEmptySound(FluidVariant.of(fluid)), SoundSource.BLOCKS, 1.0F, 1.0F);
-                return new Tuple<>(true, BucketLibUtil.removeFluid(stack, serverLevel, player));
+                return new FluidInteractionResult(true, BucketLibUtil.removeFluid(stack, serverLevel, player));
             }
         }
-        return new Tuple<>(false, stack);
+        return new FluidInteractionResult(false, stack);
     }
 
     @Override

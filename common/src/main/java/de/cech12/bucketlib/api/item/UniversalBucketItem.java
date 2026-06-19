@@ -2,10 +2,11 @@ package de.cech12.bucketlib.api.item;
 
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.platform.Services;
+import de.cech12.bucketlib.platform.services.IFluidHelper;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
 import de.cech12.bucketlib.util.WorldInteractionUtil;
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
@@ -16,15 +17,15 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Bucketable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Bucketable;
+import net.minecraft.world.entity.monster.cubemob.SulfurCube;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -53,7 +54,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
+import java.util.function.IntSupplier;
 
 public class UniversalBucketItem extends Item {
 
@@ -137,6 +139,16 @@ public class UniversalBucketItem extends Item {
         Integer minTemperature = getMinTemperature();
         return (maxTemperature == null || fluidTemperature <= maxTemperature)
                 && (minTemperature == null || fluidTemperature >= minTemperature);
+    }
+
+    public boolean canHoldEntity(Entity entity) {
+        if (canHoldEntity(entity.getType())) {
+            if (entity instanceof SulfurCube sulfurCube) {
+                return !sulfurCube.isBaby() && !sulfurCube.isPrimed();
+            }
+            return true;
+        }
+        return false;
     }
 
     public boolean canHoldEntity(EntityType<?> entityType) {
@@ -239,9 +251,9 @@ public class UniversalBucketItem extends Item {
                 if (caldronInteractionResult.consumesAction()) {
                     return caldronInteractionResult;
                 }
-                Tuple<Boolean, ItemStack> result = Services.FLUID.tryPickUpFluid(BucketLibUtil.removeEntityData(itemstack, serverLevel, player, false), player, level, interactionHand, hitBlockPos, hitDirection);
-                if (result.getA()) {
-                    return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(itemstack, player, result.getB()));
+                IFluidHelper.FluidInteractionResult result = Services.FLUID.tryPickUpFluid(BucketLibUtil.removeEntityData(itemstack, serverLevel, player, false), player, level, interactionHand, hitBlockPos, hitDirection);
+                if (result.success()) {
+                    return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(itemstack, player, result.stack()));
                 }
                 //pickup block interaction
                 RegistryUtil.BucketBlock bucketBlock = RegistryUtil.getBucketBlock(hitBlockState.getBlock());
@@ -265,13 +277,13 @@ public class UniversalBucketItem extends Item {
                     //try to place fluid at hit block and then at the relative block
                     for (BlockPos pos : Arrays.asList(hitBlockPos, relativeBlockPos)) {
                         //remove entity to be able to use tryPlaceFluid method
-                        Tuple<Boolean, ItemStack> result = Services.FLUID.tryPlaceFluid(BucketLibUtil.removeEntityData(itemstack, serverLevel, player, false), player, level, interactionHand, pos);
-                        if (result.getA()) {
+                        IFluidHelper.FluidInteractionResult result = Services.FLUID.tryPlaceFluid(BucketLibUtil.removeEntityData(itemstack, serverLevel, player, false), player, level, interactionHand, pos);
+                        if (result.success()) {
                             if (BucketLibUtil.containsEntityType(itemstack)) {
                                 //place entity if exists
                                 spawnEntityFromBucket(player, level, itemstack, pos, false);
                             }
-                            return InteractionResult.SUCCESS.heldItemTransformedTo(BucketLibUtil.createEmptyResult(itemstack, player, result.getB(), interactionHand));
+                            return InteractionResult.SUCCESS.heldItemTransformedTo(BucketLibUtil.createEmptyResult(itemstack, player, result.stack(), interactionHand));
                         }
                     }
                 } else if (BucketLibUtil.containsEntityType(itemstack)) {
@@ -323,7 +335,7 @@ public class UniversalBucketItem extends Item {
     @Override
     @NotNull
     public InteractionResult interactLivingEntity(@NotNull ItemStack itemStack, @NotNull Player player, @NotNull LivingEntity entity, @NotNull InteractionHand interactionHand) {
-        if (entity instanceof Bucketable && !BucketLibUtil.containsEntityType(itemStack) && canHoldEntity(entity.getType())) {
+        if (entity instanceof Bucketable && !BucketLibUtil.containsEntityType(itemStack) && canHoldEntity(entity)) {
             InteractionResult result = this.pickupEntityWithBucket(player, interactionHand, (LivingEntity & Bucketable) entity);
             if (result.consumesAction()) {
                 return result;
@@ -432,16 +444,16 @@ public class UniversalBucketItem extends Item {
         return getCraftingRemainder((ItemInstance) itemStack);
     }
 
-    private boolean getBooleanProperty(Supplier<Boolean> config, boolean defaultValue) {
+    private boolean getBooleanProperty(BooleanSupplier config, boolean defaultValue) {
         if (config != null) {
-            return config.get();
+            return config.getAsBoolean();
         }
         return defaultValue;
     }
 
-    private Integer getIntProperty(Supplier<Integer> config, Integer defaultValue) {
+    private Integer getIntProperty(IntSupplier config, Integer defaultValue) {
         if (config != null) {
-            return config.get();
+            return config.getAsInt();
         }
         return defaultValue;
     }
@@ -557,16 +569,16 @@ public class UniversalBucketItem extends Item {
         int maxStackSize = 16;
 
         int durability = 0;
-        Supplier<Integer> durabilityConfig = null;
+        IntSupplier durabilityConfig = null;
 
         Integer maxTemperature = null;
-        Supplier<Integer> maxTemperatureConfig = null;
+        IntSupplier maxTemperatureConfig = null;
         Integer upperCrackingTemperature = null;
-        Supplier<Integer> upperBreakTemperatureConfig = null;
+        IntSupplier upperBreakTemperatureConfig = null;
         Integer lowerCrackingTemperature = null;
-        Supplier<Integer> lowerCrackingTemperatureConfig = null;
+        IntSupplier lowerCrackingTemperatureConfig = null;
         Integer minTemperature = null;
-        Supplier<Integer> minTemperatureConfig = null;
+        IntSupplier minTemperatureConfig = null;
 
         List<Fluid> crackingFluids = null;
         TagKey<Fluid> crackingFluidsTag = null;
@@ -576,31 +588,31 @@ public class UniversalBucketItem extends Item {
         TagKey<Fluid> allowedFluidsTag = null;
 
         Integer burningTemperature = null;
-        Supplier<Integer> burningTemperatureConfig = null;
+        IntSupplier burningTemperatureConfig = null;
         List<Fluid> burningFluids = null;
         TagKey<Fluid> burningFluidsTag = null;
         List<Block> burningBlocks = null;
         TagKey<Block> burningBlocksTag = null;
 
         Integer freezingTemperature = null;
-        Supplier<Integer> freezingTemperatureConfig = null;
+        IntSupplier freezingTemperatureConfig = null;
         List<Fluid> freezingFluids = null;
         TagKey<Fluid> freezingFluidsTag = null;
         List<Block> freezingBlocks = null;
         TagKey<Block> freezingBlocksTag = null;
 
         boolean milking = true;
-        Supplier<Boolean> milkingConfig = null;
+        BooleanSupplier milkingConfig = null;
 
         boolean entityObtaining = true;
-        Supplier<Boolean> entityObtainingConfig = null;
+        BooleanSupplier entityObtainingConfig = null;
         List<EntityType<?>> deniedEntities = null;
         TagKey<EntityType<?>> deniedEntitiesTag = null;
         List<EntityType<?>> allowedEntities = null;
         TagKey<EntityType<?>> allowedEntitiesTag = null;
 
         boolean blockObtaining = true;
-        Supplier<Boolean> blockObtainingConfig = null;
+        BooleanSupplier blockObtainingConfig = null;
         List<Block> deniedBlocks = null;
         TagKey<Block> deniedBlocksTag = null;
         List<Block> allowedBlocks = null;
@@ -641,7 +653,7 @@ public class UniversalBucketItem extends Item {
          * @param durabilityConfig supplier of the configuration value
          * @return Properties object
          */
-        public Properties durability(Supplier<Integer> durabilityConfig) {
+        public Properties durability(IntSupplier durabilityConfig) {
             this.durabilityConfig = durabilityConfig;
             return this;
         }
@@ -651,7 +663,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties maxTemperature(Supplier<Integer> maxTemperatureConfig) {
+        public Properties maxTemperature(IntSupplier maxTemperatureConfig) {
             this.maxTemperatureConfig = maxTemperatureConfig;
             return this;
         }
@@ -661,7 +673,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties upperCrackingTemperature(Supplier<Integer> upperCrackingTemperatureConfig) {
+        public Properties upperCrackingTemperature(IntSupplier upperCrackingTemperatureConfig) {
             this.upperBreakTemperatureConfig = upperCrackingTemperatureConfig;
             return this;
         }
@@ -671,7 +683,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties lowerCrackingTemperature(Supplier<Integer> lowerCrackingTemperatureConfig) {
+        public Properties lowerCrackingTemperature(IntSupplier lowerCrackingTemperatureConfig) {
             this.lowerCrackingTemperatureConfig = lowerCrackingTemperatureConfig;
             return this;
         }
@@ -681,7 +693,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties minTemperature(Supplier<Integer> minTemperatureConfig) {
+        public Properties minTemperature(IntSupplier minTemperatureConfig) {
             this.minTemperatureConfig = minTemperatureConfig;
             return this;
         }
@@ -701,7 +713,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties burningTemperature(Supplier<Integer> burningTemperatureConfig) {
+        public Properties burningTemperature(IntSupplier burningTemperatureConfig) {
             this.burningTemperatureConfig = burningTemperatureConfig;
             return this;
         }
@@ -731,7 +743,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties freezingTemperature(Supplier<Integer> freezingTemperatureConfig) {
+        public Properties freezingTemperature(IntSupplier freezingTemperatureConfig) {
             this.freezingTemperatureConfig = freezingTemperatureConfig;
             return this;
         }
@@ -781,7 +793,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties milking(Supplier<Boolean> milkingConfig) {
+        public Properties milking(BooleanSupplier milkingConfig) {
             this.milkingConfig = milkingConfig;
             return this;
         }
@@ -791,7 +803,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties entityObtaining(Supplier<Boolean> entityObtainingConfig) {
+        public Properties entityObtaining(BooleanSupplier entityObtainingConfig) {
             this.entityObtainingConfig = entityObtainingConfig;
             return this;
         }
@@ -821,7 +833,7 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
-        public Properties blockObtaining(Supplier<Boolean> blockObtainingConfig) {
+        public Properties blockObtaining(BooleanSupplier blockObtainingConfig) {
             this.blockObtainingConfig = blockObtainingConfig;
             return this;
         }

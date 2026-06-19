@@ -7,7 +7,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -55,10 +54,12 @@ public interface IFluidHelper {
 
     ItemStack removeFluid(ItemStack stack, ServerLevel level, @Nullable Player player);
 
-    Tuple<Boolean, ItemStack> tryPickUpFluid(ItemStack stack, Player player, Level level, InteractionHand interactionHand, BlockPos pos, Direction direction);
+    FluidInteractionResult tryPickUpFluid(ItemStack stack, Player player, Level level, InteractionHand interactionHand, BlockPos pos, Direction direction);
 
-    Tuple<Boolean, ItemStack> tryPlaceFluid(ItemStack stack, Player player, Level level, InteractionHand interactionHand, BlockPos pos);
+    FluidInteractionResult tryPlaceFluid(ItemStack stack, Player player, Level level, InteractionHand interactionHand, BlockPos pos);
 
     void curePotionEffects(LivingEntity entity, ItemStack curativeItem);
+
+    record FluidInteractionResult(boolean success, ItemStack stack) {}
 
 }

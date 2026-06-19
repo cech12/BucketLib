@@ -6,7 +6,7 @@ import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.mixin.LivingEntityAccessor;
 import de.cech12.bucketlib.platform.Services;
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentType;
@@ -18,15 +18,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Bucketable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -333,8 +334,10 @@ public class BucketLibUtil {
         types.add(DataComponents.BUCKET_ENTITY_DATA);
         //support custom item stack data components
         if (entity instanceof Bucketable bucketable) {
-            ItemStack emptyVanillaStack = new ItemStack(BucketLibUtil.getFluid(itemStack).getBucket());
-            ItemStack changedVanillaStack = new ItemStack(BucketLibUtil.getFluid(itemStack).getBucket());
+            Fluid bucketFluid = BucketLibUtil.getFluid(itemStack);
+            Item bucketItem = bucketFluid == Fluids.EMPTY ? Items.BUCKET : bucketFluid.getBucket();
+            ItemStack emptyVanillaStack = new ItemStack(bucketItem);
+            ItemStack changedVanillaStack = new ItemStack(bucketItem);
             bucketable.saveToBucketTag(changedVanillaStack);
             changedVanillaStack.getComponents().stream().forEach(typedDataComponent -> {
                 AtomicBoolean addType = new AtomicBoolean(true);

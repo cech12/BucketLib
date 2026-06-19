@@ -7,7 +7,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -128,19 +127,19 @@ public class NeoforgeFluidHelper implements IFluidHelper {
     }
 
     @Override
-    public Tuple<Boolean, ItemStack> tryPickUpFluid(ItemStack stack, Player player, Level level, InteractionHand interactionHand, BlockPos pos, Direction direction) {
+    public FluidInteractionResult tryPickUpFluid(ItemStack stack, Player player, Level level, InteractionHand interactionHand, BlockPos pos, Direction direction) {
         ItemAccess access = ItemAccess.forStack(stack.copyWithCount(1));
         ResourceHandler<FluidResource> handler = access.getCapability(Capabilities.Fluid.ITEM);
-        FluidStack pickedFluidStack = FluidUtil.tryPickupFluid(handler, player, level, pos, direction);
-        return new Tuple<>(!pickedFluidStack.isEmpty(), access.getResource().toStack());
+        FluidStack pickedFluidStack = FluidUtil.tryPickupFluid(handler, player, level, pos, direction, null);
+        return new FluidInteractionResult(!pickedFluidStack.isEmpty(), access.getResource().toStack());
     }
 
     @Override
-    public Tuple<Boolean, ItemStack> tryPlaceFluid(ItemStack stack, Player player, Level level, InteractionHand interactionHand, BlockPos pos) {
+    public FluidInteractionResult tryPlaceFluid(ItemStack stack, Player player, Level level, InteractionHand interactionHand, BlockPos pos) {
         ItemAccess access = ItemAccess.forStack(stack.copy());
         ResourceHandler<FluidResource> handler = access.getCapability(Capabilities.Fluid.ITEM);
-        FluidStack placedFluidStack = FluidUtil.tryPlaceFluid(handler, player, level, interactionHand, pos);
-        return new Tuple<>(!placedFluidStack.isEmpty(), access.getResource().toStack());
+        FluidStack placedFluidStack = FluidUtil.tryPlaceFluid(handler, player, level, pos, false, null);
+        return new FluidInteractionResult(!placedFluidStack.isEmpty(), access.getResource().toStack());
     }
 
     @Override
