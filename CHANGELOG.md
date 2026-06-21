@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [26.2-5.2.0.0] - 2026-06-19
 ### Changed
-- updated to Minecraft 26.2 (Fabric 0.152.2+26.2, NeoForge 26.2.0.6-beta, Forge 65.0.0)
+- updated to Minecraft 26.2 (Fabric 0.152.2+26.2, NeoForge 26.2.0.6-beta)
 - updated Cloth Config support (26.2.155) (Fabric/Quilt)
 - updated ModMenu support (20.0.0-beta.3) (Fabric/Quilt)
 - updated JEI support (30.0.0.1) (NeoForge, Fabric/Quilt)
