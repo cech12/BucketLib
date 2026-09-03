@@ -40,6 +40,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
@@ -166,12 +167,12 @@ public class UniversalBucketItem extends Item {
     }
 
     //used by mixins
-    public int getBucketBurnTime(ItemStack stack, RecipeType<?> recipeType) {
+    public int getBucketBurnTime(ItemStack stack, RecipeType<?> recipeType, FuelValues fuelValues) {
         //entity buckets should not use the burn time of its fluid
         if (stack.getItem() instanceof UniversalBucketItem && !BucketLibUtil.containsEntityType(stack)) {
             Fluid fluid = Services.FLUID.getContainedFluid(stack);
             if (fluid != Fluids.EMPTY) {
-                return Services.PLATFORM.getBurnTime(new ItemStack(fluid.getBucket()), recipeType);
+                return Services.PLATFORM.getBurnTime(new ItemStack(fluid.getBucket()), recipeType, fuelValues);
             }
         }
         return 0; //don't call Services.PLATFORM.getBurnTime() to avoid recursive calls
