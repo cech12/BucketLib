@@ -36,7 +36,7 @@ public class BucketLibReiClientPlugin implements REIClientPlugin {
             for (Fluid fluid : Services.REGISTRY.getAllFluids()) {
                 if (fluid != Fluids.EMPTY && bucketItem.canHoldFluid(fluid)) {
                     ItemStack bucket = BucketLibUtil.addFluid(new ItemStack(bucketItem), fluid);
-                    int burnTime = bucketItem.getBurnTime(bucket, null, Objects.requireNonNull(Minecraft.getInstance().getSingleplayerServer()).fuelValues());
+                    int burnTime = bucketItem.getBucketBurnTime(bucket, null, Objects.requireNonNull(Minecraft.getInstance().level).fuelValues());
                     if (burnTime > 0) {
                         registry.add(new DefaultFuelDisplay(
                                 List.of(EntryIngredients.of(bucket)),
