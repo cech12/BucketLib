@@ -14,14 +14,14 @@ public abstract class FuelValuesMixin {
     @Inject(method = "burnDuration", at = @At("RETURN"), cancellable = true)
     private void getBurnDurationProxy(ItemStack itemStack, CallbackInfoReturnable<Integer> cir) {
         if (cir.getReturnValue() <= 0 && itemStack.getItem() instanceof UniversalBucketItem universalBucketItem)  {
-            cir.setReturnValue(universalBucketItem.getBucketBurnTime(itemStack, null));
+            cir.setReturnValue(universalBucketItem.getBucketBurnTime(itemStack, null, (FuelValues) (Object) this));
         }
     }
 
     @Inject(method = "isFuel", at = @At("RETURN"), cancellable = true)
     private void isFuelProxy(ItemStack itemStack, CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValue() && itemStack.getItem() instanceof UniversalBucketItem universalBucketItem)  {
-            cir.setReturnValue(universalBucketItem.getBucketBurnTime(itemStack, null) > 0);
+            cir.setReturnValue(universalBucketItem.getBucketBurnTime(itemStack, null, (FuelValues) (Object) this) > 0);
         }
     }
 
