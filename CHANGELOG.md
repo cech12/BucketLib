@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [26.1.2-5.1.0.1] - 2026-09-03
+### Fixed
+- fixed that burn duration of buckets could not be calculated on clients when connected to servers (thanks to Fressikus and benbenlaw for the report) #86 https://github.com/cech12/CeramicBucket/issues/100
+
 ## [26.1.2-5.1.0.0] - 2026-06-15
 ### Changed
 - Updated to Minecraft 26.1.2 (Fabric 0.150.0+26.1.2, NeoForge 26.1.2.71)
