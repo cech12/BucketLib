@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.block.entity.FuelValues;
 
 /**
  * Common platform helper service interface.
@@ -60,6 +61,6 @@ public interface IPlatformHelper {
      *
      * @return burn time of an ItemStack
      */
-    int getBurnTime(ItemStack stack, RecipeType<?> recipeType);
+    int getBurnTime(ItemStack stack, RecipeType<?> recipeType, FuelValues fuelValues);
 
 }
