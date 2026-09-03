@@ -23,7 +23,7 @@ public class NeoforgeUniversalBucketItemMixin extends Item {
     @Override
     public int getBurnTime(@NotNull ItemStack itemStack, @Nullable RecipeType<?> recipeType, @NotNull FuelValues fuelValues) {
         if (itemStack.getItem() instanceof UniversalBucketItem universalBucketItem) {
-            return universalBucketItem.getBucketBurnTime(itemStack, recipeType);
+            return universalBucketItem.getBucketBurnTime(itemStack, recipeType, fuelValues);
         }
         return super.getBurnTime(itemStack, recipeType, fuelValues);
     }
