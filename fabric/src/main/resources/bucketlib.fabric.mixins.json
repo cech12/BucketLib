@@ -3,8 +3,7 @@
   "package": "de.cech12.bucketlib.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "EnchantmentMixin",
-    "FuelValuesMixin"
+    "EnchantmentMixin"
   ],
   "client": [
   ],

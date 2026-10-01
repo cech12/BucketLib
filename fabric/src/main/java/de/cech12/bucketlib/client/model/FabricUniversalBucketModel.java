@@ -8,15 +8,13 @@ import de.cech12.bucketlib.client.model.neoforge.UnbakedElementsHelper;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.client.color.item.ItemTintSource;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.dispatch.BlockModelRotation;
 import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ModelRenderProperties;
-import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.cuboid.ItemModelGenerator;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
@@ -33,8 +31,9 @@ import java.util.List;
 
 public class FabricUniversalBucketModel extends UniversalBucketModel {
 
-    //workaround for https://github.com/neoforged/NeoForge/issues/3058
-    public static final RenderType BLOCK_ITEM_UNSORTED_TRANSLUCENT = RenderType.create("bucketlib_entity_unsorted_translucent", RenderSetup.builder(RenderPipelines.ENTITY_TRANSLUCENT).withTexture("Sampler0", TextureAtlas.LOCATION_BLOCKS).useLightmap().useOverlay().setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).affectsCrumbling().createRenderSetup());
+    private static final RenderType ITEM_RENDER_TYPE = Sheets.translucentBlockItemSheet();
+    private static final RenderType ITEM_GLINT_RENDER_TYPE = Sheets.translucentBlockItemGlintSheet();
+    private static final RenderType ITEM_GLINT_SPECIAL_RENDER_TYPE = Sheets.translucentBlockItemGlintSpecialSheet();
 
     // Depth offsets to prevent Z-fighting
     private static final Transformation DEPTH_OFFSET_TRANSFORM_FLUID = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(1f, 1f, 1.002f), new Quaternionf());
@@ -79,9 +78,11 @@ public class FabricUniversalBucketModel extends UniversalBucketModel {
         return new BakedQuad.MaterialInfo(
                 materialInfo.sprite(),
                 materialInfo.layer(),
-                BLOCK_ITEM_UNSORTED_TRANSLUCENT,
+                ITEM_RENDER_TYPE,
+                ITEM_GLINT_RENDER_TYPE,
+                ITEM_GLINT_SPECIAL_RENDER_TYPE,
                 materialInfo.tintIndex(),
-                materialInfo.shade(),
+                materialInfo.shadeDirectionOverride(),
                 materialInfo.lightEmission());
     }
 

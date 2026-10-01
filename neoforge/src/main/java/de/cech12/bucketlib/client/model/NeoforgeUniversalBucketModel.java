@@ -4,6 +4,7 @@ import com.mojang.math.Transformation;
 import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.platform.Services;
 import net.minecraft.client.color.item.ItemTintSource;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.dispatch.BlockModelRotation;
 import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
@@ -34,9 +35,12 @@ import java.util.function.UnaryOperator;
 
 public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
 
-    //workaround for https://github.com/neoforged/NeoForge/issues/3058
-    public static final RenderType BLOCK_ITEM_UNSORTED_TRANSLUCENT = NeoForgeRenderTypes.getUnsortedTranslucent(TextureAtlas.LOCATION_BLOCKS);
-    public static final RenderType BLOCK_ITEM_UNSORTED_UNLIT_TRANSLUCENT = NeoForgeRenderTypes.getUnlitUnsortedTranslucent(TextureAtlas.LOCATION_BLOCKS);
+    private static final RenderType ITEM_RENDER_TYPE = Sheets.translucentBlockItemSheet();
+    private static final RenderType ITEM_GLINT_RENDER_TYPE = Sheets.translucentBlockItemGlintSheet();
+    private static final RenderType ITEM_GLINT_SPECIAL_RENDER_TYPE = Sheets.translucentBlockItemGlintSpecialSheet();
+    private static final RenderType ITEM_RENDER_TYPE_EMISSIVE = NeoForgeRenderTypes.getItemTranslucentUnlit(TextureAtlas.LOCATION_BLOCKS);
+    private static final RenderType ITEM_GLINT_RENDER_TYPE_EMISSIVE = NeoForgeRenderTypes.getItemGlintTranslucentUnlit(TextureAtlas.LOCATION_BLOCKS);
+    private static final RenderType ITEM_GLINT_SPECIAL_RENDER_TYPE_EMISSIVE = NeoForgeRenderTypes.getItemGlintSpecialTranslucentUnlit(TextureAtlas.LOCATION_BLOCKS);
 
     // Depth offsets to prevent Z-fighting
     private static final Transformation DEPTH_OFFSET_TRANSFORM_FLUID = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(1f, 1f, 1.002f), new Quaternionf());
@@ -82,9 +86,11 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
         return new BakedQuad.MaterialInfo(
                 materialInfo.sprite(),
                 materialInfo.layer(),
-                BLOCK_ITEM_UNSORTED_UNLIT_TRANSLUCENT,
+                ITEM_RENDER_TYPE_EMISSIVE,
+                ITEM_GLINT_RENDER_TYPE_EMISSIVE,
+                ITEM_GLINT_SPECIAL_RENDER_TYPE_EMISSIVE,
                 materialInfo.tintIndex(),
-                materialInfo.shade(),
+                materialInfo.shadeDirectionOverride(),
                 Level.MAX_BRIGHTNESS,
                 materialInfo.ambientOcclusion());
     }
@@ -93,9 +99,11 @@ public class NeoforgeUniversalBucketModel extends UniversalBucketModel {
         return new BakedQuad.MaterialInfo(
                 materialInfo.sprite(),
                 materialInfo.layer(),
-                BLOCK_ITEM_UNSORTED_TRANSLUCENT,
+                ITEM_RENDER_TYPE,
+                ITEM_GLINT_RENDER_TYPE,
+                ITEM_GLINT_SPECIAL_RENDER_TYPE,
                 materialInfo.tintIndex(),
-                materialInfo.shade(),
+                materialInfo.shadeDirectionOverride(),
                 materialInfo.lightEmission(),
                 materialInfo.ambientOcclusion());
     }

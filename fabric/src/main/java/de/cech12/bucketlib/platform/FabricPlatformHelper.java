@@ -5,9 +5,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.block.entity.FuelValues;
 
 /**
  * The platform service implementation for Fabric.
@@ -37,11 +34,6 @@ public class FabricPlatformHelper implements IPlatformHelper {
     @Override
     public String getMilkTranslationKey() {
         return "tag.fluid.c.milk";
-    }
-
-    @Override
-    public int getBurnTime(ItemStack stack, RecipeType<?> recipeType, FuelValues fuelValues) {
-        return fuelValues.burnDuration(stack);
     }
 
 }

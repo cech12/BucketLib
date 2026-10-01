@@ -39,15 +39,14 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProvider;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +65,7 @@ public class UniversalBucketItem extends Item {
     private final Properties properties;
 
     public UniversalBucketItem(ResourceKey<Item> id, Properties properties) {
-        super((new Item.Properties().setId(id).stacksTo(1)));
+        super((new Item.Properties().setId(id).stacksTo(1).cookingFuel(getCookingFuel(properties))));
         this.properties = properties;
     }
 
@@ -186,18 +185,6 @@ public class UniversalBucketItem extends Item {
     //used by mixin
     public int getMaxStackSize(ItemInstance itemInstance) {
         return BucketLibUtil.isEmpty(itemInstance) ? this.properties.maxStackSize : 1;
-    }
-
-    //used by mixins
-    public int getBucketBurnTime(ItemStack stack, RecipeType<?> recipeType, FuelValues fuelValues) {
-        //entity buckets should not use the burn time of its fluid
-        if (stack.getItem() instanceof UniversalBucketItem && !BucketLibUtil.containsEntityType(stack)) {
-            Fluid fluid = Services.FLUID.getContainedFluid(stack);
-            if (fluid != Fluids.EMPTY) {
-                return Services.PLATFORM.getBurnTime(new ItemStack(fluid.getBucket()), recipeType, fuelValues);
-            }
-        }
-        return 0; //don't call Services.PLATFORM.getBurnTime() to avoid recursive calls
     }
 
     @Override
@@ -480,6 +467,13 @@ public class UniversalBucketItem extends Item {
         return this.properties.tab;
     }
 
+    private static ResourceKey<ContextIntProvider> getCookingFuel(Properties properties) {
+        if (properties.cookingFuel == null) {
+            properties.cookingFuel = BucketLib.DEFAULT_COOKING_FUEL;
+        }
+        return properties.cookingFuel;
+    }
+
     public int getDurability() {
         return getIntProperty(this.properties.durabilityConfig, this.properties.durability);
     }
@@ -567,6 +561,7 @@ public class UniversalBucketItem extends Item {
     public static class Properties {
 
         ResourceKey<CreativeModeTab> tab = null;
+        ResourceKey<ContextIntProvider> cookingFuel = null;
         int maxStackSize = 16;
 
         int durability = 0;
@@ -621,6 +616,11 @@ public class UniversalBucketItem extends Item {
 
         public Properties tab(ResourceKey<CreativeModeTab> tab) {
             this.tab = tab;
+            return this;
+        }
+
+        public Properties cookingFuel(ResourceKey<ContextIntProvider> cookingFuel) {
+            this.cookingFuel = cookingFuel;
             return this;
         }
 

@@ -22,7 +22,7 @@ public class EnchantmentMixin {
     @Unique
     private boolean isInfinityEnchantment() {
         if (infinityEnchantment == null) {
-            infinityEnchantment = VanillaRegistries.createLookup().lookup(Registries.ENCHANTMENT).get().getOrThrow(Enchantments.INFINITY).value();
+            infinityEnchantment = VanillaRegistries.createWorldLookup().lookup(Registries.ENCHANTMENT).get().getOrThrow(Enchantments.INFINITY).value();
         }
         return ((Enchantment)(Object)this).description().equals(infinityEnchantment.description());
     }

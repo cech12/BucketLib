@@ -1,13 +1,17 @@
 package de.cech12.bucketlib.mixin;
 
+import de.cech12.bucketlib.CommonLoader;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CookingFuel;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,10 +44,11 @@ public abstract class AbstractFurnaceBlockEntityMixin {
 
     @Inject(at = @At("RETURN"), method = "canPlaceItem", cancellable = true)
     public void canPlaceItemProxy(final int slot, final ItemStack itemStack, CallbackInfoReturnable<Boolean> cir) {
-        if (!cir.getReturnValue() && slot == 1 && !itemStack.isEmpty() && itemStack.getItem() instanceof UniversalBucketItem bucketItem
-                && BucketLibUtil.isEmpty(itemStack) && bucketItem.canHoldFluid(Fluids.WATER) && getItems().get(1).getItem() != itemStack.getItem()
+        if (cir.getReturnValue() && slot == 1 && !itemStack.isEmpty() && itemStack.getItem() instanceof UniversalBucketItem bucketItem
+                && !(BucketLibUtil.isEmpty(itemStack) && bucketItem.canHoldFluid(Fluids.WATER) && getItems().get(1).getItem() != itemStack.getItem())
+                && ResolvableInt.getFromItem(itemStack, DataComponents.COOKING_FUEL, CookingFuel::burnTime, CommonLoader.createLootContext(this), 0) <= 0
         ) {
-            cir.setReturnValue(true);
+            cir.setReturnValue(false);
         }
     }
 

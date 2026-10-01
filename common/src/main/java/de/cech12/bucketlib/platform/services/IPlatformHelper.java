@@ -2,9 +2,6 @@ package de.cech12.bucketlib.platform.services;
 
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.block.entity.FuelValues;
 
 /**
  * Common platform helper service interface.
@@ -55,12 +52,5 @@ public interface IPlatformHelper {
      * @return translation key for milk
      */
     String getMilkTranslationKey();
-
-    /**
-     * Gets the burn time of an ItemStack.
-     *
-     * @return burn time of an ItemStack
-     */
-    int getBurnTime(ItemStack stack, RecipeType<?> recipeType, FuelValues fuelValues);
 
 }
