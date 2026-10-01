@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [26.3-5.3.0.1] - 2026-10-01
+### Fixed
+- Jitpack build was broken
+
 ## [26.3-5.3.0.0] - 2026-10-01
 ### Changed
 - updated to Minecraft 26.3 (Fabric 0.161.0+26.3, NeoForge 26.3.0.39-beta)
