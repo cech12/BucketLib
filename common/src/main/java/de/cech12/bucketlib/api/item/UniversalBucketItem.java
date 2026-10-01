@@ -619,6 +619,16 @@ public class UniversalBucketItem extends Item {
             return this;
         }
 
+        /**
+         * Sets the ContextIntProvider that generates the fuel duration of an empty bucket.
+         * It only affects the empty bucket, not the filled bucket.
+         * The default ContextIntProvider is "bucketlib:cooking/time_bucketlib" that contains a constant value of 0 (no fuel).
+         * If the bucket contains a fluid, the fuel duration is determined by the fluid's fuel duration.
+         * If the bucket contains something else, it has no fuel duration (=0).
+         *
+         * @param cookingFuel ResourceKey of the ContextIntProvider
+         * @return Properties object
+         */
         public Properties cookingFuel(ResourceKey<ContextIntProvider> cookingFuel) {
             this.cookingFuel = cookingFuel;
             return this;
