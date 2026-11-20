@@ -54,6 +54,14 @@ loom {
     }
 }
 
+// REI is only needed in the client run. On the game test server it only logs errors for every brewing recipe
+// ("Failed to fill display for recipe"), so it is removed from the classpath of the game test run.
+afterEvaluate {
+    tasks.named('runGameTestServer', JavaExec) {
+        classpath = classpath.filter { !it.name.startsWith('RoughlyEnoughItems') }
+    }
+}
+
 // Implement mcgradleconventions loader attribute
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
 ['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements', 'includeInternal', 'modCompileClasspath'].each { variant ->

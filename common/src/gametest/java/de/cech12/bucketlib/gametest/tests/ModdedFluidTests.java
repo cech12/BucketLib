@@ -149,7 +149,9 @@ public final class ModdedFluidTests {
      * instead of crashing.
      */
     public static void fluidWhoseBucketThrowsCannotBeHeld(GameTestHelper helper) {
+        int errors = de.cech12.bucketlib.gametest.ExpectedLogs.incompatibleFluidErrors();
         assertCannotBeHeld(helper, TestFluids.THROWING_BUCKET_FLUID);
+        helper.assertTrue(de.cech12.bucketlib.gametest.ExpectedLogs.incompatibleFluidErrors() > errors, "BucketLib did not log the incompatible fluid");
         helper.succeed();
     }
 

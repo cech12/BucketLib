@@ -1,17 +1,23 @@
 package de.cech12.bucketlib.gametest.tests;
 
 import de.cech12.bucketlib.gametest.BucketLibGameTests;
+import de.cech12.bucketlib.gametest.KnownIssues;
+import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.WorldInteractionUtil;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -27,6 +33,8 @@ import net.minecraft.world.phys.Vec3;
 public final class CauldronTests {
 
     private static final BlockPos CAULDRON = TestUtils.CENTER;
+    private static final BlockPos VANILLA = new BlockPos(1, 1, 2);
+    private static final BlockPos BUCKETLIB = new BlockPos(3, 1, 2);
 
     private CauldronTests() {}
 
@@ -44,6 +52,9 @@ public final class CauldronTests {
         tests.add("cauldron/creative_mode_keeps_the_bucket", CauldronTests::creativeModeKeepsTheBucket);
         tests.add("cauldron/entity_bucket_is_not_emptied_into_cauldron", CauldronTests::entityBucketIsNotEmptiedIntoCauldron);
         tests.add("cauldron/other_blocks_are_ignored", CauldronTests::otherBlocksAreIgnored);
+        tests.add("cauldron/behaves_like_vanilla_buckets", CauldronTests::behavesLikeVanillaBuckets);
+        tests.add("cauldron/fills_one_of_stacked_buckets", CauldronTests::fillsOneOfStackedBuckets);
+        tests.add("cauldron/respects_allowed_and_denied_fluids", CauldronTests::respectsAllowedAndDeniedFluids);
     }
 
     private static ServerPlayer lookingAtCauldron(GameTestHelper helper, GameType gameType, ItemStack stack) {
@@ -135,6 +146,123 @@ public final class CauldronTests {
         helper.setBlock(CAULDRON, Blocks.CAULDRON);
         helper.assertFalse(WorldInteractionUtil.tryPlaceIntoCauldron(helper.getLevel(), player, InteractionHand.MAIN_HAND, hit).consumesAction(), "milk was emptied into a cauldron");
         helper.assertBlockPresent(Blocks.CAULDRON, CAULDRON);
+        helper.succeed();
+    }
+
+    // --- comparison with vanilla buckets ---------------------------------------------------------------------------------------------------
+
+    private enum Content {
+        EMPTY(Items.BUCKET), WATER(Items.WATER_BUCKET), LAVA(Items.LAVA_BUCKET), POWDER_SNOW(Items.POWDER_SNOW_BUCKET);
+
+        private final Item vanillaBucket;
+
+        Content(Item vanillaBucket) {
+            this.vanillaBucket = vanillaBucket;
+        }
+
+        ItemStack bucketLib() {
+            return switch (this) {
+                case EMPTY -> TestUtils.bucket(TestBuckets.TEST_BUCKET);
+                case WATER -> TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER);
+                case LAVA -> TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.LAVA);
+                case POWDER_SNOW -> TestUtils.withBlock(TestBuckets.TEST_BUCKET, Blocks.POWDER_SNOW);
+            };
+        }
+
+        static Content ofVanilla(ItemStack stack) {
+            for (Content content : values()) {
+                if (stack.is(content.vanillaBucket)) {
+                    return content;
+                }
+            }
+            return null;
+        }
+
+        static Content ofBucketLib(ItemStack stack) {
+            if (!stack.is(TestBuckets.TEST_BUCKET.item())) {
+                return null;
+            }
+            if (BucketLibUtil.getBlock(stack) == Blocks.POWDER_SNOW) {
+                return POWDER_SNOW;
+            }
+            if (BucketLibUtil.getFluid(stack) == Fluids.WATER) {
+                return WATER;
+            }
+            if (BucketLibUtil.getFluid(stack) == Fluids.LAVA) {
+                return LAVA;
+            }
+            return BucketLibUtil.isEmpty(stack) ? EMPTY : null;
+        }
+    }
+
+    private record Outcome(BlockState cauldron, BlockState above, Content hand) {}
+
+    private static Outcome useOn(GameTestHelper helper, BlockPos pos, BlockState cauldron, ItemStack stack, boolean vanilla) {
+        helper.setBlock(pos.above(), Blocks.AIR);
+        helper.setBlock(pos, cauldron);
+        ServerPlayer player = TestUtils.player(helper, GameType.SURVIVAL, stack);
+        TestUtils.lookDownAt(helper, player, pos);
+        // players use items on blocks with useItemOn first (vanilla cauldron interactions), then use (BucketLib)
+        var hit = new net.minecraft.world.phys.BlockHitResult(helper.absoluteVec(net.minecraft.world.phys.Vec3.atCenterOf(pos).add(0, 0.5, 0)), Direction.UP, helper.absolutePos(pos), false);
+        var result = player.gameMode.useItemOn(player, helper.getLevel(), player.getMainHandItem(), net.minecraft.world.InteractionHand.MAIN_HAND, hit);
+        if (!result.consumesAction()) {
+            TestUtils.use(helper, player);
+        }
+        ItemStack hand = player.getMainHandItem();
+        Outcome outcome = new Outcome(helper.getBlockState(pos), helper.getBlockState(pos.above()), vanilla ? Content.ofVanilla(hand) : Content.ofBucketLib(hand));
+        helper.setBlock(pos.above(), Blocks.AIR);
+        helper.setBlock(pos, Blocks.AIR);
+        return outcome;
+    }
+
+    /**
+     * Every bucket content on every cauldron (empty, partly and fully filled water/powder snow, lava) has the same
+     * result as with the vanilla bucket: same cauldron afterward, same block above, same content of the held bucket.
+     */
+    public static void behavesLikeVanillaBuckets(GameTestHelper helper) {
+        List<BlockState> cauldrons = new ArrayList<>(List.of(Blocks.CAULDRON.defaultBlockState(), Blocks.LAVA_CAULDRON.defaultBlockState()));
+        for (int level = 1; level <= 3; level++) {
+            cauldrons.add(Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, level));
+            cauldrons.add(Blocks.POWDER_SNOW_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, level));
+        }
+        List<String> differences = new ArrayList<>();
+        for (BlockState cauldron : cauldrons) {
+            for (Content content : Content.values()) {
+                Outcome vanilla = useOn(helper, VANILLA, cauldron, new ItemStack(content.vanillaBucket), true);
+                Outcome bucketLib = TestUtils.noException(helper, content + " on " + cauldron, () -> useOn(helper, BUCKETLIB, cauldron, content.bucketLib(), false));
+                if (!vanilla.equals(bucketLib)) {
+                    differences.add(content + " on " + cauldron + ": vanilla " + vanilla + ", BucketLib " + bucketLib);
+                }
+            }
+        }
+        KnownIssues.run(helper, "KI-21 buckets are not emptied into partly filled cauldrons like vanilla buckets", Platforms.ALL, () ->
+                helper.assertTrue(differences.isEmpty(), differences.size() + " differences to vanilla buckets: " + differences));
+    }
+
+    /** From a stack of empty buckets one is filled from a cauldron and put into the inventory. */
+    public static void fillsOneOfStackedBuckets(GameTestHelper helper) {
+        helper.setBlock(CAULDRON, Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3));
+        ServerPlayer player = TestUtils.player(helper, GameType.SURVIVAL, TestUtils.bucket(TestBuckets.TEST_BUCKET).copyWithCount(2));
+        TestUtils.lookDownAt(helper, player, CAULDRON);
+        TestUtils.use(helper, player);
+        helper.assertBlockPresent(Blocks.CAULDRON, CAULDRON);
+        ItemStack hand = player.getMainHandItem();
+        helper.assertTrue(BucketLibUtil.isEmpty(hand) && hand.getCount() == 1, "hand does not hold 1 empty bucket: " + TestUtils.describe(hand));
+        helper.assertTrue(player.getInventory().getNonEquipmentItems().stream().anyMatch(s -> !s.isEmpty() && BucketLibUtil.getFluid(s) == Fluids.WATER), "water bucket is not in the inventory");
+        helper.succeed();
+    }
+
+    /** Allowed and denied fluid lists and tags also apply to cauldrons. */
+    public static void respectsAllowedAndDeniedFluids(GameTestHelper helper) {
+        for (var bucket : List.of(TestBuckets.WATER_ALLOWING_BUCKET, TestBuckets.WATER_ALLOWING_TAG_BUCKET, TestBuckets.WATER_DENYING_BUCKET, TestBuckets.WATER_DENYING_TAG_BUCKET)) {
+            boolean allowed = bucket.item().canHoldFluid(Fluids.WATER);
+            helper.setBlock(CAULDRON, Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3));
+            ServerPlayer player = TestUtils.player(helper, GameType.SURVIVAL, TestUtils.bucket(bucket));
+            TestUtils.lookDownAt(helper, player, CAULDRON);
+            TestUtils.use(helper, player);
+            TestUtils.assertEquals(helper, BucketLibUtil.getFluid(player.getMainHandItem()) == Fluids.WATER, allowed, bucket.name() + " was filled from the water cauldron");
+            TestUtils.assertEquals(helper, helper.getBlockState(CAULDRON).is(Blocks.CAULDRON), allowed, "cauldron was emptied by " + bucket.name());
+        }
         helper.succeed();
     }
 

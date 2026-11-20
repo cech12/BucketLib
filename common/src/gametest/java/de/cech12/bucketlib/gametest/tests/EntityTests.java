@@ -5,6 +5,7 @@ import de.cech12.bucketlib.gametest.KnownIssues;
 import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
+import de.cech12.bucketlib.platform.Services;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.material.Fluids;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Picking up and releasing entities (fish, axolotl, tadpole, sulfur cube) and feeding entities with bucket entities,
@@ -64,6 +66,9 @@ public final class EntityTests {
         tests.add("entity/axolotl_food_like_vanilla_buckets", EntityTests::axolotlFoodLikeVanillaBuckets);
         tests.add("entity/nautilus_food_like_vanilla_buckets", EntityTests::nautilusFoodLikeVanillaBuckets);
         tests.add("entity/tames_nautilus", EntityTests::tamesNautilus);
+        tests.add("entity/filled_buckets_do_not_pick_up_entities", EntityTests::filledBucketsDoNotPickUpEntities);
+        tests.add("entity/creative_pickup_keeps_the_water_bucket", EntityTests::creativePickupKeepsTheWaterBucket);
+        tests.add("entity/anti_salmon_bucket_picks_up_cod", EntityTests::antiSalmonBucketPicksUpCod);
     }
 
     private static InteractionResult interact(ServerPlayer player, Entity entity) {
@@ -273,6 +278,55 @@ public final class EntityTests {
         ItemStack hand = player.getMainHandItem();
         helper.assertFalse(BucketLibUtil.containsEntityType(hand), "entity was not removed from the bucket: " + TestUtils.describe(hand));
         helper.assertTrue(hand.is(TestBuckets.TEST_BUCKET.item()), "bucket was consumed: " + hand);
+        helper.succeed();
+    }
+
+    private static void assertNoPickup(GameTestHelper helper, ItemStack stack) {
+        SulfurCube cube = helper.spawnWithNoFreeWill(EntityTypes.SULFUR_CUBE, TestUtils.CENTER);
+        cube.setSize(2, true);
+        cube.setBaby(false);
+        ServerPlayer player = TestUtils.player(helper, GameType.SURVIVAL, stack);
+        TestUtils.interact(player, cube);
+        boolean removed = cube.isRemoved();
+        boolean picked = BucketLibUtil.containsEntityType(player.getMainHandItem());
+        cube.discard();
+        helper.assertFalse(removed || picked, TestUtils.describe(stack) + " picked up a sulfur cube: " + TestUtils.describe(player.getMainHandItem()));
+    }
+
+    /**
+     * Buckets with content (milk, powder snow, a fluid) do not pick up entities, also not sulfur cubes (whose vanilla
+     * bucket has no fluid).
+     */
+    public static void filledBucketsDoNotPickUpEntities(GameTestHelper helper) {
+        assertNoPickup(helper, TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER));
+        KnownIssues.check(helper, "KI-22 buckets with powder snow or milk pick up sulfur cubes", Platforms.ALL, () ->
+                assertNoPickup(helper, TestUtils.withBlock(TestBuckets.TEST_BUCKET, Blocks.POWDER_SNOW)));
+        // with the NeoForge milk fluid, milk is a fluid and the bucket is not "fluid empty"
+        KnownIssues.check(helper, "KI-22 buckets with powder snow or milk pick up sulfur cubes", Services.FLUID.hasMilkFluid() ? Set.of() : Platforms.ALL, () ->
+                assertNoPickup(helper, TestUtils.withMilk(TestBuckets.TEST_BUCKET)));
+        helper.succeed();
+    }
+
+    /** Like a vanilla water bucket in creative mode: the water bucket stays, the bucket with the fish is added. */
+    public static void creativePickupKeepsTheWaterBucket(GameTestHelper helper) {
+        var salmon = helper.spawnWithNoFreeWill(EntityTypes.SALMON, TestUtils.CENTER);
+        ServerPlayer player = TestUtils.player(helper, GameType.CREATIVE, TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER));
+        TestUtils.interact(player, salmon);
+        helper.assertTrue(salmon.isRemoved(), "salmon was not picked up in creative mode");
+        ItemStack hand = player.getMainHandItem();
+        helper.assertTrue(BucketLibUtil.getFluid(hand) == Fluids.WATER && !BucketLibUtil.containsEntityType(hand), "hand does not keep the water bucket: " + TestUtils.describe(hand));
+        helper.assertTrue(player.getInventory().getNonEquipmentItems().stream().anyMatch(s -> !s.isEmpty() && BucketLibUtil.getEntityType(s) == EntityTypes.SALMON), "salmon bucket is not in the inventory");
+        helper.succeed();
+    }
+
+    /** A bucket that denies salmon picks up other fish. */
+    public static void antiSalmonBucketPicksUpCod(GameTestHelper helper) {
+        for (var bucket : List.of(TestBuckets.ANTI_SALMON_BUCKET, TestBuckets.ANTI_SALMON_TAG_BUCKET)) {
+            var cod = helper.spawnWithNoFreeWill(EntityTypes.COD, TestUtils.CENTER);
+            ServerPlayer player = TestUtils.player(helper, GameType.SURVIVAL, TestUtils.withFluid(bucket, Fluids.WATER));
+            TestUtils.interact(player, cod);
+            TestUtils.assertEquals(helper, BucketLibUtil.getEntityType(player.getMainHandItem()), EntityTypes.COD, "entity in the " + bucket.name());
+        }
         helper.succeed();
     }
 

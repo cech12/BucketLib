@@ -6,6 +6,10 @@ base {
     archivesName = "${mod_id}-neoforge"
 }
 
+// NeoforgeUniversalBucketItemMixin changes UniversalBucketItem, so its execution data never matches the class file
+// ("Classes in bundle 'neoforge' do not match with execution data"). It is measured by the Fabric run instead.
+jacocoCoverageExcludes.add('de/cech12/bucketlib/api/item/UniversalBucketItem.class')
+
 dependencies {
     compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
     runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")

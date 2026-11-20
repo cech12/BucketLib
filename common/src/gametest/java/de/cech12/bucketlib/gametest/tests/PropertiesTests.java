@@ -5,6 +5,7 @@ import de.cech12.bucketlib.gametest.BucketLibGameTests;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import de.cech12.bucketlib.platform.Services;
+import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
@@ -38,6 +39,7 @@ public final class PropertiesTests {
         tests.add("properties/stack_size", PropertiesTests::stackSize);
         tests.add("properties/invalid_values_are_rejected", PropertiesTests::invalidValuesAreRejected);
         tests.add("properties/getters", PropertiesTests::getters);
+        tests.add("properties/temperature_limits_are_inclusive", PropertiesTests::temperatureLimitsAreInclusive);
     }
 
     private static void assertFluids(GameTestHelper helper, TestBuckets.Definition bucket, boolean water, boolean lava) {
@@ -249,6 +251,41 @@ public final class PropertiesTests {
         helper.assertTrue(TestBuckets.FREEZING_FLUIDS_BUCKET.item().isFreezingBlock(Blocks.POWDER_SNOW), "powder snow is no freezing block (tag)");
         helper.assertFalse(test.isBurningFluid(Fluids.LAVA) || test.isFreezingFluid(Fluids.WATER) || test.isBurningBlock(Blocks.POWDER_SNOW) || test.isFreezingBlock(Blocks.POWDER_SNOW), "test bucket has burning or freezing contents");
         helper.assertFalse(test.isBurningBlock(null), "null is a burning block");
+        helper.succeed();
+    }
+
+    /**
+     * The temperature limits include the limit itself: max temperature 1300 holds lava (1300), 1299 not; an upper
+     * cracking temperature of 1300 cracks with lava, 1301 not; the same for min and lower cracking temperature.
+     */
+    public static void temperatureLimitsAreInclusive(GameTestHelper helper) {
+        var bucket = TestBuckets.CONFIG_BUCKET.item();
+        ItemStack lava = TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.LAVA);
+        try {
+            TestBuckets.Config.maxTemperature = 1300;
+            helper.assertTrue(bucket.canHoldFluid(Fluids.LAVA), "max temperature 1300 does not allow lava (1300)");
+            TestBuckets.Config.maxTemperature = 1299;
+            helper.assertFalse(bucket.canHoldFluid(Fluids.LAVA), "max temperature 1299 allows lava (1300)");
+            TestBuckets.Config.maxTemperature = 2000;
+            TestBuckets.Config.minTemperature = 300;
+            helper.assertTrue(bucket.canHoldFluid(Fluids.WATER), "min temperature 300 does not allow water (300)");
+            TestBuckets.Config.minTemperature = 301;
+            helper.assertFalse(bucket.canHoldFluid(Fluids.WATER), "min temperature 301 allows water (300)");
+            TestBuckets.Config.minTemperature = 0;
+            ItemStack configLava = BucketLibUtil.addFluid(TestUtils.bucket(TestBuckets.CONFIG_BUCKET), Fluids.LAVA);
+            ItemStack configWater = BucketLibUtil.addFluid(TestUtils.bucket(TestBuckets.CONFIG_BUCKET), Fluids.WATER);
+            TestBuckets.Config.upperCrackingTemperature = 1300;
+            helper.assertTrue(bucket.isCracked(configLava), "upper cracking temperature 1300 does not crack with lava");
+            TestBuckets.Config.upperCrackingTemperature = 1301;
+            helper.assertFalse(bucket.isCracked(configLava), "upper cracking temperature 1301 cracks with lava");
+            TestBuckets.Config.lowerCrackingTemperature = 300;
+            helper.assertTrue(bucket.isCracked(configWater), "lower cracking temperature 300 does not crack with water");
+            TestBuckets.Config.lowerCrackingTemperature = 299;
+            helper.assertFalse(bucket.isCracked(configWater), "lower cracking temperature 299 cracks with water");
+            helper.assertTrue(!lava.isEmpty(), "test setup broken");
+        } finally {
+            TestBuckets.Config.reset();
+        }
         helper.succeed();
     }
 

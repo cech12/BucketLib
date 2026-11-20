@@ -12,7 +12,6 @@ import de.cech12.bucketlib.gametest.tests.FluidApiTests;
 import de.cech12.bucketlib.gametest.tests.FluidTests;
 import de.cech12.bucketlib.gametest.tests.FurnaceTests;
 import de.cech12.bucketlib.gametest.tests.IngredientTests;
-import de.cech12.bucketlib.gametest.tests.LegacySuiteTests;
 import de.cech12.bucketlib.gametest.tests.InfinityTests;
 import de.cech12.bucketlib.gametest.tests.MetaTests;
 import de.cech12.bucketlib.gametest.tests.MilkTests;
@@ -54,7 +53,11 @@ public final class BucketLibGameTests {
             Map<Identifier, Consumer<GameTestHelper>> map = new LinkedHashMap<>();
             TestCollector collector = (name, test) -> {
                 Identifier id = BucketLib.id(name);
-                if (map.put(id, test) != null) {
+                // hides the log messages that the tests provoke on purpose (see ExpectedLogs)
+                if (map.put(id, helper -> {
+                    ExpectedLogs.install();
+                    test.accept(helper);
+                }) != null) {
                     throw new IllegalStateException("Duplicate game test " + id);
                 }
             };
@@ -78,7 +81,6 @@ public final class BucketLibGameTests {
             RecipeTests.register(collector);
             CodecTests.register(collector);
             ResourceTests.register(collector);
-            LegacySuiteTests.register(collector);
             tests = Collections.unmodifiableMap(map);
         }
         return tests;

@@ -20,6 +20,7 @@ common/src/gametest/java/.../gametest/   test logic (vanilla + BucketLib API onl
   TestBuckets                            buckets of the test mod "bucketlibtest" (one per property combination)
   TestFluids, TestBlocks                 fluids and blocks of "other mods" for the cases vanilla does not have
   KnownIssues                            marks known bugs ("deactivated" tests, see below)
+  ExpectedLogs                           hides log errors that tests provoke on purpose (and counts them)
   IGameTestPlatform                      loader specific operations (config, fluid API, ingredient sync, enchanting)
   tests/*Tests                           the tests, grouped by feature
 common/src/gametest/resources/           test instances, environments, test mod assets/data
@@ -87,7 +88,6 @@ All test names are relative to `bucketlib:`. Every test runs on Fabric and NeoFo
 | Fluid API | `fluid_api/*` | other mods reading, filling and draining buckets through the loader API |
 | Recipes | `ingredient/*`, `recipe/*`, `codec/*` | all ingredient types, crafting remainders, cake recipe, bucket filling recipes, dyeing, repairing, json and network codecs |
 | Fluids of other mods | `modded_fluid/*` | test fluids: own bucket and attributes (temperature, light, gas, name), no bucket, bucket of another fluid, milk bucket, throwing `getBucket()`, incompatible fluid source block |
-| Old test suites | `LegacySuiteTests` (prefix of the feature) | cases of the former Ceramic Bucket and BucketLib Forge tests: cauldrons like vanilla, dispenser with lava/breaking/durability/waterlogging, filled buckets and entities, inclusive temperature limits, Infinity with entities, stacked and creative variants |
 | Resources, setup | `resources/*`, `meta/*` | translations, textures, test buckets, cooking fuel, every test function has an instance, KnownIssues marker |
 
 ## Code coverage
@@ -100,11 +100,11 @@ Every game test run is measured with JaCoCo (only BucketLib classes):
 | `build/reports/jacoco/gametest/html/index.html` (`./gradlew jacocoMergedGameTestReport`) | common classes, merged over all loaders |
 
 The old test suites of Ceramic Bucket (`CeramicBucket/forge/src/test`) and the former Forge tests of BucketLib
-(`forge/src/test`) were compared with these tests; all applicable cases are covered (cases for removed Minecraft
-mechanics are obsolete).
+(`forge/src/test`) were compared with these tests; all applicable cases are part of the feature tests above (cases for
+removed Minecraft mechanics are obsolete).
 
 Excluded: client only code (models, tints, JEI, REI, ModMenu) and mixin classes (their code is merged into Minecraft
-classes, the tests check their behavior). On NeoForge `UniversalBucketItem` is changed by a mixin, so it is only
+classes, the tests check their behavior). On NeoForge `UniversalBucketItem` is changed by a mixin, so it is excluded from the NeoForge report and only
 measured by the Fabric run (the mixin adds the NeoForge methods `supportsEnchantment`/`isPrimaryItemFor`; the Mixin
 session id differs per run, so even the dumped classes of two runs do not match). Declaring both methods directly in
 `UniversalBucketItem` (like `getMaxStackSize(ItemStack)`) would make the mixin unnecessary and the class measurable on
@@ -118,6 +118,13 @@ as the bugs are fixed), code that only runs on clients (`CommonLoader.createLoot
 `.github/workflows/cicd-workflow.yml` runs build and game tests in one job (`gametest: true` of the shared build
 workflow of cech12/MinecraftModActions), then the server start test of the release jars (Fabric, NeoForge). Publishing
 on a tag needs both. `server-starttest-newest.yml` runs the server start test weekly with the newest versions.
+
+## Log output
+
+The game test logs only contain real problems and the "Known issue still present" warnings of the `KnownIssues`
+markers. `ExpectedLogs` hides the errors that BucketLib logs for the test fluid whose `getBucket()` throws (it would
+log a stack trace for every bucket when the creative tabs are built). REI is not loaded on the Fabric game test server
+(it logs an error for every brewing recipe there); it stays in the client run.
 
 ## Not tested automatically
 

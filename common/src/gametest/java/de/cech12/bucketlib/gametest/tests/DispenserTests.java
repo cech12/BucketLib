@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.material.Fluids;
 
 import java.util.Set;
+import net.minecraft.world.level.block.SlabBlock;
 
 /**
  * Dispensers use BucketLib buckets like vanilla buckets: picking up and placing fluids, blocks and entities.
@@ -46,6 +47,11 @@ public final class DispenserTests {
         tests.add("dispenser/drops_unusable_buckets_like_vanilla", DispenserTests::dropsUnusableBucketsLikeVanilla);
         tests.add("dispenser/milk_bucket_does_not_remove_water", DispenserTests::milkBucketDoesNotRemoveWater);
         tests.add("dispenser/ignores_other_items", DispenserTests::ignoresOtherItems);
+        tests.add("dispenser/picks_up_and_places_lava", DispenserTests::picksUpAndPlacesLava);
+        tests.add("dispenser/cracking_bucket_breaks", DispenserTests::crackingBucketBreaks);
+        tests.add("dispenser/damages_durability_bucket", DispenserTests::damagesDurabilityBucket);
+        tests.add("dispenser/waterlogs_blocks", DispenserTests::waterlogsBlocks);
+        tests.add("dispenser/picks_up_water_of_waterlogged_blocks", DispenserTests::picksUpWaterOfWaterloggedBlocks);
     }
 
     /** Places a dispenser with the stack that faces the target position (south) and powers it. */
@@ -208,6 +214,60 @@ public final class DispenserTests {
         // Fabric keeps the stone, NeoForge drops it like the default dispense behaviour (never happens in game: the behaviour is only registered for buckets)
         helper.assertTrue(result.is(Items.STONE) || result.isEmpty(), "stone was changed to " + result);
         helper.succeed();
+    }
+
+    public static void picksUpAndPlacesLava(GameTestHelper helper) {
+        helper.setBlock(TARGET, Blocks.LAVA);
+        DispenserBlockEntity dispenser = dispense(helper, TestUtils.bucket(TestBuckets.TEST_BUCKET));
+        helper.startSequence()
+                .thenWaitUntil(() -> TestUtils.assertEquals(helper, BucketLibUtil.getFluid(dispenser.getItem(0)), Fluids.LAVA, "fluid in the dispenser bucket"))
+                .thenExecute(() -> helper.assertBlockPresent(Blocks.AIR, TARGET))
+                .thenExecute(() -> {
+                    helper.setBlock(DISPENSER.west(), Blocks.AIR);
+                })
+                .thenIdle(2)
+                .thenExecute(() -> helper.setBlock(DISPENSER.west(), Blocks.REDSTONE_BLOCK))
+                .thenWaitUntil(() -> helper.assertTrue(helper.getBlockState(TARGET).getFluidState().isSourceOfType(Fluids.LAVA), "lava was not placed again"))
+                .thenExecute(() -> helper.assertTrue(BucketLibUtil.isEmpty(dispenser.getItem(0)), "dispenser bucket is not empty: " + TestUtils.describe(dispenser.getItem(0))))
+                .thenSucceed();
+    }
+
+    /** A dispensed cracking bucket places its fluid and breaks. */
+    public static void crackingBucketBreaks(GameTestHelper helper) {
+        DispenserBlockEntity dispenser = dispense(helper, TestUtils.withFluid(TestBuckets.CRACKING_BUCKET, Fluids.LAVA));
+        helper.succeedWhen(() -> {
+            helper.assertTrue(helper.getBlockState(TARGET).getFluidState().isSourceOfType(Fluids.LAVA), "lava was not placed");
+            helper.assertTrue(dispenser.getItem(0).isEmpty(), "cracking bucket did not break: " + TestUtils.describe(dispenser.getItem(0)));
+        });
+    }
+
+    /** A dispensed bucket with durability loses one point when it is emptied. */
+    public static void damagesDurabilityBucket(GameTestHelper helper) {
+        DispenserBlockEntity dispenser = dispense(helper, TestUtils.withFluid(TestBuckets.DURABILITY_BUCKET, Fluids.WATER));
+        helper.succeedWhen(() -> {
+            helper.assertTrue(helper.getBlockState(TARGET).getFluidState().isSource(), "water was not placed");
+            TestUtils.assertEquals(helper, dispenser.getItem(0).getDamageValue(), 1, "damage of the dispenser bucket");
+        });
+    }
+
+    /** Like a vanilla water bucket, a dispensed water bucket waterlogs the block in front of it. */
+    public static void waterlogsBlocks(GameTestHelper helper) {
+        helper.setBlock(TARGET, Blocks.OAK_SLAB);
+        DispenserBlockEntity dispenser = dispense(helper, TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER));
+        helper.succeedWhen(() -> {
+            helper.assertBlockProperty(TARGET, SlabBlock.WATERLOGGED, true);
+            helper.assertTrue(BucketLibUtil.isEmpty(dispenser.getItem(0)), "dispenser bucket is not empty: " + TestUtils.describe(dispenser.getItem(0)));
+        });
+    }
+
+    /** Like a vanilla bucket, a dispensed empty bucket takes the water of a waterlogged block. */
+    public static void picksUpWaterOfWaterloggedBlocks(GameTestHelper helper) {
+        helper.setBlock(TARGET, Blocks.OAK_SLAB.defaultBlockState().setValue(SlabBlock.WATERLOGGED, true));
+        DispenserBlockEntity dispenser = dispense(helper, TestUtils.bucket(TestBuckets.TEST_BUCKET));
+        helper.succeedWhen(() -> {
+            helper.assertBlockProperty(TARGET, SlabBlock.WATERLOGGED, false);
+            TestUtils.assertEquals(helper, BucketLibUtil.getFluid(dispenser.getItem(0)), Fluids.WATER, "fluid in the dispenser bucket");
+        });
     }
 
 }

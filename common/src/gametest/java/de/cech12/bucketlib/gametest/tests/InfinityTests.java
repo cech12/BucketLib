@@ -13,6 +13,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -39,6 +40,7 @@ public final class InfinityTests {
         tests.add("infinity/enabled/no_durability_loss", InfinityTests::noDurabilityLoss);
         tests.add("infinity/enabled/crafting_keeps_the_water", InfinityTests::craftingKeepsTheWater);
         tests.add("infinity/enabled/prevents_cracking", InfinityTests::preventsCracking);
+        tests.add("infinity/enabled/entity_buckets_are_not_enchantable", InfinityTests::entityBucketsAreNotEnchantable);
     }
 
     private static Holder<Enchantment> infinity(GameTestHelper helper) {
@@ -131,6 +133,15 @@ public final class InfinityTests {
             helper.assertFalse(TestBuckets.CRACKING_FLUIDS_BUCKET.item().isCracked(fluids), "Infinity bucket with water as cracking fluid is cracked");
             helper.assertTrue(TestBuckets.CRACKING_FLUIDS_BUCKET.item().getCraftingRemainder(fluids) != null, "Infinity bucket with water as cracking fluid has no crafting remainder");
         });
+    }
+
+    /** A bucket with water and an entity is no infinite water bucket, it cannot be enchanted with Infinity. */
+    public static void entityBucketsAreNotEnchantable(GameTestHelper helper) {
+        var infinity = helper.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.INFINITY);
+        ItemStack salmon = TestUtils.withEntity(TestBuckets.TEST_BUCKET, Fluids.WATER, EntityTypes.SALMON);
+        helper.assertTrue(de.cech12.bucketlib.gametest.GameTestPlatform.INSTANCE.canEnchant(TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER), infinity), "test setup broken: water bucket cannot get Infinity");
+        KnownIssues.run(helper, "KI-23 buckets with water and an entity can be enchanted with Infinity", Platforms.ALL, () ->
+                helper.assertFalse(de.cech12.bucketlib.gametest.GameTestPlatform.INSTANCE.canEnchant(salmon, infinity), "bucket with water and salmon can be enchanted with Infinity"));
     }
 
 }

@@ -47,6 +47,7 @@ public final class ContentTests {
         tests.add("content/item_instances", ContentTests::itemInstances);
         tests.add("content/removing_one_content_keeps_the_other", ContentTests::removingOneContentKeepsTheOther);
         tests.add("content/other_items_are_not_changed", ContentTests::otherItemsAreNotChanged);
+        tests.add("content/stacks_compare_by_content", ContentTests::stacksCompareByContent);
     }
 
     /** An empty bucket contains nothing. */
@@ -279,6 +280,16 @@ public final class ContentTests {
         helper.assertTrue(ItemStackUtil.copyStackWithSize(water, 0).isEmpty(), "copy with size 0 is not empty");
         ItemStack copy = ItemStackUtil.copyStackWithSize(TestUtils.bucket(TestBuckets.TEST_BUCKET), 5);
         TestUtils.assertEquals(helper, copy.getCount(), 5, "count of a copy");
+        helper.succeed();
+    }
+
+    /** Buckets with the same content are equal (they stack when empty and match recipes), different contents are not. */
+    public static void stacksCompareByContent(GameTestHelper helper) {
+        helper.assertTrue(ItemStack.isSameItemSameComponents(TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER), TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER)), "two water buckets differ");
+        helper.assertFalse(ItemStack.isSameItemSameComponents(TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER), TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.LAVA)), "water and lava bucket are equal");
+        helper.assertFalse(ItemStack.isSameItemSameComponents(TestUtils.withEntity(TestBuckets.TEST_BUCKET, Fluids.WATER, EntityTypes.COD), TestUtils.withEntity(TestBuckets.TEST_BUCKET, Fluids.WATER, EntityTypes.SALMON)), "cod and salmon bucket are equal");
+        helper.assertFalse(ItemStack.isSameItemSameComponents(TestUtils.bucket(TestBuckets.TEST_BUCKET), TestUtils.withMilk(TestBuckets.TEST_BUCKET)), "empty and milk bucket are equal");
+        helper.assertTrue(ItemStack.isSameItemSameComponents(BucketLibUtil.removeFluid(TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER), helper.getLevel(), null), TestUtils.bucket(TestBuckets.TEST_BUCKET)), "emptied bucket differs from a new bucket");
         helper.succeed();
     }
 
