@@ -100,6 +100,20 @@ public final class TestFluids {
     /** all test fluids in registration order */
     public static final List<Definition> ALL = List.of(HOT_GAS, NO_BUCKET_FLUID, FOREIGN_BUCKET_FLUID, MILK_BUCKET_FLUID, THROWING_BUCKET_FLUID);
 
+    /**
+     * true in the game test runs (system property {@code bucketlibtest.gameTestRun}, set by the gametest runs of the
+     * loaders), false in the client runs for manual tests.
+     */
+    public static final boolean GAME_TEST_RUN = Boolean.getBoolean("bucketlibtest.gameTestRun");
+
+    /**
+     * The test fluids that are registered. The fluids that simulate broken mods ({@link #MILK_BUCKET_FLUID} triggers
+     * KI-19 on NeoForge without milk fluid, {@link #THROWING_BUCKET_FLUID} logs an error for every bucket) are only
+     * registered in the game test runs, so that the creative inventory of the client runs keeps working.
+     */
+    public static final List<Definition> REGISTERED = GAME_TEST_RUN ? ALL
+            : ALL.stream().filter(definition -> definition != MILK_BUCKET_FLUID && definition != THROWING_BUCKET_FLUID).toList();
+
     private TestFluids() {}
 
     /**

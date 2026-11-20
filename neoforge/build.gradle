@@ -56,6 +56,7 @@ neoForge {
             gameDirectory = this.mkdir(this.file("runs/gametest"))
             loadedMods = [mods."${mod_id}", mods."${mod_id}test"]
             systemProperty('bucketlibtest.milkEnabled', 'false') // checked by meta/milk_fluid_matches_the_run
+            systemProperty('bucketlibtest.gameTestRun', 'true') // registers all test fluids (TestFluids.REGISTERED)
             programArguments.addAll '--tests', "${mod_id}:*".toString(), '--report', file('build/gametest-report.xml').getAbsolutePath()
         }
         // the same game tests with the NeoForge milk fluid enabled (NeoForgeMod.enableMilkFluid() by the test mod)
@@ -65,6 +66,7 @@ neoForge {
             gameDirectory = this.mkdir(this.file("runs/gametest-milk"))
             loadedMods = [mods."${mod_id}", mods."${mod_id}test"]
             systemProperty('bucketlibtest.milkEnabled', 'true')
+            systemProperty('bucketlibtest.gameTestRun', 'true')
             programArguments.addAll '--tests', "${mod_id}:*".toString(), '--report', file('build/gametest-milk-report.xml').getAbsolutePath()
         }
         data {

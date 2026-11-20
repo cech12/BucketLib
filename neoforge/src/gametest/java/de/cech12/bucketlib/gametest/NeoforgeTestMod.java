@@ -49,8 +49,8 @@ public final class NeoforgeTestMod {
 
     private static void register(RegisterEvent event) {
         event.register(Registries.BLOCK, helper -> helper.register(TestBlocks.INCOMPATIBLE_FLUID_SOURCE, TestBlocks.create()));
-        event.register(NeoForgeRegistries.Keys.FLUID_TYPES, helper -> TestFluids.ALL.forEach(definition -> helper.register(definition.id(), fluidType(definition))));
-        event.register(Registries.FLUID, helper -> TestFluids.ALL.forEach(definition -> {
+        event.register(NeoForgeRegistries.Keys.FLUID_TYPES, helper -> TestFluids.REGISTERED.forEach(definition -> helper.register(definition.id(), fluidType(definition))));
+        event.register(Registries.FLUID, helper -> TestFluids.REGISTERED.forEach(definition -> {
             FluidType type = fluidType(definition);
             TestFluids.TestFluid fluid = new TestFluids.TestFluid(definition) {
                 @Override
@@ -62,7 +62,7 @@ public final class NeoforgeTestMod {
             helper.register(definition.id(), fluid);
         }));
         event.register(Registries.ITEM, helper -> {
-            if (FLUIDS.size() != TestFluids.ALL.size()) {
+            if (FLUIDS.size() != TestFluids.REGISTERED.size()) {
                 throw new IllegalStateException("test fluids must be registered before the items");
             }
             FLUIDS.forEach((definition, fluid) -> {

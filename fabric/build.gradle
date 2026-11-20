@@ -48,6 +48,7 @@ loom {
             source(sourceSets.gametest)
             runDir('runs/gametest')
             property('fabric-api.gametest')
+            property('bucketlibtest.gameTestRun', 'true') // registers all test fluids (TestFluids.REGISTERED)
             property('fabric-api.gametest.filter', "${mod_id}:*".toString())
             property('fabric-api.gametest.report-file', file('build/gametest-report.xml').absolutePath)
         }

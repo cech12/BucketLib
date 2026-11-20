@@ -3,7 +3,7 @@
     "bucketlibtest:hot_gas",
     "bucketlibtest:no_bucket_fluid",
     "bucketlibtest:foreign_bucket_fluid",
-    "bucketlibtest:milk_bucket_fluid",
-    "bucketlibtest:throwing_bucket_fluid"
+    {"id": "bucketlibtest:milk_bucket_fluid", "required": false},
+    {"id": "bucketlibtest:throwing_bucket_fluid", "required": false}
   ]
 }

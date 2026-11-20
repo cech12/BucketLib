@@ -137,6 +137,7 @@ public final class MetaTests {
      * true), so a run that silently loses the milk fluid (or the property) fails here instead of testing the wrong case.
      */
     public static void milkFluidMatchesTheRun(GameTestHelper helper) {
+        helper.assertTrue(de.cech12.bucketlib.gametest.TestFluids.GAME_TEST_RUN, "system property bucketlibtest.gameTestRun is not set by the game test run");
         if (Platforms.isNeoForge()) {
             String property = System.getProperty("bucketlibtest.milkEnabled");
             helper.assertTrue(property != null, "system property bucketlibtest.milkEnabled is not set by the NeoForge game test run");

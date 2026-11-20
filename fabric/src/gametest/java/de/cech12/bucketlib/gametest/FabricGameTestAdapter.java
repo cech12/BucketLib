@@ -33,7 +33,7 @@ public final class FabricGameTestAdapter implements ModInitializer, IGameTestPla
         // test blocks
         Registry.register(BuiltInRegistries.BLOCK, TestBlocks.INCOMPATIBLE_FLUID_SOURCE, TestBlocks.create());
         // test fluids of other mods with their attributes and buckets
-        for (TestFluids.Definition definition : TestFluids.ALL) {
+        for (TestFluids.Definition definition : TestFluids.REGISTERED) {
             net.minecraft.world.level.material.Fluid fluid = Registry.register(BuiltInRegistries.FLUID, definition.id(), new TestFluids.TestFluid(definition) {});
             net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes.register(fluid, new net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler() {
                 @Override
