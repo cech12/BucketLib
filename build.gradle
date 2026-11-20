@@ -8,3 +8,68 @@ plugins {
     // see https://plugins.gradle.org/plugin/net.minecraftforge.accesstransformers
     id 'net.minecraftforge.accesstransformers' version '5.0.3' apply false
 }
+// ---------------------------------------------------------------------------------------------------------------------
+// Merged code coverage of the common code over the game tests of all loaders (see TESTING.md, "Code coverage"):
+// ./gradlew runGameTestServer jacocoMergedGameTestReport -> build/reports/jacoco/gametest/html/index.html
+// The common classes are taken from the Fabric build (every loader compiles the same common sources). Execution data
+// of all runs is merged, so common code counts as covered if any loader covers it. Loader specific classes have the
+// same names on every loader (BucketLibApi, ingredients, ...), so they cannot be merged: see the loader reports.
+// On NeoForge, UniversalBucketItem is changed by a mixin, so its NeoForge execution data does not match the class
+// file and is ignored; it is measured by the Fabric run.
+// ---------------------------------------------------------------------------------------------------------------------
+apply plugin: 'jacoco'
+
+repositories {
+    mavenCentral()
+}
+
+jacoco {
+    toolVersion = '0.8.14'
+}
+
+def coverageExcludes = [
+        'de/cech12/bucketlib/client/**',
+        'de/cech12/bucketlib/jei/**',
+        'de/cech12/bucketlib/rei/**',
+        'de/cech12/bucketlib/compat/**',
+        'de/cech12/bucketlib/mixin/**',
+        'de/cech12/bucketlib/platform/*ClientHelper*',
+]
+// class file patterns of the common sources (Foo.java -> Foo.class and Foo$*.class)
+def commonSourceDir = file('common/src/main/java')
+def commonClassPatterns = fileTree(commonSourceDir).matching { include '**/*.java' }.files.collect { source ->
+    def relative = commonSourceDir.toPath().relativize(source.toPath()).toString().replace(File.separator, '/')
+    def base = relative.substring(0, relative.length() - '.java'.length())
+    ["${base}.class".toString(), "${base}\$*.class".toString()]
+}.flatten()
+
+tasks.register('jacocoMergedGameTestReport', JacocoReport) {
+    group = 'verification'
+    description = 'Creates the merged code coverage report of the common code over the last game test runs of all loaders.'
+    mustRunAfter(':fabric:runGameTestServer', ':neoforge:runGameTestServer', ':neoforge:runGameTestServerMilk')
+    dependsOn(':fabric:classes') // the common classes are read from the Fabric build
+    executionData.from(fileTree('.').include('*/build/jacoco/run*GameTestServer*.exec'))
+    sourceDirectories.from(commonSourceDir)
+    classDirectories.from(fileTree('fabric/build/classes/java/main') { include commonClassPatterns; exclude coverageExcludes })
+    reports {
+        xml.required = true
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/gametest/html')
+        xml.outputLocation = layout.buildDirectory.file('reports/jacoco/gametest/jacoco.xml')
+    }
+    onlyIf { !executionData.filter { it.exists() }.isEmpty() }
+    doLast {
+        def xmlFile = reports.xml.outputLocation.get().asFile
+        def parser = new groovy.xml.XmlSlurper(false, false)
+        parser.setFeature('http://apache.org/xml/features/disallow-doctype-decl', false)
+        parser.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', false)
+        parser.parse(xmlFile).counter.each { counter ->
+            long missed = counter.@missed.toLong()
+            long covered = counter.@covered.toLong()
+            long total = missed + covered
+            logger.lifecycle(String.format('merged coverage %-11s %6.2f%% (%d of %d)', counter.@type.toString(),
+                    total == 0 ? 100.0d : covered * 100.0d / total, covered, total))
+        }
+        logger.lifecycle("Coverage report: ${reports.html.outputLocation.get().asFile}/index.html")
+    }
+}

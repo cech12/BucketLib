@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}test",
+  "version": "${version}",
+  "name": "${mod_name} Test Mod",
+  "description": "Test buckets and game tests of ${mod_name}. Never part of a release.",
+  "license": "${mod_license}",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "de.cech12.bucketlib.gametest.FabricGameTestAdapter"
+    ]
+  },
+  "depends": {
+    "${mod_id}": "*",
+    "fabric-gametest-api-v1": "*"
+  }
+}

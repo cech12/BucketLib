@@ -6,9 +6,12 @@ base {
     archivesName = "${mod_id}-neoforge"
 }
 
+// NeoforgeUniversalBucketItemMixin changes UniversalBucketItem, so its execution data never matches the class file
+// ("Classes in bundle 'neoforge' do not match with execution data"). It is measured by the Fabric run instead.
+jacocoCoverageExcludes.add('de/cech12/bucketlib/api/item/UniversalBucketItem.class')
+
 dependencies {
     compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
-    testCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
     runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 
     compileOnly("me.shedaniel:RoughlyEnoughItems-api-neoforge:$rei_version")
@@ -24,13 +27,14 @@ neoForge {
     if (at.exists()) {
         accessTransformers.from(at.absolutePath)
     }
-    addModdingDependenciesTo sourceSets.test
+    addModdingDependenciesTo sourceSets.gametest
     mods {
         "${mod_id}" {
             sourceSet sourceSets.main
         }
+        // test mod with the test buckets and the game tests (see TESTING.md), never part of a release
         "${mod_id}test" {
-            sourceSet sourceSets.test
+            sourceSet sourceSets.gametest
         }
     }
     runs {
@@ -38,11 +42,32 @@ neoForge {
             systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
             ideName = "NeoForge ${it.name.capitalize()} (${project.path})" // Unify the run config names with fabric
         }
+        // the client run contains the test mod for manual tests
         client {
             client()
             gameDirectory = this.mkdir(this.file("runs/client"))
-            sourceSet = sourceSets.test
+            sourceSet = sourceSets.gametest
             loadedMods = [mods."${mod_id}", mods."${mod_id}test"]
+        }
+        // GameTests (see TESTING.md): ./gradlew :neoforge:runGameTestServer (runs both game test servers)
+        gameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.gametest
+            gameDirectory = this.mkdir(this.file("runs/gametest"))
+            loadedMods = [mods."${mod_id}", mods."${mod_id}test"]
+            systemProperty('bucketlibtest.milkEnabled', 'false') // checked by meta/milk_fluid_matches_the_run
+            systemProperty('bucketlibtest.gameTestRun', 'true') // registers all test fluids (TestFluids.REGISTERED)
+            programArguments.addAll '--tests', "${mod_id}:*".toString(), '--report', file('build/gametest-report.xml').getAbsolutePath()
+        }
+        // the same game tests with the NeoForge milk fluid enabled (NeoForgeMod.enableMilkFluid() by the test mod)
+        gameTestServerMilk {
+            type = "gameTestServer"
+            sourceSet = sourceSets.gametest
+            gameDirectory = this.mkdir(this.file("runs/gametest-milk"))
+            loadedMods = [mods."${mod_id}", mods."${mod_id}test"]
+            systemProperty('bucketlibtest.milkEnabled', 'true')
+            systemProperty('bucketlibtest.gameTestRun', 'true')
+            programArguments.addAll '--tests', "${mod_id}:*".toString(), '--report', file('build/gametest-milk-report.xml').getAbsolutePath()
         }
         data {
             clientData()
@@ -63,8 +88,12 @@ neoForge {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-tasks.withType(Test).configureEach {
-    failOnNoDiscoveredTests = false
+// runGameTestServer (used by all loaders and the CI) also runs the game tests with the milk fluid
+tasks.named('runGameTestServer') {
+    finalizedBy 'runGameTestServerMilk'
+}
+tasks.named('runGameTestServerMilk') {
+    mustRunAfter 'runGameTestServer'
 }
 
 // Implement mcgradleconventions loader attribute

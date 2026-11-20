@@ -1,0 +1,8 @@
+{
+  "values": [
+    "bucketlibtest:durability_bucket",
+    "bucketlibtest:burning_bucket",
+    "bucketlibtest:freezing_bucket",
+    "bucketlibtest:config_bucket"
+  ]
+}
