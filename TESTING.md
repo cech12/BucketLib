@@ -18,6 +18,7 @@ without client code and mixin classes): `<loader>/build/reports/jacoco/gametest/
 common/src/gametest/java/.../gametest/   test logic (vanilla + BucketLib API only), shared by all loaders
   BucketLibGameTests                     central list of all test classes
   TestBuckets                            buckets of the test mod "bucketlibtest" (one per property combination)
+  TestFluids, TestBlocks                 fluids and blocks of "other mods" for the cases vanilla does not have
   KnownIssues                            marks known bugs ("deactivated" tests, see below)
   IGameTestPlatform                      loader specific operations (config, fluid API, ingredient sync, enchanting)
   tests/*Tests                           the tests, grouped by feature
@@ -60,6 +61,11 @@ test buckets are still available for manual tests.
 | KI-16 | NeoForge | `BucketLibUtil.containsFluid/isEmpty` throw for empty stacks | `content/empty_stack_has_no_content` |
 | KI-17 | NeoForge | fluid API fills fluids into buckets with a block (powder snow) | `fluid_api/does_not_fill_filled_buckets` |
 | KI-18 | NeoForge | empty ingredient with item tag shows no buckets (recipe viewers) | `ingredient/empty_tag` |
+| KI-19 | NeoForge without milk fluid | `canHoldFluid` crashes for a fluid of another mod whose bucket is the milk bucket (`getMilkFluid()` of an unbound fluid); this also breaks the creative tab contents of all BucketLib buckets | `modded_fluid/fluid_with_milk_bucket_cannot_be_held`, creative tab tests |
+| KI-20 | all | fluid ingredients crash in `items()` (recipe book, recipe viewers) if a fluid of the tag throws in `getBucket()` | `modded_fluid/fluid_ingredient_with_modded_fluids` |
+| KI-21 | all | buckets are not emptied into / filled from cauldrons exactly like vanilla buckets (e.g. partly filled cauldrons) | `cauldron/behaves_like_vanilla_buckets` |
+| KI-22 | all (milk: without milk fluid) | buckets with powder snow or milk pick up sulfur cubes | `entity/filled_buckets_do_not_pick_up_entities` |
+| KI-23 | all | buckets with water and an entity can be enchanted with Infinity | `infinity/enabled/entity_buckets_are_not_enchantable` |
 
 All known issues are confirmed by the game test runs of all loaders (a marker fails as soon as its bug is fixed).
 GitHub issues for them are not opened yet.
@@ -80,6 +86,8 @@ All test names are relative to `bucketlib:`. Every test runs on Fabric and NeoFo
 | Furnace | `furnace/*` | burn times, remainders, wet sponge, hoppers, fuel slot |
 | Fluid API | `fluid_api/*` | other mods reading, filling and draining buckets through the loader API |
 | Recipes | `ingredient/*`, `recipe/*`, `codec/*` | all ingredient types, crafting remainders, cake recipe, bucket filling recipes, dyeing, repairing, json and network codecs |
+| Fluids of other mods | `modded_fluid/*` | test fluids: own bucket and attributes (temperature, light, gas, name), no bucket, bucket of another fluid, milk bucket, throwing `getBucket()`, incompatible fluid source block |
+| Old test suites | `LegacySuiteTests` (prefix of the feature) | cases of the former Ceramic Bucket and BucketLib Forge tests: cauldrons like vanilla, dispenser with lava/breaking/durability/waterlogging, filled buckets and entities, inclusive temperature limits, Infinity with entities, stacked and creative variants |
 | Resources, setup | `resources/*`, `meta/*` | translations, textures, test buckets, cooking fuel, every test function has an instance, KnownIssues marker |
 
 ## Code coverage
@@ -91,9 +99,16 @@ Every game test run is measured with JaCoCo (only BucketLib classes):
 | `<loader>/build/reports/jacoco/gametest/html/index.html` | common + loader specific classes of one loader |
 | `build/reports/jacoco/gametest/html/index.html` (`./gradlew jacocoMergedGameTestReport`) | common classes, merged over all loaders |
 
+The old test suites of Ceramic Bucket (`CeramicBucket/forge/src/test`) and the former Forge tests of BucketLib
+(`forge/src/test`) were compared with these tests; all applicable cases are covered (cases for removed Minecraft
+mechanics are obsolete).
+
 Excluded: client only code (models, tints, JEI, REI, ModMenu) and mixin classes (their code is merged into Minecraft
 classes, the tests check their behavior). On NeoForge `UniversalBucketItem` is changed by a mixin, so it is only
-measured by the Fabric run. The remaining gaps are mostly the code paths of the known issues (they are covered as soon
+measured by the Fabric run (the mixin adds the NeoForge methods `supportsEnchantment`/`isPrimaryItemFor`; the Mixin
+session id differs per run, so even the dumped classes of two runs do not match). Declaring both methods directly in
+`UniversalBucketItem` (like `getMaxStackSize(ItemStack)`) would make the mixin unnecessary and the class measurable on
+NeoForge; this is a mod change for a later PR. The remaining gaps are mostly the code paths of the known issues (they are covered as soon
 as the bugs are fixed), code that only runs on clients (`CommonLoader.createLootContext`, `RegistryUtil.getRegistryAccess`,
 `IFluidHelper.getFluidTintColor`) or in production, and defensive code for fluids of other mods (e.g. fluids whose
 `getBucket()` throws) that would need test fluids.

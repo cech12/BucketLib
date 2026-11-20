@@ -7,6 +7,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
 /**
@@ -32,8 +34,44 @@ public final class NeoforgeTestMod {
         modEventBus.addListener(NeoforgeTestMod::registerCapabilities);
     }
 
+    /** test fluids of other mods (fluids can only be created while their registry is open) */
+    private static final java.util.Map<TestFluids.Definition, TestFluids.TestFluid> FLUIDS = new java.util.LinkedHashMap<>();
+    /** fluid types of the test fluids */
+    private static final java.util.Map<TestFluids.Definition, FluidType> FLUID_TYPES = new java.util.LinkedHashMap<>();
+
+    private static FluidType fluidType(TestFluids.Definition definition) {
+        return FLUID_TYPES.computeIfAbsent(definition, d -> new FluidType(FluidType.Properties.create()
+                .descriptionId("fluid." + TestBuckets.NAMESPACE + "." + d.name())
+                .temperature(d.temperature())
+                .lightLevel(d.lightLevel())
+                .density(d.lighterThanAir() ? -1000 : 1000)));
+    }
+
     private static void register(RegisterEvent event) {
-        event.register(Registries.ITEM, helper -> TestBuckets.ALL.forEach(bucket -> helper.register(bucket.id(), bucket.create())));
+        event.register(Registries.BLOCK, helper -> helper.register(TestBlocks.INCOMPATIBLE_FLUID_SOURCE, TestBlocks.create()));
+        event.register(NeoForgeRegistries.Keys.FLUID_TYPES, helper -> TestFluids.ALL.forEach(definition -> helper.register(definition.id(), fluidType(definition))));
+        event.register(Registries.FLUID, helper -> TestFluids.ALL.forEach(definition -> {
+            FluidType type = fluidType(definition);
+            TestFluids.TestFluid fluid = new TestFluids.TestFluid(definition) {
+                @Override
+                public FluidType getFluidType() {
+                    return type;
+                }
+            };
+            FLUIDS.put(definition, fluid);
+            helper.register(definition.id(), fluid);
+        }));
+        event.register(Registries.ITEM, helper -> {
+            if (FLUIDS.size() != TestFluids.ALL.size()) {
+                throw new IllegalStateException("test fluids must be registered before the items");
+            }
+            FLUIDS.forEach((definition, fluid) -> {
+                if (definition.bucketKind() == TestFluids.BucketKind.OWN_BUCKET) {
+                    helper.register(definition.bucketId(), definition.createBucket(fluid));
+                }
+            });
+            TestBuckets.ALL.forEach(bucket -> helper.register(bucket.id(), bucket.create()));
+        });
         event.register(Registries.TEST_FUNCTION, helper -> BucketLibGameTests.registerTestFunctions(helper::register));
         event.register(Registries.TEST_ENVIRONMENT_DEFINITION_TYPE, helper -> BucketLibGameTests.registerEnvironmentTypes(helper::register));
     }

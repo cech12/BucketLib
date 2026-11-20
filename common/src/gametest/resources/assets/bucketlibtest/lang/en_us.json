@@ -106,5 +106,11 @@
   "item.bucketlibtest.tab_bucket.filled": "Tab %s Bucket",
   "item.bucketlibtest.fuel_bucket": "Fuel Bucket",
   "item.bucketlibtest.fuel_bucket.entity": "Fuel Bucket of %s",
-  "item.bucketlibtest.fuel_bucket.filled": "Fuel %s Bucket"
+  "item.bucketlibtest.fuel_bucket.filled": "Fuel %s Bucket",
+  "fluid.bucketlibtest.hot_gas": "Hot Gas",
+  "fluid.bucketlibtest.no_bucket_fluid": "No Bucket Fluid",
+  "fluid.bucketlibtest.foreign_bucket_fluid": "Foreign Bucket Fluid",
+  "fluid.bucketlibtest.milk_bucket_fluid": "Milk Bucket Fluid",
+  "fluid.bucketlibtest.throwing_bucket_fluid": "Throwing Bucket Fluid",
+  "item.bucketlibtest.hot_gas_bucket": "Hot Gas Bucket"
 }

@@ -30,6 +30,36 @@ public final class FabricGameTestAdapter implements ModInitializer, IGameTestPla
 
     @Override
     public void onInitialize() {
+        // test blocks
+        Registry.register(BuiltInRegistries.BLOCK, TestBlocks.INCOMPATIBLE_FLUID_SOURCE, TestBlocks.create());
+        // test fluids of other mods with their attributes and buckets
+        for (TestFluids.Definition definition : TestFluids.ALL) {
+            net.minecraft.world.level.material.Fluid fluid = Registry.register(BuiltInRegistries.FLUID, definition.id(), new TestFluids.TestFluid(definition) {});
+            net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes.register(fluid, new net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler() {
+                @Override
+                public int getTemperature(FluidVariant variant) {
+                    return definition.temperature();
+                }
+
+                @Override
+                public int getLightEmission(FluidVariant variant) {
+                    return definition.lightLevel();
+                }
+
+                @Override
+                public boolean isLighterThanAir(FluidVariant variant) {
+                    return definition.lighterThanAir();
+                }
+
+                @Override
+                public net.minecraft.network.chat.Component getName(FluidVariant variant) {
+                    return net.minecraft.network.chat.Component.translatable("fluid." + TestBuckets.NAMESPACE + "." + definition.name());
+                }
+            });
+            if (definition.bucketKind() == TestFluids.BucketKind.OWN_BUCKET) {
+                Registry.register(BuiltInRegistries.ITEM, definition.bucketId(), definition.createBucket(fluid));
+            }
+        }
         // test buckets, registered like a mod that uses BucketLib would do it
         for (TestBuckets.Definition bucket : TestBuckets.ALL) {
             Registry.register(BuiltInRegistries.ITEM, bucket.id(), bucket.create());

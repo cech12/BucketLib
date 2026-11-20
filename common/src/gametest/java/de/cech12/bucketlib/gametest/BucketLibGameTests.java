@@ -12,9 +12,11 @@ import de.cech12.bucketlib.gametest.tests.FluidApiTests;
 import de.cech12.bucketlib.gametest.tests.FluidTests;
 import de.cech12.bucketlib.gametest.tests.FurnaceTests;
 import de.cech12.bucketlib.gametest.tests.IngredientTests;
+import de.cech12.bucketlib.gametest.tests.LegacySuiteTests;
 import de.cech12.bucketlib.gametest.tests.InfinityTests;
 import de.cech12.bucketlib.gametest.tests.MetaTests;
 import de.cech12.bucketlib.gametest.tests.MilkTests;
+import de.cech12.bucketlib.gametest.tests.ModdedFluidTests;
 import de.cech12.bucketlib.gametest.tests.PropertiesTests;
 import de.cech12.bucketlib.gametest.tests.RecipeTests;
 import de.cech12.bucketlib.gametest.tests.RegistrationTests;
@@ -61,6 +63,7 @@ public final class BucketLibGameTests {
             PropertiesTests.register(collector);
             ContentTests.register(collector);
             FluidTests.register(collector);
+            ModdedFluidTests.register(collector);
             CauldronTests.register(collector);
             BlockTests.register(collector);
             EntityTests.register(collector);
@@ -75,6 +78,7 @@ public final class BucketLibGameTests {
             RecipeTests.register(collector);
             CodecTests.register(collector);
             ResourceTests.register(collector);
+            LegacySuiteTests.register(collector);
             tests = Collections.unmodifiableMap(map);
         }
         return tests;

@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "bucketlib:infinity/enabled/entity_buckets_are_not_enchantable",
+  "environment": "bucketlib:infinity_enabled",
+  "structure": "bucketlib:platform",
+  "max_ticks": 100
+}
