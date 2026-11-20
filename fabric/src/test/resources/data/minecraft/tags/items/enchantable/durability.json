@@ -1,8 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "bucketlibtest:durability_bucket",
-    "bucketlibtest:burning_bucket",
-    "bucketlibtest:freezing_bucket"
-  ]
-}

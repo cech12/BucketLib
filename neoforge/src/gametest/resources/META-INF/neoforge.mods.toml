@@ -1,0 +1,14 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="${mod_license}"
+[[mods]]
+modId="${mod_id}test"
+version="${version}"
+displayName="${mod_name} Test Mod"
+description='''Test buckets and game tests of ${mod_name}. Never part of a release.'''
+[[dependencies.${mod_id}test]]
+modId="${mod_id}"
+type="required"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"

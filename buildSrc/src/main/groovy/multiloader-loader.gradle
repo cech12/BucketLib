@@ -1,5 +1,6 @@
 plugins {
     id 'multiloader-common'
+    id 'jacoco'
 }
 
 configurations {
@@ -13,12 +14,6 @@ configurations {
 
 dependencies {
     compileOnly(project(':common')) {
-        def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
-        attributes {
-            attribute(loaderAttribute, 'common')
-        }
-    }
-    testCompileOnly(project(':common')) {
         def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
         attributes {
             attribute(loaderAttribute, 'common')
@@ -48,4 +43,122 @@ tasks.named('sourcesJar', Jar) {
     from(configurations.commonJava)
     dependsOn(configurations.commonResources)
     from(configurations.commonResources)
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// GameTests
+// The test logic and the test mod "bucketlibtest" (test buckets) live in common/src/gametest. Each loader compiles it
+// together with its own thin adapter (<loader>/src/gametest) into the "gametest" source set, which is only used by the
+// runGameTestServer task and the client run, and is never part of the released jar.
+// ---------------------------------------------------------------------------------------------------------------------
+sourceSets {
+    gametest {
+        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+        runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
+    }
+}
+
+configurations {
+    commonGametestJava {
+        canBeResolved = true
+    }
+    commonGametestResources {
+        canBeResolved = true
+    }
+}
+
+dependencies {
+    commonGametestJava project(path: ':common', configuration: 'commonGametestJava')
+    commonGametestResources project(path: ':common', configuration: 'commonGametestResources')
+    // The common game tests compiled on their own (common:compileGametestJava). Two purposes:
+    // - IDE: the common sources are only added to the compileGametestJava task below, which IntelliJ does not see. With
+    //   the compiled classes on the compile classpath, IntelliJ resolves them in <loader>/src/gametest (like
+    //   compileOnly(project(':common')) for the main source set).
+    // - Build: the common game tests must compile against vanilla and the common code alone, which enforces "no loader
+    //   API in common tests". The loader still compiles the common sources itself (javac prefers them).
+    gametestCompileOnly project(path: ':common', configuration: 'commonGametestClasses')
+}
+
+tasks.named('compileGametestJava', JavaCompile) {
+    dependsOn(configurations.commonGametestJava)
+    source(configurations.commonGametestJava)
+}
+
+tasks.named('processGametestResources', ProcessResources) {
+    dependsOn(configurations.commonGametestResources)
+    from(configurations.commonGametestResources)
+    // the test mod needs its own pack.mcmeta - reuse the one of the main mod to avoid duplicate pack formats
+    from(project(':common').file('src/main/resources/pack.mcmeta'))
+    var gametestExpandProps = ['version': version, 'mod_id': mod_id, 'mod_name': mod_name, 'mod_license': mod_license]
+    filesMatching(['fabric.mod.json', 'META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
+        expand gametestExpandProps
+    }
+    inputs.properties(gametestExpandProps)
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Code coverage of the game tests (see TESTING.md, "Code coverage")
+// The game test server runs (JavaExec tasks run*GameTestServer*) get the JaCoCo agent, only for BucketLib classes.
+// jacocoGameTestReport writes an html and xml report of the BucketLib classes (common + loader code) to
+// <loader>/build/reports/jacoco/gametest. Client only code (models, JEI, REI, ModMenu) and mixin classes (their code
+// runs inside the Minecraft classes and cannot be measured) are excluded, their behavior is covered by the tests anyway.
+// ---------------------------------------------------------------------------------------------------------------------
+jacoco {
+    toolVersion = '0.8.14'
+}
+
+afterEvaluate {
+    tasks.withType(JavaExec).matching { it.name.startsWith('run') && it.name.contains('GameTestServer') }.configureEach { run ->
+        jacoco.applyTo(run)
+        run.jacoco {
+            destinationFile = layout.buildDirectory.file("jacoco/${run.name}.exec").get().asFile
+            includes = ['de.cech12.bucketlib.*']
+            excludes = ['de.cech12.bucketlib.gametest.*', 'de.cech12.bucketlib.mixin.*']
+            includeNoLocationClasses = true
+        }
+        run.finalizedBy('jacocoGameTestReport')
+    }
+}
+
+ext.jacocoCoverageExcludes = [
+        'de/cech12/bucketlib/client/**',
+        'de/cech12/bucketlib/jei/**',
+        'de/cech12/bucketlib/rei/**',
+        'de/cech12/bucketlib/compat/**',
+        'de/cech12/bucketlib/mixin/**',
+        'de/cech12/bucketlib/platform/*ClientHelper*',
+]
+
+tasks.register('jacocoGameTestReport', JacocoReport) {
+    group = 'verification'
+    description = 'Creates the code coverage report of the last game test run (runGameTestServer).'
+    executionData.from(fileTree(layout.buildDirectory.dir('jacoco')).include('run*GameTestServer*.exec'))
+    sourceDirectories.from(sourceSets.main.java.srcDirs, project(':common').sourceSets.main.java.srcDirs)
+    classDirectories.from(sourceSets.main.output.classesDirs.collect { dir ->
+        fileTree(dir) { exclude jacocoCoverageExcludes }
+    })
+    reports {
+        xml.required = true
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/gametest/html')
+        xml.outputLocation = layout.buildDirectory.file('reports/jacoco/gametest/jacoco.xml')
+    }
+    onlyIf { !executionData.filter { it.exists() }.isEmpty() }
+    doLast {
+        def xmlFile = reports.xml.outputLocation.get().asFile
+        if (xmlFile.exists()) {
+            def parser = new groovy.xml.XmlSlurper(false, false)
+            parser.setFeature('http://apache.org/xml/features/disallow-doctype-decl', false)
+            parser.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', false)
+            def report = parser.parse(xmlFile)
+            report.counter.each { counter ->
+                long missed = counter.@missed.toLong()
+                long covered = counter.@covered.toLong()
+                long total = missed + covered
+                logger.lifecycle(String.format('%s coverage %-11s %6.2f%% (%d of %d)', project.name, counter.@type.toString(),
+                        total == 0 ? 100.0d : covered * 100.0d / total, covered, total))
+            }
+            logger.lifecycle("Coverage report: ${reports.html.outputLocation.get().asFile}/index.html")
+        }
+    }
 }
