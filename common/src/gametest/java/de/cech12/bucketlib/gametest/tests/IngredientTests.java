@@ -193,9 +193,12 @@ public final class IngredientTests {
                 assertDisplayed(helper, ingredient, "empty ingredient (#dyeable)", List.of(TestBuckets.COLORED_BUCKET.item()), List.of()));
     }
 
-    private static void assertMatchesNothing(GameTestHelper helper, String type, String field) {
-        Ingredient ingredient = TestUtils.noException(helper, "decoding an ingredient with unknown " + type,
+    private static Ingredient unknown(GameTestHelper helper, String type, String field) {
+        return TestUtils.noException(helper, "decoding an ingredient with unknown " + type,
                 () -> TestUtils.ingredient(helper, type, Map.of(field, "bucketlibtest:not_existing")));
+    }
+
+    private static void assertMatchesNothing(GameTestHelper helper, String type, Ingredient ingredient) {
         for (ItemStack stack : List.of(TestUtils.bucket(TestBuckets.TEST_BUCKET), TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER),
                 new ItemStack(Items.BUCKET), new ItemStack(Items.SALMON_BUCKET), new ItemStack(Items.POWDER_SNOW_BUCKET))) {
             boolean matches = TestUtils.noException(helper, "testing an ingredient with unknown " + type, () -> ingredient.test(stack));
@@ -205,10 +208,14 @@ public final class IngredientTests {
 
     /** Ingredients with unknown ids (e.g. of a removed mod) do not crash the recipe matching and match nothing. */
     public static void unknownIdsMatchNothing(GameTestHelper helper) {
-        assertMatchesNothing(helper, "fluid", "fluid");
-        KnownIssues.check(helper, "KI-15 empty ingredient with an unknown item accepts every empty bucket", Platforms.ALL, () -> assertMatchesNothing(helper, "empty", "item"));
-        KnownIssues.check(helper, "KI-13 entity ingredients with unknown ids crash the recipe matching", Platforms.ALL, () -> assertMatchesNothing(helper, "entity", "entity"));
-        KnownIssues.check(helper, "KI-13 block ingredients with unknown ids crash the recipe matching", Platforms.ALL, () -> assertMatchesNothing(helper, "block", "block"));
+        // decoded outside the markers, so that a broken setup is not hidden as known issue
+        assertMatchesNothing(helper, "fluid", unknown(helper, "fluid", "fluid"));
+        Ingredient empty = unknown(helper, "empty", "item");
+        Ingredient entity = unknown(helper, "entity", "entity");
+        Ingredient block = unknown(helper, "block", "block");
+        KnownIssues.check(helper, "KI-15 empty ingredient with an unknown item accepts every empty bucket", Platforms.ALL, () -> assertMatchesNothing(helper, "empty", empty));
+        KnownIssues.check(helper, "KI-13 entity ingredients with unknown ids crash the recipe matching", Platforms.ALL, () -> assertMatchesNothing(helper, "entity", entity));
+        KnownIssues.check(helper, "KI-13 block ingredients with unknown ids crash the recipe matching", Platforms.ALL, () -> assertMatchesNothing(helper, "block", block));
         helper.succeed();
     }
 

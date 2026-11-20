@@ -49,7 +49,7 @@ test buckets are still available for manual tests.
 | KI-3 | NeoForge (milk) | bucket filled with the milk fluid through the fluid API is no drinkable milk bucket | `milk/milk_fluid_of_other_mods_can_be_drunk` |
 | KI-4 | Fabric | dispensers keep unusable buckets instead of dropping them like vanilla | `dispenser/drops_unusable_buckets_like_vanilla` |
 | KI-5 | Fabric | dispensed milk bucket removes a water source in front of it | `dispenser/milk_bucket_does_not_remove_water` |
-| KI-6 | all | Infinity does not prevent cracking by cracking fluids (operator precedence in `isCracked`) | `infinity/enabled/prevents_cracking` |
+| KI-6 | all | Infinity does not prevent cracking by cracking fluids and the upper cracking temperature (operator precedence in `isCracked`) | `infinity/enabled/prevents_cracking` |
 | KI-7 | all | furnace fuel checks (hopper, furnace menu) use client classes (`CommonLoader.createLootContext`) and crash on dedicated servers | `furnace/fuel_rules_work_on_a_dedicated_server` |
 | KI-8 | all | fluid ingredient accepts buckets with water and an entity (entity is destroyed when crafting) | `ingredient/fluid_does_not_accept_buckets_with_entities` |
 | KI-9 | all | bucket filling recipes fail to load if the first bucket of the ingredients cannot hold the content | `recipe/bucket_filling_with_several_buckets` |
@@ -64,9 +64,10 @@ test buckets are still available for manual tests.
 | KI-18 | NeoForge | empty ingredient with item tag shows no buckets (recipe viewers) | `ingredient/empty_tag` |
 | KI-19 | NeoForge without milk fluid | `canHoldFluid` crashes for a fluid of another mod whose bucket is the milk bucket (`getMilkFluid()` of an unbound fluid); this also breaks the creative tab contents of all BucketLib buckets | `modded_fluid/fluid_with_milk_bucket_cannot_be_held`, creative tab tests |
 | KI-20 | all | fluid ingredients crash in `items()` (recipe book, recipe viewers) if a fluid of the tag throws in `getBucket()` | `modded_fluid/fluid_ingredient_with_modded_fluids` |
-| KI-21 | all | buckets are not emptied into / filled from cauldrons exactly like vanilla buckets (e.g. partly filled cauldrons) | `cauldron/behaves_like_vanilla_buckets` |
+| KI-21 | all | filled buckets are not emptied into cauldrons that are not empty like vanilla buckets (they place the content above the cauldron; all other combinations match vanilla) | `cauldron/behaves_like_vanilla_buckets` |
 | KI-22 | all (milk: without milk fluid) | buckets with powder snow or milk pick up sulfur cubes | `entity/filled_buckets_do_not_pick_up_entities` |
 | KI-23 | all | buckets with water and an entity can be enchanted with Infinity | `infinity/enabled/entity_buckets_are_not_enchantable` |
+| KI-24 | all | filling and emptying buckets does not count the "used" statistic of the bucket (vanilla buckets do) | `fluid/picks_up_*`, `fluid/places_*` |
 
 All known issues are confirmed by the game test runs of all loaders (a marker fails as soon as its bug is fixed).
 GitHub issues for them are not opened yet.
@@ -88,7 +89,7 @@ All test names are relative to `bucketlib:`. Every test runs on Fabric and NeoFo
 | Fluid API | `fluid_api/*` | other mods reading, filling and draining buckets through the loader API |
 | Recipes | `ingredient/*`, `recipe/*`, `codec/*` | all ingredient types, crafting remainders, cake recipe, bucket filling recipes, dyeing, repairing, json and network codecs |
 | Fluids of other mods | `modded_fluid/*` | test fluids: own bucket and attributes (temperature, light, gas, name), no bucket, bucket of another fluid, milk bucket, throwing `getBucket()`, incompatible fluid source block |
-| Resources, setup | `resources/*`, `meta/*` | translations, textures, test buckets, cooking fuel, every test function has an instance, KnownIssues marker |
+| Resources, setup | `resources/*`, `meta/*` | translations, textures, test buckets, cooking fuel, every test function has an instance, KnownIssues marker, milk fluid of the NeoForge runs |
 
 ## Code coverage
 
@@ -124,7 +125,8 @@ on a tag needs both. `server-starttest-newest.yml` runs the server start test we
 The game test logs only contain real problems and the "Known issue still present" warnings of the `KnownIssues`
 markers. `ExpectedLogs` hides the errors that BucketLib logs for the test fluid whose `getBucket()` throws (it would
 log a stack trace for every bucket when the creative tabs are built). REI is not loaded on the Fabric game test server
-(it logs an error for every brewing recipe there); it stays in the client run.
+(it logs an error for every brewing recipe there); it stays in the client run. The generated IDE run configuration
+"Fabric GameTest Server" uses the module classpath and still loads REI, so these errors can appear there.
 
 ## Not tested automatically
 

@@ -226,17 +226,21 @@ public final class CauldronTests {
             cauldrons.add(Blocks.POWDER_SNOW_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, level));
         }
         List<String> differences = new ArrayList<>();
+        List<String> knownDifferences = new ArrayList<>();
         for (BlockState cauldron : cauldrons) {
             for (Content content : Content.values()) {
                 Outcome vanilla = useOn(helper, VANILLA, cauldron, new ItemStack(content.vanillaBucket), true);
                 Outcome bucketLib = TestUtils.noException(helper, content + " on " + cauldron, () -> useOn(helper, BUCKETLIB, cauldron, content.bucketLib(), false));
                 if (!vanilla.equals(bucketLib)) {
-                    differences.add(content + " on " + cauldron + ": vanilla " + vanilla + ", BucketLib " + bucketLib);
+                    // KI-21: a filled bucket on a cauldron that is not empty places its content above the cauldron
+                    boolean known = content != Content.EMPTY && !cauldron.is(Blocks.CAULDRON);
+                    (known ? knownDifferences : differences).add(content + " on " + cauldron + ": vanilla " + vanilla + ", BucketLib " + bucketLib);
                 }
             }
         }
-        KnownIssues.run(helper, "KI-21 buckets are not emptied into partly filled cauldrons like vanilla buckets", Platforms.ALL, () ->
-                helper.assertTrue(differences.isEmpty(), differences.size() + " differences to vanilla buckets: " + differences));
+        helper.assertTrue(differences.isEmpty(), differences.size() + " differences to vanilla buckets: " + differences);
+        KnownIssues.run(helper, "KI-21 filled buckets are not emptied into cauldrons that are not empty like vanilla buckets", Platforms.ALL, () ->
+                helper.assertTrue(knownDifferences.isEmpty(), knownDifferences.size() + " differences to vanilla buckets: " + knownDifferences));
     }
 
     /** From a stack of empty buckets one is filled from a cauldron and put into the inventory. */

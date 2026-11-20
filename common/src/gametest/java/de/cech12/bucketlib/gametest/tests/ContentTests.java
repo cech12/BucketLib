@@ -188,7 +188,9 @@ public final class ContentTests {
         helper.assertTrue(BucketLibUtil.getEntityType(stack) == null, "unknown entity type is found");
         helper.assertTrue(BucketLibUtil.getBlock(stack) == null, "unknown block is found");
         Component name = TestUtils.noException(helper, "name of a bucket with unknown content", () -> stack.getHoverName());
-        helper.assertTrue(name.getString().contains("?") || name.getContents() instanceof TranslatableContents, "name of a bucket with an unknown entity: " + name);
+        helper.assertTrue(name.getContents() instanceof TranslatableContents contents && contents.getArgs().length == 1
+                && String.valueOf(contents.getArgs()[0] instanceof Component argument ? argument.getString() : contents.getArgs()[0]).equals("?"),
+                "name of a bucket with an unknown entity has not '?' as argument: " + name);
         helper.succeed();
     }
 

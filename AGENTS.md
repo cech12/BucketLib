@@ -26,7 +26,7 @@ recipes. The complete feature catalog and the tests are in [TESTING.md](TESTING.
 ## Build and test
 
 ```bash
-./gradlew build                                        # all loaders
+./gradlew build                                        # all loaders (does not compile the game tests)
 ./gradlew runGameTestServer                            # game tests of all loaders (NeoForge also with milk fluid)
 ./gradlew :fabric:runGameTestServer                    # one loader (also :neoforge:)
 ./gradlew runGameTestServer jacocoMergedGameTestReport # + coverage of the common code over all loaders

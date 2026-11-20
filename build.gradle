@@ -47,6 +47,7 @@ tasks.register('jacocoMergedGameTestReport', JacocoReport) {
     group = 'verification'
     description = 'Creates the merged code coverage report of the common code over the last game test runs of all loaders.'
     mustRunAfter(':fabric:runGameTestServer', ':neoforge:runGameTestServer', ':neoforge:runGameTestServerMilk')
+    dependsOn(':fabric:classes') // the common classes are read from the Fabric build
     executionData.from(fileTree('.').include('*/build/jacoco/run*GameTestServer*.exec'))
     sourceDirectories.from(commonSourceDir)
     classDirectories.from(fileTree('fabric/build/classes/java/main') { include commonClassPatterns; exclude coverageExcludes })

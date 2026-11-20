@@ -32,6 +32,7 @@ public final class MetaTests {
         tests.add("meta/platform_name_matches_the_loader", MetaTests::platformNameMatchesTheLoader);
         tests.add("meta/test_buckets_are_registered", MetaTests::testBucketsAreRegistered);
         tests.add("meta/known_issue_marker_works", MetaTests::knownIssueMarkerWorks);
+        tests.add("meta/milk_fluid_matches_the_run", MetaTests::milkFluidMatchesTheRun);
     }
 
     /**
@@ -128,6 +129,21 @@ public final class MetaTests {
             notAffectedFailed = true;
         }
         helper.assertTrue(notAffectedFailed, "KnownIssues hides failures on not affected platforms");
+        helper.succeed();
+    }
+
+    /**
+     * The NeoForge runs set the system property bucketlibtest.milkEnabled (gameTestServer: false, gameTestServerMilk:
+     * true), so a run that silently loses the milk fluid (or the property) fails here instead of testing the wrong case.
+     */
+    public static void milkFluidMatchesTheRun(GameTestHelper helper) {
+        if (Platforms.isNeoForge()) {
+            String property = System.getProperty("bucketlibtest.milkEnabled");
+            helper.assertTrue(property != null, "system property bucketlibtest.milkEnabled is not set by the NeoForge game test run");
+            TestUtils.assertEquals(helper, Services.FLUID.hasMilkFluid(), Boolean.parseBoolean(property), "milk fluid enabled");
+        } else {
+            helper.assertFalse(Services.FLUID.hasMilkFluid(), "Fabric has a milk fluid");
+        }
         helper.succeed();
     }
 

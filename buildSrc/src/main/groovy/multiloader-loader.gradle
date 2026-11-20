@@ -144,6 +144,7 @@ tasks.register('jacocoGameTestReport', JacocoReport) {
         xml.outputLocation = layout.buildDirectory.file('reports/jacoco/gametest/jacoco.xml')
     }
     onlyIf { !executionData.filter { it.exists() }.isEmpty() }
+    def projectName = project.name
     doLast {
         def xmlFile = reports.xml.outputLocation.get().asFile
         if (xmlFile.exists()) {
@@ -155,7 +156,7 @@ tasks.register('jacocoGameTestReport', JacocoReport) {
                 long missed = counter.@missed.toLong()
                 long covered = counter.@covered.toLong()
                 long total = missed + covered
-                logger.lifecycle(String.format('%s coverage %-11s %6.2f%% (%d of %d)', project.name, counter.@type.toString(),
+                logger.lifecycle(String.format('%s coverage %-11s %6.2f%% (%d of %d)', projectName, counter.@type.toString(),
                         total == 0 ? 100.0d : covered * 100.0d / total, covered, total))
             }
             logger.lifecycle("Coverage report: ${reports.html.outputLocation.get().asFile}/index.html")

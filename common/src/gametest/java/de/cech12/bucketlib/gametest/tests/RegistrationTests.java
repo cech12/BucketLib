@@ -207,7 +207,7 @@ public final class RegistrationTests {
         helper.assertTrue(containsSame(ingredients, TestUtils.bucket(TestBuckets.TAB_BUCKET)), "Ingredients does not contain the tab bucket");
         helper.assertFalse(containsSame(tools, TestUtils.bucket(TestBuckets.TAB_BUCKET)), "Tools & Utilities contains the tab bucket");
         // the temperature bucket cannot hold lava, so there is no lava variant
-        helper.assertFalse(containsSame(tools, TestUtils.withFluid(TestBuckets.TEMPERATURE_BUCKET, Fluids.LAVA)) && BucketLibUtil.containsFluid(TestUtils.withFluid(TestBuckets.TEMPERATURE_BUCKET, Fluids.LAVA)), "Tools & Utilities contains a lava temperature bucket");
+        helper.assertFalse(tools.stream().anyMatch(stack -> stack.is(TestBuckets.TEMPERATURE_BUCKET.item()) && BucketLibUtil.getFluid(stack) == Fluids.LAVA), "Tools & Utilities contains a lava temperature bucket");
         helper.assertFalse(tools.stream().anyMatch(stack -> stack.is(TestBuckets.NO_ENTITIES_BUCKET.item()) && BucketLibUtil.containsEntityType(stack)), "Tools & Utilities contains a no entities bucket with an entity");
         helper.assertFalse(tools.stream().anyMatch(stack -> stack.is(TestBuckets.NO_BLOCKS_BUCKET.item()) && BucketLibUtil.containsBlock(stack)), "Tools & Utilities contains a no blocks bucket with a block");
         helper.succeed();

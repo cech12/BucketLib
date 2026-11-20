@@ -268,11 +268,8 @@ public final class EntityTests {
                 .filter(entry -> nautilus.isFood(new ItemStack(entry.getValue())))
                 .map(entry -> TestUtils.withEntity(TestBuckets.TEST_BUCKET, entry.getKey() == EntityTypes.SULFUR_CUBE ? null : Fluids.WATER, entry.getKey()))
                 .findFirst().orElse(null);
-        if (food == null) {
-            // no vanilla bucket tames a nautilus in this Minecraft version
-            helper.succeed();
-            return;
-        }
+        // fails visibly if Minecraft changes the nautilus food (then this test and nautilus_food_like_vanilla_buckets must be adapted)
+        helper.assertTrue(food != null, "no vanilla bucket with an entity tames a nautilus");
         ServerPlayer player = TestUtils.player(helper, GameType.SURVIVAL, food);
         interact(player, nautilus);
         ItemStack hand = player.getMainHandItem();
