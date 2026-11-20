@@ -139,6 +139,7 @@ public final class InfinityTests {
             ItemStack plain = TestUtils.withFluid(TestBuckets.CONFIG_BUCKET, Fluids.WATER);
             helper.assertTrue(TestBuckets.CONFIG_BUCKET.item().isCracked(plain), "test setup broken: water does not crack without Infinity");
             ItemStack upper = enchanted(helper, plain.copy());
+            helper.assertTrue(BucketLibUtil.isAffectedByInfinityEnchantment(upper), "test setup broken: not affected by Infinity");
             KnownIssues.check(helper, "KI-6 Infinity does not prevent cracking by the upper cracking temperature", Platforms.ALL, () ->
                     helper.assertFalse(TestBuckets.CONFIG_BUCKET.item().isCracked(upper), "Infinity bucket above the upper cracking temperature is cracked"));
         } finally {

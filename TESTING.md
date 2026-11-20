@@ -28,7 +28,8 @@ common/src/gametest/resources/           test instances, environments, test mod 
 ```
 
 The old `src/test` test mods were moved into the gametest source sets; the client runs load the test mod, so the
-test buckets are still available for manual tests.
+test buckets are still available for manual tests. `meta/milk_fluid_matches_the_run` needs the system property
+`bucketlibtest.milkEnabled` of the NeoForge game test runs, so it fails when started by hand in the NeoForge client.
 
 ### Writing a new test
 
