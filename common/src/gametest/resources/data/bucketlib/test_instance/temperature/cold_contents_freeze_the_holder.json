@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "bucketlib:temperature/cold_contents_freeze_the_holder",
+  "environment": "bucketlib:default",
+  "structure": "bucketlib:platform",
+  "max_ticks": 100
+}

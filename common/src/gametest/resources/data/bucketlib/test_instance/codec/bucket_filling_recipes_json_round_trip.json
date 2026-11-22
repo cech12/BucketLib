@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "bucketlib:codec/bucket_filling_recipes_json_round_trip",
+  "environment": "bucketlib:default",
+  "structure": "bucketlib:platform",
+  "max_ticks": 100
+}

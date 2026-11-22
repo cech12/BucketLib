@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "bucketlib:meta/platform_name_matches_the_loader",
+  "environment": "bucketlib:default",
+  "structure": "bucketlib:platform",
+  "max_ticks": 100
+}

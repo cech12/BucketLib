@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "bucketlib:resources/test_buckets_have_models_and_names",
+  "environment": "bucketlib:default",
+  "structure": "bucketlib:platform",
+  "max_ticks": 100
+}

@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "bucketlib:codec/buckets_are_synced",
+  "environment": "bucketlib:default",
+  "structure": "bucketlib:platform",
+  "max_ticks": 100
+}

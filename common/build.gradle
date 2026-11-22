@@ -24,6 +24,14 @@ dependencies {
     compileOnlyApi("me.shedaniel:RoughlyEnoughItems-default-plugin:$rei_version")
 }
 
+sourceSets {
+    // game test logic shared by all loaders (see TESTING.md)
+    gametest {
+        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+    }
+}
+neoForge.addModdingDependenciesTo(sourceSets.gametest)
+
 configurations {
     commonJava {
         canBeResolved = false
@@ -33,11 +41,31 @@ configurations {
         canBeResolved = false
         canBeConsumed = true
     }
+    commonGametestJava {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+    commonGametestResources {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+    // compiled game tests (against vanilla only), see multiloader-loader.gradle
+    commonGametestClasses {
+        canBeResolved = false
+        canBeConsumed = true
+    }
 }
 
 artifacts {
     commonJava sourceSets.main.java.sourceDirectories.singleFile
     commonResources sourceSets.main.resources.sourceDirectories.singleFile
+    commonGametestJava sourceSets.gametest.java.sourceDirectories.singleFile
+    commonGametestResources sourceSets.gametest.resources.sourceDirectories.singleFile
+    sourceSets.gametest.output.classesDirs.each { dir ->
+        commonGametestClasses(dir) {
+            builtBy tasks.named('compileGametestJava')
+        }
+    }
 }
 
 

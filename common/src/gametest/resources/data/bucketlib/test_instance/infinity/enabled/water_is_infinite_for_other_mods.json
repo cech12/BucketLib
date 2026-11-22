@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "bucketlib:infinity/enabled/water_is_infinite_for_other_mods",
+  "environment": "bucketlib:infinity_enabled",
+  "structure": "bucketlib:platform",
+  "max_ticks": 100
+}

@@ -1,0 +1,11 @@
+# Known harmless lines of the server log that the server start test ignores, in addition to the built-in ones of
+# scripts/server-starttest.sh in cech12/MinecraftModActions (Netty kqueue probing, LAN advertising in containers).
+# One extended regex per line. Keep the patterns as specific as possible and add the reason.
+
+# REI 26.3.823 (integrations run, NeoForge): its own plugins load the client class LocalPlayer on a dedicated server
+# (DefaultPlugin/DefaultRuntimePlugin "plugin failed to reloadable-plugin"). BucketLib does not use LocalPlayer.
+# Still in 26.3.824. Remove both entries when https://github.com/shedaniel/RoughlyEnoughItems/issues/2087 is fixed.
+Caused by: java\.lang\.ClassNotFoundException: net\.minecraft\.client\.player\.LocalPlayer$
+# REI (integrations run): after the failed plugins it cannot build displays on the server, for every recipe incl.
+# vanilla ones (here matched because of BucketLib recipes like bucketlib:cake)
+\[Server thread/ERROR\] \[REI/\]: \[REI\] Failed to fill display for recipe: 

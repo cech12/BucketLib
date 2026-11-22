@@ -26,12 +26,13 @@ loom {
         accessWidenerPath.set(aw)
     }
     runs {
+        // the client run contains the test mod "bucketlibtest" (test buckets) for manual tests
         client {
             client()
             setConfigName('Fabric Client')
             ideConfigGenerated(true)
             runDir('runs/client')
-            source sourceSets.test
+            source sourceSets.gametest
         }
         server {
             server()
@@ -39,11 +40,27 @@ loom {
             ideConfigGenerated(true)
             runDir('runs/server')
         }
+        // GameTests (see TESTING.md): ./gradlew :fabric:runGameTestServer
+        gameTestServer {
+            server()
+            setConfigName('Fabric GameTest Server')
+            ideConfigGenerated(true)
+            source(sourceSets.gametest)
+            runDir('runs/gametest')
+            property('fabric-api.gametest')
+            property('bucketlibtest.gameTestRun', 'true') // registers all test fluids (TestFluids.REGISTERED)
+            property('fabric-api.gametest.filter', "${mod_id}:*".toString())
+            property('fabric-api.gametest.report-file', file('build/gametest-report.xml').absolutePath)
+        }
     }
 }
 
-tasks.withType(Test).configureEach {
-    failOnNoDiscoveredTests = false
+// REI is only needed in the client run. On the game test server it only logs errors for every brewing recipe
+// ("Failed to fill display for recipe"), so it is removed from the classpath of the game test run.
+afterEvaluate {
+    tasks.named('runGameTestServer', JavaExec) {
+        classpath = classpath.filter { !it.name.startsWith('RoughlyEnoughItems') }
+    }
 }
 
 // Implement mcgradleconventions loader attribute
