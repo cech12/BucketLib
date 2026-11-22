@@ -409,6 +409,10 @@ public class UniversalBucketItem extends Item {
             return null;
         }
         if (BucketLibUtil.isAffectedByInfinityEnchantment(itemInstance)) {
+            if (BucketLibUtil.containsEntityType(itemInstance)) {
+                //the fluid is infinite, the entity is not: it is used up by the recipe (otherwise it would be duplicated)
+                return ItemStackTemplate.fromNonEmptyStack(BucketLibUtil.removeEntityData(BucketLibUtil.getItemStack(itemInstance).copy(), null, null, false)); //ServerLevel not available here
+            }
             return BucketLibUtil.getItemStackTemplate(itemInstance);
         }
         //remove everything from bucket

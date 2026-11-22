@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "bucketlib:infinity/enabled/placing_an_entity_keeps_the_water",
+  "environment": "bucketlib:infinity_enabled",
+  "structure": "bucketlib:platform",
+  "max_ticks": 100
+}

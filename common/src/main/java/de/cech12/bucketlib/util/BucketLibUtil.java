@@ -179,9 +179,8 @@ public class BucketLibUtil {
         }
         if (getItem(itemInstance) instanceof UniversalBucketItem bucket) {
             Fluid fluid = getFluid(itemInstance);
-            //buckets with an entity are no infinite fluid buckets (the entity would be duplicated)
+            //also buckets with an entity: placing releases the entity and keeps the fluid
             return fluid != Fluids.EMPTY
-                    && !containsEntityType(itemInstance)
                     && fluid.defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)
                     && bucket.canHoldFluid(fluid);
         }
