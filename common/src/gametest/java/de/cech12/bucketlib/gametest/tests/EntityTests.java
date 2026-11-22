@@ -1,8 +1,6 @@
 package de.cech12.bucketlib.gametest.tests;
 
 import de.cech12.bucketlib.gametest.BucketLibGameTests;
-import de.cech12.bucketlib.gametest.KnownIssues;
-import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import de.cech12.bucketlib.platform.Services;
@@ -32,7 +30,6 @@ import net.minecraft.world.level.material.Fluids;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Picking up and releasing entities (fish, axolotl, tadpole, sulfur cube) and feeding entities with bucket entities,
@@ -198,8 +195,8 @@ public final class EntityTests {
         ItemStack empty = player.getMainHandItem();
         helper.assertTrue(BucketLibUtil.isEmpty(empty), "bucket is not empty: " + TestUtils.describe(empty));
         helper.assertFalse(empty.has(DataComponents.TROPICAL_FISH_PATTERN) || empty.has(DataComponents.BUCKET_ENTITY_DATA), "emptied bucket keeps the fish data: " + empty.getComponentsPatch());
-        KnownIssues.run(helper, "KI-12 emptied bucket keeps the custom name of the released entity", Platforms.ALL, () ->
-                helper.assertTrue(empty.getComponentsPatch().isEmpty(), "emptied bucket keeps components of the fish: " + empty.getComponentsPatch()));
+        helper.assertTrue(empty.getComponentsPatch().isEmpty(), "emptied bucket keeps components of the fish: " + empty.getComponentsPatch());
+        helper.succeed();
     }
 
     /** Spawning the entity of a bucket without entity does nothing and returns an unchanged copy. */
@@ -296,11 +293,9 @@ public final class EntityTests {
      */
     public static void filledBucketsDoNotPickUpEntities(GameTestHelper helper) {
         assertNoPickup(helper, TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER));
-        KnownIssues.check(helper, "KI-22 buckets with powder snow or milk pick up sulfur cubes", Platforms.ALL, () ->
-                assertNoPickup(helper, TestUtils.withBlock(TestBuckets.TEST_BUCKET, Blocks.POWDER_SNOW)));
+        assertNoPickup(helper, TestUtils.withBlock(TestBuckets.TEST_BUCKET, Blocks.POWDER_SNOW));
         // with the NeoForge milk fluid, milk is a fluid and the bucket is not "fluid empty"
-        KnownIssues.check(helper, "KI-22 buckets with powder snow or milk pick up sulfur cubes", Services.FLUID.hasMilkFluid() ? Set.of() : Platforms.ALL, () ->
-                assertNoPickup(helper, TestUtils.withMilk(TestBuckets.TEST_BUCKET)));
+        assertNoPickup(helper, TestUtils.withMilk(TestBuckets.TEST_BUCKET));
         helper.succeed();
     }
 

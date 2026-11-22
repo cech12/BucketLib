@@ -241,6 +241,7 @@ public class UniversalBucketItem extends Item {
                 }
                 IFluidHelper.FluidInteractionResult result = Services.FLUID.tryPickUpFluid(BucketLibUtil.removeEntityData(itemstack, serverLevel, player, false), player, level, interactionHand, hitBlockPos, hitDirection);
                 if (result.success()) {
+                    player.awardStat(Stats.ITEM_USED.get(this));
                     return InteractionResult.SUCCESS.heldItemTransformedTo(ItemUtils.createFilledResult(itemstack, player, result.stack()));
                 }
                 //pickup block interaction
@@ -271,12 +272,14 @@ public class UniversalBucketItem extends Item {
                                 //place entity if exists
                                 spawnEntityFromBucket(player, level, itemstack, pos, false);
                             }
+                            player.awardStat(Stats.ITEM_USED.get(this));
                             return InteractionResult.SUCCESS.heldItemTransformedTo(BucketLibUtil.createEmptyResult(itemstack, player, result.stack(), interactionHand));
                         }
                     }
                 } else if (BucketLibUtil.containsEntityType(itemstack)) {
                     //place entity interaction
                     ItemStack emptyBucket = spawnEntityFromBucket(player, level, itemstack, relativeBlockPos, true);
+                    player.awardStat(Stats.ITEM_USED.get(this));
                     return InteractionResult.SUCCESS.heldItemTransformedTo(BucketLibUtil.createEmptyResult(itemstack, player, emptyBucket, interactionHand));
                 } else if (BucketLibUtil.containsBlock(itemstack)) {
                     //place block interaction
@@ -342,7 +345,9 @@ public class UniversalBucketItem extends Item {
         Fluid entityBucketFluid = Services.BUCKET.getFluidOfBucketItem((BucketItem) entity.getBucketItemStack().getItem());
         if (itemStack.getItem() instanceof UniversalBucketItem
                 && entity.isAlive()
-                && entityBucketFluid == containedFluid) {
+                && entityBucketFluid == containedFluid
+                //a bucket with a block or milk has no fluid, but is not empty (e.g. for sulfur cubes)
+                && !BucketLibUtil.containsContent(itemStack)) {
             entity.playSound(entity.getPickupSound(), 1.0F, 1.0F);
             ItemStack filledItemStack = BucketLibUtil.addEntityType(itemStack.copyWithCount(1), entity.getType());
             entity.saveToBucketTag(filledItemStack);

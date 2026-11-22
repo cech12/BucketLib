@@ -1,8 +1,6 @@
 package de.cech12.bucketlib.gametest.tests;
 
 import de.cech12.bucketlib.gametest.BucketLibGameTests;
-import de.cech12.bucketlib.gametest.KnownIssues;
-import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import de.cech12.bucketlib.util.BucketLibUtil;
@@ -110,8 +108,7 @@ public final class FluidTests {
 
     /** Like vanilla buckets, filling and emptying counts the "used" statistic of the bucket once. */
     private static void assertUsedOnce(GameTestHelper helper, ServerPlayer player) {
-        KnownIssues.check(helper, "KI-24 filling and emptying buckets does not count the used statistic", Platforms.ALL, () ->
-                TestUtils.assertEquals(helper, player.getStats().getValue(Stats.ITEM_USED.get(TestBuckets.TEST_BUCKET.item())), 1, "used statistic of the bucket"));
+        TestUtils.assertEquals(helper, player.getStats().getValue(Stats.ITEM_USED.get(TestBuckets.TEST_BUCKET.item())), 1, "used statistic of the bucket");
     }
 
     /** In creative mode the bucket keeps its content when placing, and keeps empty in the hand when picking up. */

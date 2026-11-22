@@ -58,6 +58,10 @@ public class UniversalBucketFluidHandler extends ItemAccessFluidHandler {
         if (BucketLibUtil.containsMilk(itemAccess.getResource())) {
             return false;
         }
+        //only fill the bucket, if there is no block (e.g. powder snow) inside it
+        if (BucketLibUtil.containsBlock(itemAccess.getResource())) {
+            return false;
+        }
         return super.isValid(index, resource);
     }
 

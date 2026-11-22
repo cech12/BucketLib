@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [Unreleased]
+### Fixed
+- Dispensers kept unusable buckets instead of dropping them like vanilla (Fabric) (#95)
+- Dispensed milk buckets removed a water source in front of the dispenser (Fabric) (#96)
+- Emptied buckets kept the custom name of the released entity (#103)
+- Fluid API filled fluids into buckets with a block, e.g. powder snow (NeoForge) (#108)
+- Filled buckets were not emptied into cauldrons that are not empty like vanilla buckets (#112)
+- Buckets with powder snow or milk picked up sulfur cubes (#113)
+- Filling and emptying buckets did not count the "used" statistic of the bucket (#115)
+
 ## [26.3-5.3.0.1] - 2026-10-01
 ### Fixed
 - Jitpack build was broken
