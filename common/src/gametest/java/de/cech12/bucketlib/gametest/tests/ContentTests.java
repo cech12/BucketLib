@@ -4,8 +4,6 @@ import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.api.BucketLibComponents;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.gametest.BucketLibGameTests;
-import de.cech12.bucketlib.gametest.KnownIssues;
-import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import de.cech12.bucketlib.platform.Services;
@@ -23,7 +21,6 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 
-import java.util.Set;
 
 /**
  * Content of a bucket (fluid, milk, entity, block) via BucketLibUtil, how it is stored and the item name.
@@ -65,10 +62,9 @@ public final class ContentTests {
     /** The content checks of BucketLibUtil can be used for empty stacks (e.g. empty inventory slots). */
     public static void emptyStackHasNoContent(GameTestHelper helper) {
         helper.assertFalse(BucketLibUtil.containsMilk(ItemStack.EMPTY) || BucketLibUtil.containsEntityType(ItemStack.EMPTY) || BucketLibUtil.containsBlock(ItemStack.EMPTY), "empty stack has content");
-        KnownIssues.run(helper, "KI-16 BucketLibUtil throws for empty stacks on NeoForge", Set.of(Platforms.NEOFORGE), () -> {
-            helper.assertFalse(TestUtils.noException(helper, "containsFluid of an empty stack", () -> BucketLibUtil.containsFluid(ItemStack.EMPTY)), "empty stack contains a fluid");
-            helper.assertTrue(TestUtils.noException(helper, "isEmpty of an empty stack", () -> BucketLibUtil.isEmpty(ItemStack.EMPTY)), "empty stack is not empty");
-        });
+        helper.assertFalse(TestUtils.noException(helper, "containsFluid of an empty stack", () -> BucketLibUtil.containsFluid(ItemStack.EMPTY)), "empty stack contains a fluid");
+        helper.assertTrue(TestUtils.noException(helper, "isEmpty of an empty stack", () -> BucketLibUtil.isEmpty(ItemStack.EMPTY)), "empty stack is not empty");
+        helper.succeed();
     }
 
     /** A fluid can be added and removed, the original stack is never changed. */
@@ -200,10 +196,15 @@ public final class ContentTests {
         tag.putString("BucketContent", "Not A Valid Id!");
         ItemStack stack = TestUtils.bucket(TestBuckets.TEST_BUCKET);
         stack.set(BucketLibComponents.BUCKET_CONTENT, CustomData.of(tag));
-        KnownIssues.run(helper, "KI-2 invalid content ids crash", Platforms.ALL, () -> {
-            helper.assertTrue(TestUtils.noException(helper, "reading the block of invalid content", () -> BucketLibUtil.getBlock(stack)) == null, "invalid block id is found");
-            TestUtils.noException(helper, "name of a bucket with invalid content", () -> stack.getHoverName());
-        });
+        helper.assertTrue(TestUtils.noException(helper, "reading the block of invalid content", () -> BucketLibUtil.getBlock(stack)) == null, "invalid block id is found");
+        TestUtils.noException(helper, "name of a bucket with invalid content", () -> stack.getHoverName());
+        CompoundTag entityTag = new CompoundTag();
+        entityTag.putString("EntityType", "Not A Valid Id!");
+        ItemStack entityStack = TestUtils.bucket(TestBuckets.TEST_BUCKET);
+        entityStack.set(BucketLibComponents.BUCKET_CONTENT, CustomData.of(entityTag));
+        helper.assertTrue(TestUtils.noException(helper, "reading the entity of invalid content", () -> BucketLibUtil.getEntityType(entityStack)) == null, "invalid entity id is found");
+        TestUtils.noException(helper, "name of a bucket with an invalid entity", () -> entityStack.getHoverName());
+        helper.succeed();
     }
 
     private static void assertName(GameTestHelper helper, ItemStack stack, String expectedKey, Object expectedArgument) {

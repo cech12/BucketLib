@@ -1,10 +1,14 @@
 package de.cech12.bucketlib.item;
 
 import de.cech12.bucketlib.BucketLibMod;
+import de.cech12.bucketlib.api.BucketLib;
+import de.cech12.bucketlib.api.BucketLibComponents;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.fluids.FluidType;
@@ -42,6 +46,18 @@ public class UniversalBucketFluidHandler extends ItemAccessFluidHandler {
             amount = FluidType.BUCKET_VOLUME;
         }
         return amount;
+    }
+
+    @Override
+    protected ItemResource update(@NotNull ItemResource accessResource, int index, @NotNull FluidResource newResource, int newAmount) {
+        ItemResource updated = super.update(accessResource, index, newResource, newAmount);
+        //a bucket filled with the milk fluid (e.g. by a tank of another mod) is a milk bucket (like BucketLibUtil.addMilk)
+        if (updated != null && newAmount > 0 && NeoForgeMod.MILK.isBound() && newResource.getFluid().isSame(NeoForgeMod.MILK.get()) && !BucketLibUtil.containsMilk(updated)) {
+            CompoundTag tag = updated.getOrDefault(BucketLibComponents.BUCKET_CONTENT, CustomData.EMPTY).copyTag();
+            tag.putString(BucketLib.BUCKET_CONTENT_TAG, BucketLibUtil.MILK_LOCATION.toString());
+            updated = updated.with(BucketLibComponents.BUCKET_CONTENT, CustomData.of(tag));
+        }
+        return updated;
     }
 
     @Override

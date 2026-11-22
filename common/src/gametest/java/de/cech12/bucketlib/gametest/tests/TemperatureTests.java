@@ -1,8 +1,6 @@
 package de.cech12.bucketlib.gametest.tests;
 
 import de.cech12.bucketlib.gametest.BucketLibGameTests;
-import de.cech12.bucketlib.gametest.KnownIssues;
-import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -111,12 +109,11 @@ public final class TemperatureTests {
                 TestUtils.withFluid(TestBuckets.BURNING_FLUIDS_TAG_BUCKET, Fluids.LAVA), TestUtils.withFluid(TestBuckets.FREEZING_FLUIDS_TAG_BUCKET, Fluids.LAVA))) {
             assertNothingHappens(helper, stack);
         }
-        KnownIssues.run(helper, "KI-14 burning/freezing block lists created with List.of crash the inventory tick of buckets without block", Platforms.ALL, () -> {
-            for (ItemStack stack : List.of(TestUtils.withFluid(TestBuckets.BURNING_BUCKET, Fluids.WATER), TestUtils.withFluid(TestBuckets.FREEZING_BUCKET, Fluids.LAVA),
-                    TestUtils.bucket(TestBuckets.BURNING_BUCKET), TestUtils.bucket(TestBuckets.FREEZING_BUCKET))) {
-                assertNothingHappens(helper, stack);
-            }
-        });
+        for (ItemStack stack : List.of(TestUtils.withFluid(TestBuckets.BURNING_BUCKET, Fluids.WATER), TestUtils.withFluid(TestBuckets.FREEZING_BUCKET, Fluids.LAVA),
+                TestUtils.bucket(TestBuckets.BURNING_BUCKET), TestUtils.bucket(TestBuckets.FREEZING_BUCKET))) {
+            assertNothingHappens(helper, stack);
+        }
+        helper.succeed();
     }
 
     /**

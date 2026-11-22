@@ -2,8 +2,6 @@ package de.cech12.bucketlib.gametest.tests;
 
 import de.cech12.bucketlib.gametest.BucketLibGameTests;
 import de.cech12.bucketlib.gametest.GameTestPlatform;
-import de.cech12.bucketlib.gametest.KnownIssues;
-import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import de.cech12.bucketlib.platform.Services;
@@ -26,7 +24,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.material.Fluids;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Milking cows, goats and mooshrooms and drinking milk like with a vanilla milk bucket.
@@ -202,8 +199,8 @@ public final class MilkTests {
         }
         var transfer = GameTestPlatform.INSTANCE.insertFluid(TestUtils.bucket(TestBuckets.TEST_BUCKET), Services.FLUID.getMilkFluid(), 1000);
         TestUtils.assertEquals(helper, transfer.millibuckets(), 1000, "inserted milk");
-        KnownIssues.run(helper, "KI-3 bucket filled with the milk fluid by the fluid API is no milk bucket", Set.of(Platforms.NEOFORGE), () ->
-                helper.assertTrue(BucketLibUtil.containsMilk(transfer.result()), "bucket filled with the milk fluid is no milk bucket: " + TestUtils.describe(transfer.result())));
+        helper.assertTrue(BucketLibUtil.containsMilk(transfer.result()), "bucket filled with the milk fluid is no milk bucket: " + TestUtils.describe(transfer.result()));
+        helper.succeed();
     }
 
 }

@@ -6,8 +6,6 @@ import de.cech12.bucketlib.api.BucketLibTags;
 import de.cech12.bucketlib.api.item.UniversalBucketItem;
 import de.cech12.bucketlib.gametest.BucketLibGameTests;
 import de.cech12.bucketlib.gametest.GameTestPlatform;
-import de.cech12.bucketlib.gametest.KnownIssues;
-import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import de.cech12.bucketlib.item.crafting.BucketFillingShapedRecipe;
@@ -221,9 +219,9 @@ public final class RegistrationTests {
         }
         Collection<ItemStack> tools = tabItems(helper, Services.PLATFORM.getToolsAndUtilitiesTab());
         helper.assertTrue(containsSame(tools, TestUtils.bucket(TestBuckets.ANTI_MILK_BUCKET)), "Tools & Utilities does not contain the anti milk bucket");
-        KnownIssues.run(helper, "KI-1 creative tab lists milk for buckets that cannot be milked", Platforms.ALL, () ->
-                helper.assertFalse(tools.stream().anyMatch(stack -> stack.is(TestBuckets.ANTI_MILK_BUCKET.item()) && BucketLibUtil.containsMilk(stack)),
-                        "Tools & Utilities contains an anti milk bucket with milk"));
+        helper.assertFalse(tools.stream().anyMatch(stack -> stack.is(TestBuckets.ANTI_MILK_BUCKET.item()) && BucketLibUtil.containsMilk(stack)),
+                "Tools & Utilities contains an anti milk bucket with milk");
+        helper.succeed();
     }
 
 }
