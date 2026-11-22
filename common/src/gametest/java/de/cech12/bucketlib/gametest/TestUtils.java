@@ -158,29 +158,6 @@ public final class TestUtils {
         }
     }
 
-    /** id and description of the known issue KI-19 (see {@link #creativeTabsBrokenByKnownIssue19()}) */
-    public static final String KI_19 = "KI-19 canHoldFluid crashes on NeoForge without milk fluid for fluids with the milk bucket";
-
-    /**
-     * KI-19 also breaks the creative tab contents of all BucketLib buckets on NeoForge without milk fluid, because the
-     * test mod adds a fluid with the milk bucket ({@link TestFluids#MILK_BUCKET_FLUID}).
-     *
-     * @return true if the creative tabs cannot be built because of KI-19
-     */
-    public static boolean creativeTabsBrokenByKnownIssue19() {
-        return Platforms.isNeoForge() && !de.cech12.bucketlib.platform.Services.FLUID.hasMilkFluid();
-    }
-
-    /**
-     * Checks that the creative tabs still cannot be built because of KI-19 and succeeds the test (call it only if
-     * {@link #creativeTabsBrokenByKnownIssue19()} is true).
-     */
-    public static void assertCreativeTabsBrokenByKnownIssue19(GameTestHelper helper) {
-        // the creative tabs are only built once, so the cause of the crash is checked (the build of the tab contents calls it)
-        KnownIssues.run(helper, KI_19, java.util.Set.of(Platforms.NEOFORGE), () -> noException(helper, "canHoldFluid of the fluid with the milk bucket",
-                () -> TestBuckets.TEST_BUCKET.item().canHoldFluid(TestFluids.MILK_BUCKET_FLUID.fluid())));
-    }
-
     /** @return content of the bucket as text for assertion messages */
     public static String describe(ItemStack stack) {
         return stack + " " + stack.getComponentsPatch();
