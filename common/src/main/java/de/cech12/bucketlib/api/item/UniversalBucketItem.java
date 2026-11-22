@@ -102,9 +102,9 @@ public class UniversalBucketItem extends Item {
             int fluidTemperature = Services.FLUID.getFluidTemperature(fluid);
             Integer upperCrackingTemperature = getUpperBreakTemperature();
             Integer lowerCrackingTemperature = getLowerBreakTemperature();
-            return isCrackingFluid(fluid)
+            return (isCrackingFluid(fluid)
                     || (upperCrackingTemperature != null && fluidTemperature >= upperCrackingTemperature)
-                    || (lowerCrackingTemperature != null && fluidTemperature <= lowerCrackingTemperature)
+                    || (lowerCrackingTemperature != null && fluidTemperature <= lowerCrackingTemperature))
                     && !BucketLibUtil.isAffectedByInfinityEnchantment(itemInstance);
         }
         return false;
@@ -409,6 +409,10 @@ public class UniversalBucketItem extends Item {
             return null;
         }
         if (BucketLibUtil.isAffectedByInfinityEnchantment(itemInstance)) {
+            if (BucketLibUtil.containsEntityType(itemInstance)) {
+                //the fluid is infinite, the entity is not: it is used up by the recipe (otherwise it would be duplicated)
+                return ItemStackTemplate.fromNonEmptyStack(BucketLibUtil.removeEntityData(BucketLibUtil.getItemStack(itemInstance).copy(), null, null, false)); //ServerLevel not available here
+            }
             return BucketLibUtil.getItemStackTemplate(itemInstance);
         }
         //remove everything from bucket
