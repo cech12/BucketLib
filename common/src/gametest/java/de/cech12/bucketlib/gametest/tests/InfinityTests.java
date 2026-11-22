@@ -2,8 +2,6 @@ package de.cech12.bucketlib.gametest.tests;
 
 import de.cech12.bucketlib.gametest.BucketLibGameTests;
 import de.cech12.bucketlib.gametest.GameTestPlatform;
-import de.cech12.bucketlib.gametest.KnownIssues;
-import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import de.cech12.bucketlib.platform.Services;
@@ -129,10 +127,8 @@ public final class InfinityTests {
         helper.assertFalse(TestBuckets.LOWER_CRACKING_BUCKET.item().isCracked(lower), "Infinity bucket with lower cracking temperature is cracked");
         ItemStack fluids = enchanted(helper, TestUtils.withFluid(TestBuckets.CRACKING_FLUIDS_BUCKET, Fluids.WATER));
         helper.assertTrue(BucketLibUtil.isAffectedByInfinityEnchantment(fluids), "test setup broken: not affected by Infinity");
-        KnownIssues.check(helper, "KI-6 Infinity does not prevent cracking by cracking fluids", Platforms.ALL, () -> {
-            helper.assertFalse(TestBuckets.CRACKING_FLUIDS_BUCKET.item().isCracked(fluids), "Infinity bucket with water as cracking fluid is cracked");
-            helper.assertTrue(TestBuckets.CRACKING_FLUIDS_BUCKET.item().getCraftingRemainder(fluids) != null, "Infinity bucket with water as cracking fluid has no crafting remainder");
-        });
+        helper.assertFalse(TestBuckets.CRACKING_FLUIDS_BUCKET.item().isCracked(fluids), "Infinity bucket with water as cracking fluid is cracked");
+        helper.assertTrue(TestBuckets.CRACKING_FLUIDS_BUCKET.item().getCraftingRemainder(fluids) != null, "Infinity bucket with water as cracking fluid has no crafting remainder");
         // an upper cracking temperature of 300 cracks with water (300)
         try {
             TestBuckets.Config.upperCrackingTemperature = 300;
@@ -140,8 +136,7 @@ public final class InfinityTests {
             helper.assertTrue(TestBuckets.CONFIG_BUCKET.item().isCracked(plain), "test setup broken: water does not crack without Infinity");
             ItemStack upper = enchanted(helper, plain.copy());
             helper.assertTrue(BucketLibUtil.isAffectedByInfinityEnchantment(upper), "test setup broken: not affected by Infinity");
-            KnownIssues.check(helper, "KI-6 Infinity does not prevent cracking by the upper cracking temperature", Platforms.ALL, () ->
-                    helper.assertFalse(TestBuckets.CONFIG_BUCKET.item().isCracked(upper), "Infinity bucket above the upper cracking temperature is cracked"));
+            helper.assertFalse(TestBuckets.CONFIG_BUCKET.item().isCracked(upper), "Infinity bucket above the upper cracking temperature is cracked");
         } finally {
             TestBuckets.Config.reset();
         }
@@ -153,8 +148,9 @@ public final class InfinityTests {
         var infinity = helper.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.INFINITY);
         ItemStack salmon = TestUtils.withEntity(TestBuckets.TEST_BUCKET, Fluids.WATER, EntityTypes.SALMON);
         helper.assertTrue(de.cech12.bucketlib.gametest.GameTestPlatform.INSTANCE.canEnchant(TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER), infinity), "test setup broken: water bucket cannot get Infinity");
-        KnownIssues.run(helper, "KI-23 buckets with water and an entity can be enchanted with Infinity", Platforms.ALL, () ->
-                helper.assertFalse(de.cech12.bucketlib.gametest.GameTestPlatform.INSTANCE.canEnchant(salmon, infinity), "bucket with water and salmon can be enchanted with Infinity"));
+        helper.assertFalse(de.cech12.bucketlib.gametest.GameTestPlatform.INSTANCE.canEnchant(salmon, infinity), "bucket with water and salmon can be enchanted with Infinity");
+        helper.assertFalse(BucketLibUtil.isInfinityEnchantmentAllowed(salmon), "Infinity is allowed for a bucket with water and salmon");
+        helper.succeed();
     }
 
 }

@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [this versioning scheme](https://gist.github.com/cech12/69319028e88c50349a6b044000a6607b).
 
+## [Unreleased]
+### Fixed
+- Infinity did not prevent cracking by cracking fluids and the upper cracking temperature (#97)
+- Buckets with water and an entity could be enchanted with Infinity (#114)
+
 ## [26.3-5.3.0.1] - 2026-10-01
 ### Fixed
 - Jitpack build was broken

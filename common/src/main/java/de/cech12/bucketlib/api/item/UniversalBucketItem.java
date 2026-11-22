@@ -102,9 +102,9 @@ public class UniversalBucketItem extends Item {
             int fluidTemperature = Services.FLUID.getFluidTemperature(fluid);
             Integer upperCrackingTemperature = getUpperBreakTemperature();
             Integer lowerCrackingTemperature = getLowerBreakTemperature();
-            return isCrackingFluid(fluid)
+            return (isCrackingFluid(fluid)
                     || (upperCrackingTemperature != null && fluidTemperature >= upperCrackingTemperature)
-                    || (lowerCrackingTemperature != null && fluidTemperature <= lowerCrackingTemperature)
+                    || (lowerCrackingTemperature != null && fluidTemperature <= lowerCrackingTemperature))
                     && !BucketLibUtil.isAffectedByInfinityEnchantment(itemInstance);
         }
         return false;
