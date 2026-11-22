@@ -179,6 +179,7 @@ public class BucketLibUtil {
         }
         if (getItem(itemInstance) instanceof UniversalBucketItem bucket) {
             Fluid fluid = getFluid(itemInstance);
+            //also buckets with an entity: placing releases the entity and keeps the fluid
             return fluid != Fluids.EMPTY
                     && fluid.defaultFluidState().is(BucketLibTags.Fluids.INFINITY_ENCHANTABLE)
                     && bucket.canHoldFluid(fluid);

@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 ### Fixed
+- Fluids of other mods whose bucket is the milk bucket crashed `UniversalBucketItem.canHoldFluid` and the creative tabs of all BucketLib buckets if the NeoForge milk fluid is not enabled (NeoForge) (#110)
+- Furnace fuel checks of buckets (hoppers, furnace menu) crashed on dedicated servers, because they used client classes (#98)
+- Infinity did not prevent cracking by cracking fluids and the upper cracking temperature (#97)
+- Infinity buckets with water and an entity kept the entity as crafting remainder (the entity was duplicated) (#114)
 - Creative tab listed a milk bucket also for buckets that cannot milk (#92)
 - Invalid content ids (e.g. from commands) crashed the game when reading the block/entity or the item name (#93)
 - Buckets filled with the milk fluid through the fluid API were no drinkable milk buckets (NeoForge) (#94)
