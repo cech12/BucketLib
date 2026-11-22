@@ -7,6 +7,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.inventory.AbstractFurnaceMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CookingFuel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,10 +23,14 @@ public class AbstractFurnaceMenuMixin {
     @Shadow
     private Container container;
 
+    @Final
+    @Shadow
+    protected Level level;
+
     @Inject(at = @At("RETURN"), method = "isFuel", cancellable = true)
     private void isFuelProxy(ItemStack itemStack, CallbackInfoReturnable<Boolean> cir) {
         if (!itemStack.isEmpty() && itemStack.getItem() instanceof UniversalBucketItem
-                && ResolvableInt.getFromItem(itemStack, DataComponents.COOKING_FUEL, CookingFuel::burnTime, CommonLoader.createLootContext(container), 0) <= 0) {
+                && ResolvableInt.getFromItem(itemStack, DataComponents.COOKING_FUEL, CookingFuel::burnTime, CommonLoader.createLootContext(container, level), 0) <= 0) {
             cir.setReturnValue(false);
         }
     }

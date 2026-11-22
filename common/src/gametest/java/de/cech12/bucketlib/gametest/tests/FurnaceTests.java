@@ -1,8 +1,6 @@
 package de.cech12.bucketlib.gametest.tests;
 
 import de.cech12.bucketlib.gametest.BucketLibGameTests;
-import de.cech12.bucketlib.gametest.KnownIssues;
-import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import de.cech12.bucketlib.util.BucketLibUtil;
@@ -146,16 +144,15 @@ public final class FurnaceTests {
         FurnaceBlockEntity furnace = furnace(helper, ItemStack.EMPTY, ItemStack.EMPTY);
         ServerPlayer player = TestUtils.player(helper, GameType.SURVIVAL, ItemStack.EMPTY);
         FurnaceMenu menu = new FurnaceMenu(1, player.getInventory(), furnace, new SimpleContainerData(4));
-        KnownIssues.run(helper, "KI-7 furnace fuel checks of buckets use client classes and crash on dedicated servers", Platforms.ALL, () -> {
-            boolean lava = TestUtils.noException(helper, "hopper inserts a lava bucket into the fuel slot", () -> furnace.canPlaceItem(1, TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.LAVA)));
-            helper.assertTrue(lava, "lava bucket cannot be placed in the fuel slot");
-            boolean water = TestUtils.noException(helper, "hopper inserts a water bucket into the fuel slot", () -> furnace.canPlaceItem(1, TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER)));
-            helper.assertFalse(water, "water bucket can be placed in the fuel slot");
-            boolean menuLava = TestUtils.noException(helper, "player puts a lava bucket into the fuel slot", () -> menu.getSlot(1).mayPlace(TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.LAVA)));
-            helper.assertTrue(menuLava, "lava bucket cannot be put into the fuel slot of the menu");
-            boolean menuEmpty = TestUtils.noException(helper, "player puts an empty bucket into the fuel slot", () -> menu.getSlot(1).mayPlace(TestUtils.bucket(TestBuckets.TEST_BUCKET)));
-            helper.assertTrue(menuEmpty, "empty bucket cannot be put into the fuel slot of the menu");
-        });
+        boolean lava = TestUtils.noException(helper, "hopper inserts a lava bucket into the fuel slot", () -> furnace.canPlaceItem(1, TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.LAVA)));
+        helper.assertTrue(lava, "lava bucket cannot be placed in the fuel slot");
+        boolean water = TestUtils.noException(helper, "hopper inserts a water bucket into the fuel slot", () -> furnace.canPlaceItem(1, TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.WATER)));
+        helper.assertFalse(water, "water bucket can be placed in the fuel slot");
+        boolean menuLava = TestUtils.noException(helper, "player puts a lava bucket into the fuel slot", () -> menu.getSlot(1).mayPlace(TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.LAVA)));
+        helper.assertTrue(menuLava, "lava bucket cannot be put into the fuel slot of the menu");
+        boolean menuEmpty = TestUtils.noException(helper, "player puts an empty bucket into the fuel slot", () -> menu.getSlot(1).mayPlace(TestUtils.bucket(TestBuckets.TEST_BUCKET)));
+        helper.assertTrue(menuEmpty, "empty bucket cannot be put into the fuel slot of the menu");
+        helper.succeed();
     }
 
 }
