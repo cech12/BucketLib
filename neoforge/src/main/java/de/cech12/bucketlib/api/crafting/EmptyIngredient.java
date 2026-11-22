@@ -24,10 +24,17 @@ public class EmptyIngredient implements ICustomIngredient {
 
     protected Item item;
     protected TagKey<Item> tag;
+    /** id of the item (also if the item is unknown, e.g. of a removed mod) */
+    private final Identifier itemId;
     private Holder<Item>[] matchingStacks;
 
     public EmptyIngredient(Item item, TagKey<Item> tag) {
+        this(item, item != null ? BuiltInRegistries.ITEM.getKey(item) : null, tag);
+    }
+
+    private EmptyIngredient(Item item, Identifier itemId, TagKey<Item> tag) {
         this.item = item;
+        this.itemId = itemId;
         this.tag = tag;
     }
 
@@ -44,7 +51,7 @@ public class EmptyIngredient implements ICustomIngredient {
     }
 
     public EmptyIngredient(Optional<Identifier> itemOptional, Optional<TagKey<Item>> tagOptional) {
-        this(itemOptional.map(BuiltInRegistries.ITEM::get).filter(Optional::isPresent).map(itemReference -> itemReference.get().value()).orElse(null), tagOptional.orElse(null));
+        this(itemOptional.map(BuiltInRegistries.ITEM::get).filter(Optional::isPresent).map(itemReference -> itemReference.get().value()).orElse(null), itemOptional.orElse(null), tagOptional.orElse(null));
     }
 
     @Override
@@ -52,12 +59,16 @@ public class EmptyIngredient implements ICustomIngredient {
         if (itemStack.isEmpty()) {
             return false;
         }
-        if (this.item == null && this.tag == null && itemStack.getItem() == Items.BUCKET) {
+        if (this.itemId != null && this.item == null && this.tag == null) {
+            //unknown item (e.g. of a removed mod)
+            return false;
+        }
+        if (this.itemId == null && this.tag == null && itemStack.getItem() == Items.BUCKET) {
             return true;
         }
         if (this.item != null && itemStack.getItem() == this.item
                 || this.tag != null && itemStack.is(this.tag)
-                || this.item == null && this.tag == null && itemStack.getItem() instanceof UniversalBucketItem) {
+                || this.itemId == null && this.tag == null && itemStack.getItem() instanceof UniversalBucketItem) {
             return BucketLibUtil.isEmpty(itemStack);
         }
         return false;
@@ -68,14 +79,14 @@ public class EmptyIngredient implements ICustomIngredient {
     public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
             ArrayList<Holder<Item>> stacks = new ArrayList<>();
-            if (this.item == null && this.tag == null) {
+            if (this.itemId == null && this.tag == null) {
                 stacks.add(Holder.direct(Items.BUCKET));
             }
             BucketLibMod.getRegisteredBuckets().forEach(universalBucketItem -> {
                 Holder<Item> universalBucketItemStack = Holder.direct(universalBucketItem);
                 if (this.item != null && universalBucketItem == this.item
-                        || this.tag != null && universalBucketItemStack.is(this.tag)
-                        || this.item == null && this.tag == null) {
+                        || this.tag != null && universalBucketItem.builtInRegistryHolder().is(this.tag)
+                        || this.itemId == null && this.tag == null) {
                     stacks.add(universalBucketItemStack);
                 }
             });
@@ -97,7 +108,7 @@ public class EmptyIngredient implements ICustomIngredient {
 
     public static final MapCodec<EmptyIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
             builder.group(
-                    Identifier.CODEC.optionalFieldOf("item").forGetter(i -> Optional.of(BuiltInRegistries.ITEM.getKey(i.item))),
+                    Identifier.CODEC.optionalFieldOf("item").forGetter(i -> Optional.ofNullable(i.itemId)),
                     TagKey.codec(BuiltInRegistries.ITEM.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
             ).apply(builder, EmptyIngredient::new)
     );

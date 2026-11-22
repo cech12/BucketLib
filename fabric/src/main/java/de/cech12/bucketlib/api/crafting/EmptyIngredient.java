@@ -22,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -30,10 +29,17 @@ public class EmptyIngredient implements CustomIngredient {
 
     protected Item item;
     protected TagKey<Item> tag;
+    /** id of the item (also if the item is unknown, e.g. of a removed mod) */
+    private final Identifier itemId;
     private List<Holder<Item>> matchingStacks;
 
     public EmptyIngredient(Item item, TagKey<Item> tag) {
+        this(item, item != null ? BuiltInRegistries.ITEM.getKey(item) : null, tag);
+    }
+
+    private EmptyIngredient(Item item, Identifier itemId, TagKey<Item> tag) {
         this.item = item;
+        this.itemId = itemId;
         this.tag = tag;
     }
 
@@ -50,7 +56,7 @@ public class EmptyIngredient implements CustomIngredient {
     }
 
     public EmptyIngredient(Optional<Identifier> itemOptional, Optional<TagKey<Item>> tagOptional) {
-        this(itemOptional.map(BuiltInRegistries.ITEM::get).filter(Optional::isPresent).map(reference -> reference.get().value()).orElse(null), tagOptional.orElse(null));
+        this(itemOptional.map(BuiltInRegistries.ITEM::get).filter(Optional::isPresent).map(reference -> reference.get().value()).orElse(null), itemOptional.orElse(null), tagOptional.orElse(null));
     }
 
     @Override
@@ -58,12 +64,16 @@ public class EmptyIngredient implements CustomIngredient {
         if (itemStack == null || itemStack.isEmpty()) {
             return false;
         }
-        if (this.item == null && this.tag == null && itemStack.getItem() == Items.BUCKET) {
+        if (this.itemId != null && this.item == null && this.tag == null) {
+            //unknown item (e.g. of a removed mod)
+            return false;
+        }
+        if (this.itemId == null && this.tag == null && itemStack.getItem() == Items.BUCKET) {
             return true;
         }
         if (this.item != null && itemStack.getItem() == this.item
                 || this.tag != null && itemStack.is(this.tag)
-                || this.item == null && this.tag == null && itemStack.getItem() instanceof UniversalBucketItem) {
+                || this.itemId == null && this.tag == null && itemStack.getItem() instanceof UniversalBucketItem) {
             return BucketLibUtil.isEmpty(itemStack);
         }
         return false;
@@ -73,14 +83,14 @@ public class EmptyIngredient implements CustomIngredient {
     public Stream<Holder<Item>> items() {
         if (this.matchingStacks == null) {
             this.matchingStacks = new ArrayList<>();
-            if (this.item == null && this.tag == null) {
+            if (this.itemId == null && this.tag == null) {
                 this.matchingStacks.add(Holder.direct(Items.BUCKET));
             }
             BucketLibMod.getRegisteredBuckets().forEach(universalBucketItem -> {
                 ItemStack universalBucketItemStack = new ItemStack(universalBucketItem);
                 if (this.item != null && universalBucketItem == this.item
                         || this.tag != null && universalBucketItemStack.is(this.tag)
-                        || this.item == null && this.tag == null) {
+                        || this.itemId == null && this.tag == null) {
                     this.matchingStacks.add(Holder.direct(universalBucketItem));
 
                 }
@@ -106,7 +116,7 @@ public class EmptyIngredient implements CustomIngredient {
 
         private static final MapCodec<EmptyIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
                 builder.group(
-                        Identifier.CODEC.optionalFieldOf("item").forGetter(i -> Optional.of(BuiltInRegistries.ITEM.getKey(i.item))),
+                        Identifier.CODEC.optionalFieldOf("item").forGetter(i -> Optional.ofNullable(i.itemId)),
                         TagKey.codec(BuiltInRegistries.ITEM.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
                 ).apply(builder, EmptyIngredient::new)
         );
@@ -136,21 +146,13 @@ public class EmptyIngredient implements CustomIngredient {
         private static EmptyIngredient read(RegistryFriendlyByteBuf buffer) {
             String item = buffer.readUtf();
             String tagId = buffer.readUtf();
-            if (!item.isEmpty()) {
-                Optional<Holder.Reference<Item>> itemOptional = BuiltInRegistries.ITEM.get(Identifier.parse(item));
-                if (itemOptional.isPresent()) {
-                    return new EmptyIngredient(itemOptional.get().value());
-                }
-            }
-            if (!tagId.isEmpty()) {
-                TagKey<Item> tag = TagKey.create(Registries.ITEM, Identifier.parse(tagId));
-                return new EmptyIngredient(tag);
-            }
-            return new EmptyIngredient();
+            Optional<Identifier> itemId = item.isEmpty() ? Optional.empty() : Optional.of(Identifier.parse(item));
+            Optional<TagKey<Item>> tag = tagId.isEmpty() ? Optional.empty() : Optional.of(TagKey.create(Registries.ITEM, Identifier.parse(tagId)));
+            return new EmptyIngredient(itemId, tag);
         }
 
         private static void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull EmptyIngredient ingredient) {
-            buffer.writeUtf(ingredient.item != null ? Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(ingredient.item)).toString() : "");
+            buffer.writeUtf(ingredient.itemId != null ? ingredient.itemId.toString() : "");
             buffer.writeUtf(ingredient.tag != null ? ingredient.tag.location().toString() : "");
         }
     }

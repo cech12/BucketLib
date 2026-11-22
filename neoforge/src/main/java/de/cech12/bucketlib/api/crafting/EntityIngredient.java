@@ -57,8 +57,11 @@ public class EntityIngredient implements ICustomIngredient {
                 return false;
             }
             bucketEntities = List.of(bucketEntity);
-        } else {
+        } else if (this.tag != null) {
             bucketEntities = RegistryUtil.getBucketEntities().stream().filter(bucketBlock -> bucketBlock.entityType().builtInRegistryHolder().is(this.tag)).toList();
+        } else {
+            //unknown entity id (e.g. of a removed mod)
+            return false;
         }
         if (bucketEntities.isEmpty()) {
             return false;
@@ -120,7 +123,7 @@ public class EntityIngredient implements ICustomIngredient {
 
     public static final MapCodec<EntityIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
             builder.group(
-                    Identifier.CODEC.optionalFieldOf("entity").forGetter(i -> Optional.of(BuiltInRegistries.ENTITY_TYPE.getKey(i.entityType))),
+                    Identifier.CODEC.optionalFieldOf("entity").forGetter(i -> Optional.ofNullable(i.entityType).map(BuiltInRegistries.ENTITY_TYPE::getKey)),
                     TagKey.codec(BuiltInRegistries.ENTITY_TYPE.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
             ).apply(builder, EntityIngredient::new)
     );

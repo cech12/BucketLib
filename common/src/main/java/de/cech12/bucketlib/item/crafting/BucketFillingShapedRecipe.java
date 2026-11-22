@@ -7,6 +7,7 @@ import de.cech12.bucketlib.util.BucketLibUtil;
 import de.cech12.bucketlib.util.RegistryUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
@@ -42,10 +43,10 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
             CraftingBookInfo.STREAM_CODEC, (recipe) -> recipe.bookInfo,
             ShapedRecipePattern.STREAM_CODEC, (recipe) -> recipe.pattern,
             BucketFillingType.STREAM_CODEC, (recipe) -> recipe.fillingType,
-            RegistryUtil.STREAM_FLUID_CODEC, (recipe) -> recipe.fluid,
-            RegistryUtil.STREAM_BLOCK_CODEC, (recipe) -> recipe.block,
-            RegistryUtil.STREAM_ENTITY_TYPE_CODEC, (recipe) -> recipe.entityType,
-            BucketFillingShapedRecipe::createFromNetwork
+            ByteBufCodecs.optional(RegistryUtil.STREAM_FLUID_CODEC), (recipe) -> Optional.ofNullable(recipe.fluid),
+            ByteBufCodecs.optional(RegistryUtil.STREAM_BLOCK_CODEC), (recipe) -> Optional.ofNullable(recipe.block),
+            ByteBufCodecs.optional(RegistryUtil.STREAM_ENTITY_TYPE_CODEC), (recipe) -> Optional.ofNullable(recipe.entityType),
+            BucketFillingShapedRecipe::new
     );
     public static final RecipeSerializer<BucketFillingShapedRecipe> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
@@ -56,13 +57,6 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
     private final Holder<Fluid> fluid;
     private final Holder<Block> block;
     private final Holder<EntityType<?>> entityType;
-
-    private static BucketFillingShapedRecipe createFromNetwork(Recipe.CommonInfo commonInfo, CraftingRecipe.CraftingBookInfo bookInfo, ShapedRecipePattern pattern, BucketFillingType fillingType, Holder<Fluid> fluid, Holder<Block> block, Holder<EntityType<?>> entityType) {
-        return new BucketFillingShapedRecipe(commonInfo, bookInfo, pattern, fillingType,
-                fluid != null ? Optional.of(fluid) : Optional.empty(),
-                block != null ? Optional.of(block) : Optional.empty(),
-                entityType != null ? Optional.of(entityType) : Optional.empty());
-    }
 
     public BucketFillingShapedRecipe(Recipe.CommonInfo commonInfo, CraftingRecipe.CraftingBookInfo bookInfo, ShapedRecipePattern pattern, BucketFillingType fillingType, Optional<Holder<Fluid>> fluid, Optional<Holder<Block>> block, Optional<Holder<EntityType<?>>> entityType) {
         super(commonInfo, bookInfo, pattern, ItemStackTemplate.fromNonEmptyStack(getAssembledBucket(fillingType, fluid.orElse(null), block.orElse(null), entityType.orElse(null), pattern.ingredients().stream().filter(Optional::isPresent).map(ingredient -> ingredient.get().items().map(itemHolder -> new ItemStack(itemHolder.value())).toList()).flatMap(List::stream).toList())));
@@ -87,8 +81,12 @@ public class BucketFillingShapedRecipe extends ShapedRecipe {
     }
 
     private static ItemStack getAssembledBucket(BucketFillingType fillingType, Holder<Fluid> fluid, Holder<Block> block, Holder<EntityType<?>> entityType, List<ItemStack> itemStacks) {
-        ItemStack bucket = getAffectedBucket(itemStacks);
-        if (bucket.getItem() instanceof UniversalBucketItem universalBucketItem) {
+        //the first empty bucket that can hold the content (an ingredient may also list buckets that cannot hold it)
+        for (ItemStack stack : itemStacks) {
+            if (!(stack.getItem() instanceof UniversalBucketItem universalBucketItem) || !BucketLibUtil.isEmpty(stack)) {
+                continue;
+            }
+            ItemStack bucket = stack.copyWithCount(1);
             if (fillingType == BucketFillingType.BLOCK && universalBucketItem.canHoldBlock(block.value())) {
                 return BucketLibUtil.addBlock(bucket, block.value());
             } else if (fillingType == BucketFillingType.ENTITY && universalBucketItem.canHoldEntity(entityType.value()) && (fluid == null || universalBucketItem.canHoldFluid(fluid.value()))) {

@@ -1,8 +1,6 @@
 package de.cech12.bucketlib.gametest.tests;
 
 import de.cech12.bucketlib.gametest.BucketLibGameTests;
-import de.cech12.bucketlib.gametest.KnownIssues;
-import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -87,8 +85,8 @@ public final class IngredientTests {
     public static void fluidDoesNotAcceptBucketsWithEntities(GameTestHelper helper) {
         Ingredient ingredient = TestUtils.ingredient(helper, "fluid", Map.of("fluid", "minecraft:water"));
         helper.assertFalse(ingredient.test(new ItemStack(Items.SALMON_BUCKET)), "fluid ingredient accepts a vanilla salmon bucket");
-        KnownIssues.run(helper, "KI-8 fluid ingredient accepts buckets with an entity", Platforms.ALL, () ->
-                helper.assertFalse(ingredient.test(TestUtils.withEntity(TestBuckets.TEST_BUCKET, Fluids.WATER, EntityTypes.SALMON)), "fluid ingredient (water) accepts a bucket with water and salmon"));
+        helper.assertFalse(ingredient.test(TestUtils.withEntity(TestBuckets.TEST_BUCKET, Fluids.WATER, EntityTypes.SALMON)), "fluid ingredient (water) accepts a bucket with water and salmon");
+        helper.succeed();
     }
 
     public static void milk(GameTestHelper helper) {
@@ -189,8 +187,8 @@ public final class IngredientTests {
                 TestUtils.bucket(TestBuckets.TEST_BUCKET), false,
                 new ItemStack(Items.BUCKET), false));
         assertDisplayed(helper, ingredient, "empty ingredient (#dyeable)", List.of(), List.of(Items.BUCKET, TestBuckets.TEST_BUCKET.item()));
-        KnownIssues.run(helper, "KI-18 NeoForge empty ingredient with item tag shows no buckets", java.util.Set.of(Platforms.NEOFORGE), () ->
-                assertDisplayed(helper, ingredient, "empty ingredient (#dyeable)", List.of(TestBuckets.COLORED_BUCKET.item()), List.of()));
+        assertDisplayed(helper, ingredient, "empty ingredient (#dyeable)", List.of(TestBuckets.COLORED_BUCKET.item()), List.of());
+        helper.succeed();
     }
 
     private static Ingredient unknown(GameTestHelper helper, String type, String field) {
@@ -208,14 +206,13 @@ public final class IngredientTests {
 
     /** Ingredients with unknown ids (e.g. of a removed mod) do not crash the recipe matching and match nothing. */
     public static void unknownIdsMatchNothing(GameTestHelper helper) {
-        // decoded outside the markers, so that a broken setup is not hidden as known issue
         assertMatchesNothing(helper, "fluid", unknown(helper, "fluid", "fluid"));
         Ingredient empty = unknown(helper, "empty", "item");
         Ingredient entity = unknown(helper, "entity", "entity");
         Ingredient block = unknown(helper, "block", "block");
-        KnownIssues.check(helper, "KI-15 empty ingredient with an unknown item accepts every empty bucket", Platforms.ALL, () -> assertMatchesNothing(helper, "empty", empty));
-        KnownIssues.check(helper, "KI-13 entity ingredients with unknown ids crash the recipe matching", Platforms.ALL, () -> assertMatchesNothing(helper, "entity", entity));
-        KnownIssues.check(helper, "KI-13 block ingredients with unknown ids crash the recipe matching", Platforms.ALL, () -> assertMatchesNothing(helper, "block", block));
+        assertMatchesNothing(helper, "empty", empty);
+        assertMatchesNothing(helper, "entity", entity);
+        assertMatchesNothing(helper, "block", block);
         helper.succeed();
     }
 

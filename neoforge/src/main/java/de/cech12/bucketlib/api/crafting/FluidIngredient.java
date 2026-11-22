@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.platform.Services;
+import de.cech12.bucketlib.util.BucketLibUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -61,6 +62,10 @@ public class FluidIngredient implements ICustomIngredient {
         if (itemStack.isEmpty()) {
             return false;
         }
+        //like vanilla fish buckets, buckets with an entity are no fluid buckets for recipes (crafting would destroy the entity)
+        if (BucketLibUtil.containsEntityType(itemStack)) {
+            return false;
+        }
         Identifier location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
         //Mekansim tanks are not compatible: https://github.com/cech12/BucketLib/issues/55 | https://github.com/mekanism/Mekanism/issues/8335
         if ("mekanism".equals(location.getNamespace()) && (itemStack.getCraftingRemainder() == null || itemStack.getCraftingRemainder().count() < 1)) {
@@ -88,7 +93,12 @@ public class FluidIngredient implements ICustomIngredient {
             }
             for (Fluid fluid : fluids) {
                 //vanilla bucket
-                Item bucketItem = fluid.getBucket();
+                Item bucketItem;
+                try {
+                    bucketItem = fluid.getBucket();
+                } catch (IllegalArgumentException ex) {
+                    continue; //incompatible fluid (e.g. "noBucket" fluids of Registrate), logged by UniversalBucketItem.canHoldFluid
+                }
                 if (!(bucketItem instanceof BucketItem) || Services.BUCKET.getFluidOfBucketItem((BucketItem) bucketItem) != fluid) {
                     continue; //skip fluids that have no vanilla bucket
                 }
@@ -119,7 +129,7 @@ public class FluidIngredient implements ICustomIngredient {
 
     public static final MapCodec<FluidIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
             builder.group(
-                    Identifier.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.of(BuiltInRegistries.FLUID.getKey(i.fluid))),
+                    Identifier.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.ofNullable(i.fluid).map(BuiltInRegistries.FLUID::getKey)),
                     TagKey.codec(BuiltInRegistries.FLUID.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
             ).apply(builder, FluidIngredient::new)
     );

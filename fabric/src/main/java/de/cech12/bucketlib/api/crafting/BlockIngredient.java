@@ -61,8 +61,11 @@ public class BlockIngredient implements CustomIngredient {
                 return false;
             }
             bucketBlocks = List.of(bucketBlock);
-        } else {
+        } else if (this.tag != null) {
             bucketBlocks = RegistryUtil.getBucketBlocks().stream().filter(bucketBlock -> bucketBlock.block().defaultBlockState().is(this.tag)).toList();
+        } else {
+            //unknown block id (e.g. of a removed mod)
+            return false;
         }
         if (bucketBlocks.isEmpty()) {
             return false;
@@ -119,7 +122,7 @@ public class BlockIngredient implements CustomIngredient {
 
         private static final MapCodec<BlockIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
                 builder.group(
-                        Identifier.CODEC.optionalFieldOf("block").forGetter(i -> Optional.of(BuiltInRegistries.BLOCK.getKey(i.block))),
+                        Identifier.CODEC.optionalFieldOf("block").forGetter(i -> Optional.ofNullable(i.block).map(BuiltInRegistries.BLOCK::getKey)),
                         TagKey.codec(BuiltInRegistries.BLOCK.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
                 ).apply(builder, BlockIngredient::new)
         );
@@ -152,14 +155,8 @@ public class BlockIngredient implements CustomIngredient {
                 TagKey<Block> tag = TagKey.create(Registries.BLOCK, Identifier.parse(tagId));
                 return new BlockIngredient(tag);
             }
-            if (block.isEmpty()) {
-                throw new IllegalArgumentException("Cannot create a block ingredient with no block or tag.");
-            }
-            Optional<Holder.Reference<Block>> blockOptional = BuiltInRegistries.BLOCK.get(Identifier.parse(block));
-            if (blockOptional.isEmpty()) {
-                throw new IllegalArgumentException("Block resource location \"" + block + " \" could not be found.");
-            }
-            return new BlockIngredient(blockOptional.get().value());
+            //no or unknown block (e.g. of a removed mod): the ingredient matches nothing
+            return new BlockIngredient(block.isEmpty() ? Optional.empty() : Optional.of(Identifier.parse(block)), Optional.empty());
         }
 
         private static void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull BlockIngredient ingredient) {

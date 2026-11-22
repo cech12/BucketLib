@@ -61,8 +61,11 @@ public class EntityIngredient implements CustomIngredient {
                 return false;
             }
             bucketEntities = List.of(bucketEntity);
-        } else {
+        } else if (this.tag != null) {
             bucketEntities = RegistryUtil.getBucketEntities().stream().filter(bucketBlock -> bucketBlock.entityType().builtInRegistryHolder().is(this.tag)).toList();
+        } else {
+            //unknown entity id (e.g. of a removed mod)
+            return false;
         }
         if (bucketEntities.isEmpty()) {
             return false;
@@ -126,7 +129,7 @@ public class EntityIngredient implements CustomIngredient {
 
         public static final MapCodec<EntityIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
                 builder.group(
-                        Identifier.CODEC.optionalFieldOf("entity").forGetter(i -> Optional.of(BuiltInRegistries.ENTITY_TYPE.getKey(i.entityType))),
+                        Identifier.CODEC.optionalFieldOf("entity").forGetter(i -> Optional.ofNullable(i.entityType).map(BuiltInRegistries.ENTITY_TYPE::getKey)),
                         TagKey.codec(BuiltInRegistries.ENTITY_TYPE.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
                 ).apply(builder, EntityIngredient::new)
         );
@@ -160,14 +163,8 @@ public class EntityIngredient implements CustomIngredient {
                 TagKey<EntityType<?>> tag = TagKey.create(Registries.ENTITY_TYPE, Identifier.parse(tagId));
                 return new EntityIngredient(tag);
             }
-            if (entity.isEmpty()) {
-                throw new IllegalArgumentException("Cannot create a entity ingredient with no entity or tag.");
-            }
-            Optional<Holder.Reference<EntityType<?>>> entityTypeOptional = BuiltInRegistries.ENTITY_TYPE.get(Identifier.parse(entity));
-            if (entityTypeOptional.isEmpty()) {
-                throw new IllegalArgumentException("Entity type resource location \"" + entity + " \" could not be found.");
-            }
-            return new EntityIngredient(entityTypeOptional.get().value());
+            //no or unknown entity (e.g. of a removed mod): the ingredient matches nothing
+            return new EntityIngredient(entity.isEmpty() ? Optional.empty() : Optional.of(Identifier.parse(entity)), Optional.empty());
         }
 
         private static void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull EntityIngredient ingredient) {

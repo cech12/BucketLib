@@ -2,8 +2,6 @@ package de.cech12.bucketlib.gametest.tests;
 
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.gametest.BucketLibGameTests;
-import de.cech12.bucketlib.gametest.KnownIssues;
-import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import de.cech12.bucketlib.item.crafting.BucketFillingType;
@@ -244,12 +242,11 @@ public final class RecipeTests {
         String ingredient = "[\"bucketlibtest:temperature_bucket\"," + TEST_BUCKET + "]";
         String shapeless = "{\"type\":\"bucketlib:bucket_filling_shapeless\",\"category\":\"misc\",\"ingredients\":[" + ingredient + ",\"minecraft:stick\"],\"filling_type\":\"fluid\",\"fluid\":\"minecraft:lava\"}";
         String shaped = "{\"type\":\"bucketlib:bucket_filling_shaped\",\"category\":\"misc\",\"pattern\":[\"BS\"],\"key\":{\"B\":" + ingredient + ",\"S\":\"minecraft:stick\"},\"filling_type\":\"fluid\",\"fluid\":\"minecraft:lava\"}";
-        KnownIssues.run(helper, "KI-9 bucket filling recipes fail to load if the first bucket of the ingredients cannot hold the content", Platforms.ALL, () -> {
-            for (String json : List.of(shapeless, shaped)) {
-                Recipe<?> recipe = TestUtils.noException(helper, "decoding " + json, () -> TestUtils.decode(helper, Recipe.CODEC, TestUtils.json(json)).value());
-                assertFilling(helper, recipe, List.of(TestUtils.bucket(TestBuckets.TEST_BUCKET), stick), 2, TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.LAVA));
-            }
-        });
+        for (String json : List.of(shapeless, shaped)) {
+            Recipe<?> recipe = TestUtils.noException(helper, "decoding " + json, () -> TestUtils.decode(helper, Recipe.CODEC, TestUtils.json(json)).value());
+            assertFilling(helper, recipe, List.of(TestUtils.bucket(TestBuckets.TEST_BUCKET), stick), 2, TestUtils.withFluid(TestBuckets.TEST_BUCKET, Fluids.LAVA));
+        }
+        helper.succeed();
     }
 
     /** Dyeing a dyeable bucket keeps its content and does not leave a second bucket as remainder. */
