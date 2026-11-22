@@ -2,16 +2,16 @@ package de.cech12.bucketlib;
 
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.platform.Services;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.Container;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -43,7 +43,15 @@ public class CommonLoader {
 
     private CommonLoader() {}
 
-    public static LootContext createLootContext(Object reference) {
+    /**
+     * Creates a loot context to resolve data components like the cooking fuel of a bucket. Works on the server and the
+     * client, because the registries are taken from the given level (no client classes).
+     *
+     * @param reference container or block entity which is added to the context parameters
+     * @param level level of the reference (server or client level)
+     * @return loot context
+     */
+    public static LootContext createLootContext(Object reference, Level level) {
         ContextMap.Builder contextMapBuilder = ContextMap.builder();
         if (reference instanceof Container container) {
             contextMapBuilder.set(LootContextParams.CONTAINER, container);
@@ -53,28 +61,25 @@ public class CommonLoader {
                     .set(LootContextParams.BLOCK_ENTITY, blockEntity)
                     .set(LootContextParams.ORIGIN, Vec3.atCenterOf(blockEntity.getBlockPos()));
         }
-        LootParams params = new LootParams(null, contextMapBuilder.build(), Map.of(), 0);
-        assert Minecraft.getInstance().level != null;
-        return new LootContext(params, RandomSource.create(), getRegistryProvider());
+        ServerLevel serverLevel = level instanceof ServerLevel server ? server : null;
+        LootParams params = new LootParams(serverLevel, contextMapBuilder.build(), Map.of(), 0);
+        return new LootContext(params, RandomSource.create(), getRegistryProvider(level));
     }
 
-    private static HolderLookup.Provider getRegistryProvider() {
-        if (REGISTRY_PROVIDER == null) {
-            REGISTRY_PROVIDER = createRegistryProvider(getRegistryAccess());
+    private static synchronized HolderLookup.Provider getRegistryProvider(Level level) {
+        if (level == null) {
+            throw new IllegalStateException("Could not get registry, registry access is unavailable because the level is null");
+        }
+        if (level instanceof ServerLevel serverLevel) {
+            // like vanilla: the reloadable registries of the server contain the context providers of the data packs
+            return serverLevel.getServer().reloadableRegistries().lookup();
+        }
+        RegistryAccess registryAccess = level.registryAccess();
+        if (REGISTRY_ACCESS != registryAccess) {
+            REGISTRY_ACCESS = registryAccess;
+            REGISTRY_PROVIDER = createRegistryProvider(registryAccess);
         }
         return REGISTRY_PROVIDER;
-    }
-
-    private static RegistryAccess getRegistryAccess() {
-        if (REGISTRY_ACCESS == null) {
-            Minecraft minecraft = Minecraft.getInstance();
-            ClientLevel level = minecraft.level;
-            if (level == null) {
-                throw new IllegalStateException("Could not get registry, registry access is unavailable because the level is currently null");
-            }
-            REGISTRY_ACCESS = level.registryAccess();
-        }
-        return REGISTRY_ACCESS;
     }
 
     private static HolderLookup.Provider createRegistryProvider(HolderLookup.Provider registryProvider) {

@@ -107,12 +107,11 @@ public final class TestFluids {
     public static final boolean GAME_TEST_RUN = Boolean.getBoolean("bucketlibtest.gameTestRun");
 
     /**
-     * The test fluids that are registered. The fluids that simulate broken mods ({@link #MILK_BUCKET_FLUID} triggers
-     * KI-19 on NeoForge without milk fluid, {@link #THROWING_BUCKET_FLUID} logs an error for every bucket) are only
-     * registered in the game test runs, so that the creative inventory of the client runs keeps working.
+     * The test fluids that are registered. {@link #THROWING_BUCKET_FLUID} simulates a broken mod and logs an error
+     * for every bucket, so it is only registered in the game test runs to keep the log of the client runs clean.
      */
     public static final List<Definition> REGISTERED = GAME_TEST_RUN ? ALL
-            : ALL.stream().filter(definition -> definition != MILK_BUCKET_FLUID && definition != THROWING_BUCKET_FLUID).toList();
+            : ALL.stream().filter(definition -> definition != THROWING_BUCKET_FLUID).toList();
 
     private TestFluids() {}
 
