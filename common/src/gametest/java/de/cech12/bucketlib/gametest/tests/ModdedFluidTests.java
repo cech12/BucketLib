@@ -23,7 +23,6 @@ import net.minecraft.world.level.material.Fluid;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Fluids of other mods (test fluids of the test mod, see {@link TestFluids}): a modded fluid with own bucket and own
@@ -135,13 +134,8 @@ public final class ModdedFluidTests {
 
     /** A fluid whose bucket is the milk bucket, but which is not the milk fluid, cannot be held. */
     public static void fluidWithMilkBucketCannotBeHeld(GameTestHelper helper) {
-        if (Services.FLUID.hasMilkFluid()) {
-            assertCannotBeHeld(helper, TestFluids.MILK_BUCKET_FLUID);
-            helper.succeed();
-            return;
-        }
-        KnownIssues.run(helper, TestUtils.KI_19, Set.of(Platforms.NEOFORGE), () ->
-                assertCannotBeHeld(helper, TestFluids.MILK_BUCKET_FLUID));
+        assertCannotBeHeld(helper, TestFluids.MILK_BUCKET_FLUID);
+        helper.succeed();
     }
 
     /**
@@ -157,10 +151,6 @@ public final class ModdedFluidTests {
 
     /** The creative tab lists the modded fluid with own bucket, but no fluid without usable bucket. */
     public static void creativeTabListsOnlyHoldableFluids(GameTestHelper helper) {
-        if (TestUtils.creativeTabsBrokenByKnownIssue19()) {
-            TestUtils.assertCreativeTabsBrokenByKnownIssue19(helper);
-            return;
-        }
         TestUtils.noException(helper, "building the creative tabs", () -> CreativeModeTabs.tryRebuildTabContents(helper.getLevel().enabledFeatures(), true, helper.getLevel().registryAccess()));
         var items = BuiltInRegistries.CREATIVE_MODE_TAB.getValueOrThrow(Services.PLATFORM.getToolsAndUtilitiesTab()).getDisplayItems();
         Map<Fluid, Long> testFluidBuckets = new java.util.HashMap<>();
