@@ -1,6 +1,6 @@
 {
   "type": "minecraft:function",
-  "function": "bucketlib:infinity/enabled/entity_buckets_are_not_enchantable",
+  "function": "bucketlib:infinity/enabled/crafting_uses_up_the_entity",
   "environment": "bucketlib:infinity_enabled",
   "structure": "bucketlib:platform",
   "max_ticks": 100

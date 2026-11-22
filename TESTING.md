@@ -30,9 +30,9 @@ common/src/gametest/resources/           test instances, environments, test mod 
 The old `src/test` test mods were moved into the gametest source sets; the client runs load the test mod, so the
 test buckets are still available for manual tests. `meta/milk_fluid_matches_the_run` needs the system property
 `bucketlibtest.milkEnabled` of the NeoForge game test runs, so it fails when started by hand in the NeoForge client.
-The test fluids that simulate broken mods (milk bucket fluid, throwing `getBucket()`) are only registered in the game
-test runs (system property `bucketlibtest.gameTestRun`); in the client runs they would break the creative inventory
-(KI-19) or fill the log, so their tests fail there when started by hand.
+The test fluid with a throwing `getBucket()` (simulates a broken mod) is only registered in the game test runs
+(system property `bucketlibtest.gameTestRun`); in the client runs it would fill the log, so its tests fail there when
+started by hand.
 
 ### Writing a new test
 
@@ -53,16 +53,12 @@ test runs (system property `bucketlibtest.gameTestRun`); in the client runs they
 | KI-3 | [#94](https://github.com/cech12/BucketLib/issues/94) | NeoForge (milk) | bucket filled with the milk fluid through the fluid API is no drinkable milk bucket | `milk/milk_fluid_of_other_mods_can_be_drunk` |
 | KI-4 | [#95](https://github.com/cech12/BucketLib/issues/95) | Fabric | dispensers keep unusable buckets instead of dropping them like vanilla | `dispenser/drops_unusable_buckets_like_vanilla` |
 | KI-5 | [#96](https://github.com/cech12/BucketLib/issues/96) | Fabric | dispensed milk bucket removes a water source in front of it | `dispenser/milk_bucket_does_not_remove_water` |
-| KI-6 | [#97](https://github.com/cech12/BucketLib/issues/97) | all | Infinity does not prevent cracking by cracking fluids and the upper cracking temperature (operator precedence in `isCracked`) | `infinity/enabled/prevents_cracking` |
-| KI-7 | [#98](https://github.com/cech12/BucketLib/issues/98) | all | furnace fuel checks (hopper, furnace menu) use client classes (`CommonLoader.createLootContext`) and crash on dedicated servers | `furnace/fuel_rules_work_on_a_dedicated_server` |
 | KI-12 | [#103](https://github.com/cech12/BucketLib/issues/103) | all | emptied bucket keeps the custom name of the released entity | `entity/keeps_entity_data` |
 | KI-14 | [#105](https://github.com/cech12/BucketLib/issues/105) | all | burning/freezing block lists created with `List.of` crash the inventory tick (`contains(null)`) | `temperature/normal_contents_do_nothing` |
 | KI-16 | [#107](https://github.com/cech12/BucketLib/issues/107) | NeoForge | `BucketLibUtil.containsFluid/isEmpty` throw for empty stacks | `content/empty_stack_has_no_content` |
 | KI-17 | [#108](https://github.com/cech12/BucketLib/issues/108) | NeoForge | fluid API fills fluids into buckets with a block (powder snow) | `fluid_api/does_not_fill_filled_buckets` |
-| KI-19 | [#110](https://github.com/cech12/BucketLib/issues/110) | NeoForge without milk fluid | `canHoldFluid` crashes for a fluid of another mod whose bucket is the milk bucket (`getMilkFluid()` of an unbound fluid); this also breaks the creative tab contents of all BucketLib buckets | `modded_fluid/fluid_with_milk_bucket_cannot_be_held`, creative tab tests |
 | KI-21 | [#112](https://github.com/cech12/BucketLib/issues/112) | all | filled buckets are not emptied into cauldrons that are not empty like vanilla buckets (they place the content above the cauldron; all other combinations match vanilla) | `cauldron/behaves_like_vanilla_buckets` |
 | KI-22 | [#113](https://github.com/cech12/BucketLib/issues/113) | all (milk: without milk fluid) | buckets with powder snow or milk pick up sulfur cubes | `entity/filled_buckets_do_not_pick_up_entities` |
-| KI-23 | [#114](https://github.com/cech12/BucketLib/issues/114) | all | buckets with water and an entity can be enchanted with Infinity | `infinity/enabled/entity_buckets_are_not_enchantable` |
 | KI-24 | [#115](https://github.com/cech12/BucketLib/issues/115) | all | filling and emptying buckets does not count the "used" statistic of the bucket (vanilla buckets do) | `fluid/picks_up_*`, `fluid/places_*` |
 
 All known issues are confirmed by the game test runs of all loaders (a marker fails as soon as its bug is fixed).
