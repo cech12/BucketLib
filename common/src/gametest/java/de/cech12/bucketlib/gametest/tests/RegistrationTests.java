@@ -185,10 +185,6 @@ public final class RegistrationTests {
      * contents it can hold: empty, every fluid, milk, every entity and every block.
      */
     public static void bucketsAreInTheirCreativeTab(GameTestHelper helper) {
-        if (TestUtils.creativeTabsBrokenByKnownIssue19()) {
-            TestUtils.assertCreativeTabsBrokenByKnownIssue19(helper);
-            return;
-        }
         Collection<ItemStack> tools = tabItems(helper, Services.PLATFORM.getToolsAndUtilitiesTab());
         Collection<ItemStack> ingredients = tabItems(helper, TestBuckets.INGREDIENTS_TAB);
         TestUtils.assertEquals(helper, TestBuckets.TEST_BUCKET.item().getCreativeTab(), Services.PLATFORM.getToolsAndUtilitiesTab(), "default creative tab");
@@ -215,10 +211,6 @@ public final class RegistrationTests {
 
     /** Buckets that cannot be milked do not show a milk bucket in the creative tab (it cannot be filled in survival). */
     public static void creativeTabOnlyListsPossibleContents(GameTestHelper helper) {
-        if (TestUtils.creativeTabsBrokenByKnownIssue19()) {
-            TestUtils.assertCreativeTabsBrokenByKnownIssue19(helper);
-            return;
-        }
         Collection<ItemStack> tools = tabItems(helper, Services.PLATFORM.getToolsAndUtilitiesTab());
         helper.assertTrue(containsSame(tools, TestUtils.bucket(TestBuckets.ANTI_MILK_BUCKET)), "Tools & Utilities does not contain the anti milk bucket");
         KnownIssues.run(helper, "KI-1 creative tab lists milk for buckets that cannot be milked", Platforms.ALL, () ->

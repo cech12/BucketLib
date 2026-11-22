@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 ### Fixed
+- Fluids of other mods whose bucket is the milk bucket crashed `UniversalBucketItem.canHoldFluid` and the creative tabs of all BucketLib buckets if the NeoForge milk fluid is not enabled (NeoForge) (#110)
 - Furnace fuel checks of buckets (hoppers, furnace menu) crashed on dedicated servers, because they used client classes (#98)
 
 ## [26.3-5.3.0.1] - 2026-10-01

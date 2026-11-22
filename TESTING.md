@@ -30,9 +30,9 @@ common/src/gametest/resources/           test instances, environments, test mod 
 The old `src/test` test mods were moved into the gametest source sets; the client runs load the test mod, so the
 test buckets are still available for manual tests. `meta/milk_fluid_matches_the_run` needs the system property
 `bucketlibtest.milkEnabled` of the NeoForge game test runs, so it fails when started by hand in the NeoForge client.
-The test fluids that simulate broken mods (milk bucket fluid, throwing `getBucket()`) are only registered in the game
-test runs (system property `bucketlibtest.gameTestRun`); in the client runs they would break the creative inventory
-(KI-19) or fill the log, so their tests fail there when started by hand.
+The test fluid with a throwing `getBucket()` (simulates a broken mod) is only registered in the game test runs
+(system property `bucketlibtest.gameTestRun`); in the client runs it would fill the log, so its tests fail there when
+started by hand.
 
 ### Writing a new test
 
@@ -65,7 +65,6 @@ test runs (system property `bucketlibtest.gameTestRun`); in the client runs they
 | KI-16 | [#107](https://github.com/cech12/BucketLib/issues/107) | NeoForge | `BucketLibUtil.containsFluid/isEmpty` throw for empty stacks | `content/empty_stack_has_no_content` |
 | KI-17 | [#108](https://github.com/cech12/BucketLib/issues/108) | NeoForge | fluid API fills fluids into buckets with a block (powder snow) | `fluid_api/does_not_fill_filled_buckets` |
 | KI-18 | [#109](https://github.com/cech12/BucketLib/issues/109) | NeoForge | empty ingredient with item tag shows no buckets (recipe viewers) | `ingredient/empty_tag` |
-| KI-19 | [#110](https://github.com/cech12/BucketLib/issues/110) | NeoForge without milk fluid | `canHoldFluid` crashes for a fluid of another mod whose bucket is the milk bucket (`getMilkFluid()` of an unbound fluid); this also breaks the creative tab contents of all BucketLib buckets | `modded_fluid/fluid_with_milk_bucket_cannot_be_held`, creative tab tests |
 | KI-20 | [#111](https://github.com/cech12/BucketLib/issues/111) | all | fluid ingredients crash in `items()` (recipe book, recipe viewers) if a fluid of the tag throws in `getBucket()` | `modded_fluid/fluid_ingredient_with_modded_fluids` |
 | KI-21 | [#112](https://github.com/cech12/BucketLib/issues/112) | all | filled buckets are not emptied into cauldrons that are not empty like vanilla buckets (they place the content above the cauldron; all other combinations match vanilla) | `cauldron/behaves_like_vanilla_buckets` |
 | KI-22 | [#113](https://github.com/cech12/BucketLib/issues/113) | all (milk: without milk fluid) | buckets with powder snow or milk pick up sulfur cubes | `entity/filled_buckets_do_not_pick_up_entities` |
