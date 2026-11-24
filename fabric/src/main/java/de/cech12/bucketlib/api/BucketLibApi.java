@@ -58,7 +58,9 @@ public class BucketLibApi {
                 }
             }
             //add milk bucket
-            content.accept(BucketLibUtil.addMilk(emptyBucket));
+            if (bucket.canMilkEntities()) {
+                content.accept(BucketLibUtil.addMilk(emptyBucket));
+            }
             //add entity buckets
             for (RegistryUtil.BucketEntity bucketEntity : RegistryUtil.getBucketEntities()) {
                 if (bucket.canHoldEntity(bucketEntity.entityType()) && bucket.canHoldFluid(bucketEntity.fluid())) {

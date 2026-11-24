@@ -231,7 +231,8 @@ public class BucketLibUtil {
     public static Identifier getContent(DataComponentGetter componentGetter) {
         String content = getContentString(componentGetter);
         if (content != null) {
-            return Identifier.parse(content);
+            //invalid ids (e.g. written by commands) are handled as missing content
+            return Identifier.tryParse(content);
         }
         return null;
     }
@@ -301,8 +302,9 @@ public class BucketLibUtil {
 
     public static EntityType<?> getEntityType(DataComponentGetter componentGetter) {
         String content = getEntityTypeString(componentGetter);
-        if (content != null) {
-            return Services.REGISTRY.getEntityType(Identifier.parse(content));
+        Identifier id = content != null ? Identifier.tryParse(content) : null;
+        if (id != null) {
+            return Services.REGISTRY.getEntityType(id);
         }
         return null;
     }

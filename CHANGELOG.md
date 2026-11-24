@@ -9,6 +9,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Furnace fuel checks of buckets (hoppers, furnace menu) crashed on dedicated servers, because they used client classes (#98)
 - Infinity did not prevent cracking by cracking fluids and the upper cracking temperature (#97)
 - Infinity buckets with water and an entity kept the entity as crafting remainder (the entity was duplicated) (#114)
+- Creative tab listed a milk bucket also for buckets that cannot milk (#92)
+- Invalid content ids (e.g. from commands) crashed the game when reading the block/entity or the item name (#93)
+- Buckets filled with the milk fluid through the fluid API were no drinkable milk buckets (NeoForge) (#94)
+- Burning/freezing block lists created with `List.of` crashed the inventory tick of buckets (#105)
+- `BucketLibUtil.containsFluid` and `BucketLibUtil.isEmpty` threw for empty stacks (NeoForge) (#107)
 
 ## [26.3-5.3.0.1] - 2026-10-01
 ### Fixed

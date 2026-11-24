@@ -82,6 +82,9 @@ public class NeoforgeFluidHelper implements IFluidHelper {
 
     @Override
     public Fluid getContainedFluid(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return Fluids.EMPTY;
+        }
         ResourceHandler<FluidResource> handler = ItemAccess.forStack(stack).getCapability(Capabilities.Fluid.ITEM);
         if (handler != null) {
             return handler.getResource(0).getFluid();

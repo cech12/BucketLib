@@ -461,7 +461,8 @@ public class UniversalBucketItem extends Item {
                 return entityType.builtInRegistryHolder().is((TagKey<EntityType<?>>) tag);
             }
         }
-        return defaultList != null && defaultList.contains(element);
+        //immutable lists (List.of) throw for contains(null)
+        return element != null && defaultList != null && defaultList.contains(element);
     }
 
     public ResourceKey<CreativeModeTab> getCreativeTab() {

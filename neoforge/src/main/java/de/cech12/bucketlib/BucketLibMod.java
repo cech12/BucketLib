@@ -137,7 +137,9 @@ public class BucketLibMod {
                     }
                 }
                 //add milk bucket
-                event.accept(BucketLibUtil.addMilk(emptyBucket));
+                if (bucket.canMilkEntities()) {
+                    event.accept(BucketLibUtil.addMilk(emptyBucket));
+                }
                 //add entity buckets
                 for (RegistryUtil.BucketEntity bucketEntity : RegistryUtil.getBucketEntities()) {
                     if (bucket.canHoldEntity(bucketEntity.entityType()) && bucket.canHoldFluid(bucketEntity.fluid())) {
