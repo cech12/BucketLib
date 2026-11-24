@@ -106,7 +106,17 @@ public class FabricFluidHelper implements IFluidHelper {
                 return result.stack();
             }
         }
-        return stack;
+        //like vanilla buckets (and NeoForge), a bucket that cannot be used is dropped
+        return DropBehaviour.INSTANCE.drop(source, stack);
+    }
+
+    /** Gives access to the drop of {@link DefaultDispenseItemBehavior#execute}. */
+    private static final class DropBehaviour extends DefaultDispenseItemBehavior {
+        private static final DropBehaviour INSTANCE = new DropBehaviour();
+
+        private ItemStack drop(BlockSource source, ItemStack stack) {
+            return this.execute(source, stack);
+        }
     }
 
     @Override
@@ -202,6 +212,10 @@ public class FabricFluidHelper implements IFluidHelper {
             return new FluidInteractionResult(true, player.getItemInHand(interactionHand).copy());
         }
         Fluid fluid = BucketLibUtil.getFluid(stack);
+        if (fluid == Fluids.EMPTY) {
+            //nothing to place (e.g. milk without milk fluid), otherwise the fluid at the position would be removed
+            return new FluidInteractionResult(false, stack);
+        }
         ServerLevel serverLevel = (level instanceof ServerLevel) ? (ServerLevel) level : null;
         //vaporize
         if (level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos) && fluid.is(FluidTags.WATER)) {

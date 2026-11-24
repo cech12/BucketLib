@@ -1,8 +1,6 @@
 package de.cech12.bucketlib.gametest.tests;
 
 import de.cech12.bucketlib.gametest.BucketLibGameTests;
-import de.cech12.bucketlib.gametest.KnownIssues;
-import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import de.cech12.bucketlib.item.UniversalBucketDispenseBehaviour;
@@ -21,7 +19,6 @@ import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.material.Fluids;
 
-import java.util.Set;
 import net.minecraft.world.level.block.SlabBlock;
 
 /**
@@ -184,8 +181,8 @@ public final class DispenserTests {
         DispenserBlockEntity dispenser = dispense(helper, TestUtils.bucket(TestBuckets.TEST_BUCKET));
         helper.runAfterDelay(5, () -> {
             boolean dropped = !helper.getLevel().getEntitiesOfClass(ItemEntity.class, helper.getBounds()).isEmpty();
-            KnownIssues.run(helper, "KI-4 Fabric dispensers keep unusable buckets instead of dropping them", Set.of(Platforms.FABRIC), () ->
-                    helper.assertTrue(dropped && dispenser.getItem(0).isEmpty(), "unusable bucket was not dropped by the dispenser"));
+            helper.assertTrue(dropped && dispenser.getItem(0).isEmpty(), "unusable bucket was not dropped by the dispenser");
+            helper.succeed();
         });
     }
 
@@ -193,7 +190,7 @@ public final class DispenserTests {
     public static void milkBucketDoesNotRemoveWater(GameTestHelper helper) {
         helper.setBlock(TARGET, Blocks.WATER);
         DispenserBlockEntity dispenser = dispense(helper, TestUtils.withMilk(TestBuckets.TEST_BUCKET));
-        helper.runAfterDelay(5, () -> KnownIssues.run(helper, "KI-5 dispensed milk bucket removes a water source in front of it", Set.of(Platforms.FABRIC), () -> {
+        helper.runAfterDelay(5, () -> {
             helper.assertBlockPresent(Blocks.WATER, TARGET);
             boolean milk = false;
             for (int slot = 0; slot < dispenser.getContainerSize(); slot++) {
@@ -201,7 +198,8 @@ public final class DispenserTests {
             }
             milk |= helper.getLevel().getEntitiesOfClass(ItemEntity.class, helper.getBounds()).stream().anyMatch(e -> BucketLibUtil.containsMilk(e.getItem()));
             helper.assertTrue(milk, "milk bucket was emptied");
-        }));
+            helper.succeed();
+        });
     }
 
     /** The dispense behaviour of BucketLib passes other items to the fluid container behaviour of the loader. */

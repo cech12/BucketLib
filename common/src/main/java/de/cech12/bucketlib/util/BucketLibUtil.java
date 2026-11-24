@@ -333,6 +333,11 @@ public class BucketLibUtil {
         ItemStack emptyStack = removeTagContent(itemStack, BucketLib.ENTITY_TYPE_TAG);
         Set<DataComponentType<?>> types = new HashSet<>();
         types.add(DataComponents.BUCKET_ENTITY_DATA);
+        if (containsEntityType(itemStack)) {
+            //picking up an entity replaces the custom name of the bucket with the name of the entity, like vanilla the
+            //emptied bucket has no name
+            types.add(DataComponents.CUSTOM_NAME);
+        }
         //support custom item stack data components
         if (entity instanceof Bucketable bucketable) {
             Fluid bucketFluid = BucketLibUtil.getFluid(itemStack);

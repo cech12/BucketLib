@@ -4,7 +4,6 @@ import de.cech12.bucketlib.gametest.BucketLibGameTests;
 import de.cech12.bucketlib.gametest.GameTestPlatform;
 import de.cech12.bucketlib.gametest.IGameTestPlatform.FluidContent;
 import de.cech12.bucketlib.gametest.IGameTestPlatform.FluidTransfer;
-import de.cech12.bucketlib.gametest.KnownIssues;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import de.cech12.bucketlib.platform.Services;
@@ -71,8 +70,8 @@ public final class FluidApiTests {
                 TestUtils.withEntity(TestBuckets.TEST_BUCKET, null, EntityTypes.SULFUR_CUBE))) {
             assertNoInsertion(helper, stack);
         }
-        KnownIssues.run(helper, "KI-17 NeoForge fluid API fills fluids into buckets with a block", java.util.Set.of(de.cech12.bucketlib.gametest.Platforms.NEOFORGE), () ->
-                assertNoInsertion(helper, TestUtils.withBlock(TestBuckets.TEST_BUCKET, Blocks.POWDER_SNOW)));
+        assertNoInsertion(helper, TestUtils.withBlock(TestBuckets.TEST_BUCKET, Blocks.POWDER_SNOW));
+        helper.succeed();
     }
 
     private static void assertNoInsertion(GameTestHelper helper, ItemStack stack) {

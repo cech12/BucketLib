@@ -9,6 +9,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Furnace fuel checks of buckets (hoppers, furnace menu) crashed on dedicated servers, because they used client classes (#98)
 - Infinity did not prevent cracking by cracking fluids and the upper cracking temperature (#97)
 - Infinity buckets with water and an entity kept the entity as crafting remainder (the entity was duplicated) (#114)
+- Dispensers kept unusable buckets instead of dropping them like vanilla (Fabric) (#95)
+- Dispensed milk buckets removed a water source in front of the dispenser (Fabric) (#96)
+- Emptied buckets kept the custom name of the released entity (#103)
+- Fluid API filled fluids into buckets with a block, e.g. powder snow (NeoForge) (#108)
+- Filled buckets were not emptied into cauldrons that are not empty like vanilla buckets (#112)
+- Buckets with powder snow or milk picked up sulfur cubes (#113)
+- Filling and emptying buckets did not count the "used" statistic of the bucket (#115)
 
 ## [26.3-5.3.0.1] - 2026-10-01
 ### Fixed

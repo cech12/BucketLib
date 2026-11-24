@@ -86,9 +86,9 @@ public class WorldInteractionUtil {
         BlockPos hitBlockPos = blockHitResult.getBlockPos();
         BlockState hitBlockState = level.getBlockState(hitBlockPos);
         Block hitBlock = hitBlockState.getBlock();
-        if (hitBlock instanceof AbstractCauldronBlock cauldronBlock
+        //like vanilla buckets, filled buckets are emptied into every cauldron (the vanilla cauldron interaction decides)
+        if (hitBlock instanceof AbstractCauldronBlock
                 && itemstack.getItem() instanceof UniversalBucketItem
-                && cauldronBlock == Blocks.CAULDRON
                 && !BucketLibUtil.containsEntityType(itemstack)) {
             //fake vanilla bucket using on cauldron
             Fluid bucketFluid = BucketLibUtil.getFluid(itemstack);
