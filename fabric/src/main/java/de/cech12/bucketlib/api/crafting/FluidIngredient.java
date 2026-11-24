@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.cech12.bucketlib.BucketLibMod;
 import de.cech12.bucketlib.api.BucketLib;
 import de.cech12.bucketlib.platform.Services;
+import de.cech12.bucketlib.util.BucketLibUtil;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
@@ -67,6 +68,10 @@ public class FluidIngredient implements CustomIngredient {
         if (itemStack == null || itemStack.isEmpty()) {
             return false;
         }
+        //like vanilla fish buckets, buckets with an entity are no fluid buckets for recipes (crafting would destroy the entity)
+        if (BucketLibUtil.containsEntityType(itemStack)) {
+            return false;
+        }
         Identifier location = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
         //Mekansim tanks are not compatible: https://github.com/cech12/BucketLib/issues/55 | https://github.com/mekanism/Mekanism/issues/8335
         if ("mekanism".equals(location.getNamespace()) && (itemStack.getCraftingRemainder() == null || itemStack.getCraftingRemainder().count() < 1)) {
@@ -99,7 +104,12 @@ public class FluidIngredient implements CustomIngredient {
             }
             for (Fluid fluid : fluids) {
                 //vanilla bucket
-                Item bucketItem = fluid.getBucket();
+                Item bucketItem;
+                try {
+                    bucketItem = fluid.getBucket();
+                } catch (IllegalArgumentException ex) {
+                    continue; //incompatible fluid (e.g. "noBucket" fluids of Registrate), logged by UniversalBucketItem.canHoldFluid
+                }
                 if (!(bucketItem instanceof BucketItem) || Services.BUCKET.getFluidOfBucketItem((BucketItem) bucketItem) != fluid) {
                     continue; //skip fluids that have no vanilla bucket
                 }
@@ -133,7 +143,7 @@ public class FluidIngredient implements CustomIngredient {
 
         private static final MapCodec<FluidIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
                 builder.group(
-                        Identifier.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.of(BuiltInRegistries.FLUID.getKey(i.fluid))),
+                        Identifier.CODEC.optionalFieldOf("fluid").forGetter(i -> Optional.ofNullable(i.fluid).map(BuiltInRegistries.FLUID::getKey)),
                         TagKey.codec(BuiltInRegistries.FLUID.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
                 ).apply(builder, FluidIngredient::new)
         );
@@ -167,14 +177,8 @@ public class FluidIngredient implements CustomIngredient {
                 TagKey<Fluid> tag = TagKey.create(Registries.FLUID, Identifier.parse(tagId));
                 return new FluidIngredient(tag);
             }
-            if (fluid.isEmpty()) {
-                throw new IllegalArgumentException("Cannot create a fluid ingredient with no fluid or tag.");
-            }
-            Optional<Holder.Reference<Fluid>> fluidOptional = BuiltInRegistries.FLUID.get(Identifier.parse(fluid));
-            if (fluidOptional.isEmpty()) {
-                throw new IllegalArgumentException("Fluid resource location \"" + fluid + " \" could not be found.");
-            }
-            return new FluidIngredient(fluidOptional.get().value());
+            //no or unknown fluid (e.g. of a removed mod): the ingredient matches nothing
+            return new FluidIngredient(fluid.isEmpty() ? Optional.empty() : Optional.of(Identifier.parse(fluid)), Optional.empty());
         }
 
         private static void write(@NotNull RegistryFriendlyByteBuf buffer, @NotNull FluidIngredient ingredient) {

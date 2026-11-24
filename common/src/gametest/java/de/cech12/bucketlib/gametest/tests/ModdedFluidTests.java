@@ -183,10 +183,9 @@ public final class ModdedFluidTests {
             var shown = TestUtils.noException(helper, "items of the fluid ingredient of " + definition.id(), () -> without.items().map(holder -> holder.value()).toList());
             helper.assertTrue(shown.isEmpty(), "fluid ingredient of " + definition.id() + " shows " + shown);
         }
-        KnownIssues.run(helper, "KI-20 fluid ingredients crash when a fluid of the tag throws in getBucket()", Platforms.ALL, () -> {
-            var shown = TestUtils.noException(helper, "items of the fluid ingredient of the test fluid tag", () -> ingredient.items().map(holder -> holder.value()).toList());
-            helper.assertTrue(shown.contains(TestFluids.HOT_GAS.bucket()), "fluid ingredient of the tag does not show the hot gas bucket: " + shown);
-        });
+        var shown = TestUtils.noException(helper, "items of the fluid ingredient of the test fluid tag", () -> ingredient.items().map(holder -> holder.value()).toList());
+        helper.assertTrue(shown.contains(TestFluids.HOT_GAS.bucket()), "fluid ingredient of the tag does not show the hot gas bucket: " + shown);
+        helper.succeed();
     }
 
     /**

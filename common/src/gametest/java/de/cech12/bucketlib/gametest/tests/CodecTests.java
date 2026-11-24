@@ -3,8 +3,6 @@ package de.cech12.bucketlib.gametest.tests;
 import com.google.gson.JsonElement;
 import de.cech12.bucketlib.gametest.BucketLibGameTests;
 import de.cech12.bucketlib.gametest.GameTestPlatform;
-import de.cech12.bucketlib.gametest.KnownIssues;
-import de.cech12.bucketlib.gametest.Platforms;
 import de.cech12.bucketlib.gametest.TestBuckets;
 import de.cech12.bucketlib.gametest.TestUtils;
 import de.cech12.bucketlib.item.crafting.BucketFillingType;
@@ -130,11 +128,10 @@ public final class CodecTests {
         Ingredient emptyTag = TestUtils.ingredient(helper, "empty", Map.of("tag", "minecraft:dyeable"));
         Ingredient empty = TestUtils.ingredient(helper, "empty", Map.of());
         assertSameMatches(helper, jsonRoundTrip(helper, emptyTag), emptyTag, "json round trip of empty (tag)");
-        KnownIssues.run(helper, "KI-10 json codec of ingredients writes the default registry entry for missing ids", Platforms.ALL, () -> {
-            assertSameMatches(helper, jsonRoundTrip(helper, entityTag), entityTag, "json round trip of entity (tag)");
-            assertSameMatches(helper, jsonRoundTrip(helper, blockTag), blockTag, "json round trip of block (tag)");
-            assertSameMatches(helper, jsonRoundTrip(helper, empty), empty, "json round trip of empty");
-        });
+        assertSameMatches(helper, jsonRoundTrip(helper, entityTag), entityTag, "json round trip of entity (tag)");
+        assertSameMatches(helper, jsonRoundTrip(helper, blockTag), blockTag, "json round trip of block (tag)");
+        assertSameMatches(helper, jsonRoundTrip(helper, empty), empty, "json round trip of empty");
+        helper.succeed();
     }
 
     private static void assertNetworkRoundTrip(GameTestHelper helper, List<Map.Entry<String, Map<String, String>>> ingredients) {
@@ -147,7 +144,7 @@ public final class CodecTests {
 
     /**
      * All ingredient variants keep their behavior after sending them to a client. Fabric uses the packet codecs of the
-     * ingredient serializers, NeoForge the json codec (so KI-10 also affects the network on NeoForge).
+     * ingredient serializers, NeoForge the json codec.
      */
     public static void ingredientsNetworkRoundTrip(GameTestHelper helper) {
         assertNetworkRoundTrip(helper, List.of(
@@ -155,9 +152,9 @@ public final class CodecTests {
                 Map.entry("milk", Map.of()), Map.entry("entity", Map.of("entity", "minecraft:pufferfish")),
                 Map.entry("block", Map.of("block", "minecraft:powder_snow")), Map.entry("empty", Map.of("item", "bucketlibtest:test_bucket")),
                 Map.entry("empty", Map.of("tag", "minecraft:dyeable"))));
-        KnownIssues.run(helper, "KI-10 json codec of ingredients writes the default registry entry for missing ids", java.util.Set.of(Platforms.NEOFORGE), () ->
-                assertNetworkRoundTrip(helper, List.of(Map.entry("entity", Map.of("tag", "bucketlibtest:pufferfish")),
-                        Map.entry("block", Map.of("tag", "bucketlibtest:powder_snow")), Map.entry("empty", Map.of()))));
+        assertNetworkRoundTrip(helper, List.of(Map.entry("entity", Map.of("tag", "bucketlibtest:pufferfish")),
+                Map.entry("block", Map.of("tag", "bucketlibtest:powder_snow")), Map.entry("empty", Map.of())));
+        helper.succeed();
     }
 
     private static final String SHAPED = "{\"type\":\"bucketlib:bucket_filling_shaped\",\"category\":\"misc\",\"pattern\":[\"BS\"],\"key\":{\"B\":\"bucketlibtest:test_bucket\",\"S\":\"minecraft:stick\"},\"filling_type\":\"fluid\",\"fluid\":\"minecraft:water\"}";
@@ -176,8 +173,8 @@ public final class CodecTests {
         Recipe<?> shaped = TestUtils.decode(helper, Recipe.DIRECT_CODEC, TestUtils.json(SHAPED));
         assertFillsWater(helper, TestUtils.decode(helper, Recipe.DIRECT_CODEC, TestUtils.noException(helper, "encoding a shaped bucket filling recipe", () -> TestUtils.encode(helper, Recipe.DIRECT_CODEC, shaped))), "json round trip (shaped)");
         Recipe<?> shapeless = TestUtils.decode(helper, Recipe.DIRECT_CODEC, TestUtils.json(SHAPELESS));
-        KnownIssues.run(helper, "KI-11 bucket filling recipes cannot be encoded if not all of fluid, block and entity are set", Platforms.ALL, () ->
-                assertFillsWater(helper, TestUtils.decode(helper, Recipe.DIRECT_CODEC, TestUtils.noException(helper, "encoding a shapeless bucket filling recipe", () -> TestUtils.encode(helper, Recipe.DIRECT_CODEC, shapeless))), "json round trip (shapeless)"));
+        assertFillsWater(helper, TestUtils.decode(helper, Recipe.DIRECT_CODEC, TestUtils.noException(helper, "encoding a shapeless bucket filling recipe", () -> TestUtils.encode(helper, Recipe.DIRECT_CODEC, shapeless))), "json round trip (shapeless)");
+        helper.succeed();
     }
 
     private static Recipe<?> networkRoundTrip(GameTestHelper helper, Recipe<?> recipe) {
@@ -190,10 +187,9 @@ public final class CodecTests {
     public static void bucketFillingRecipesNetworkRoundTrip(GameTestHelper helper) {
         Recipe<?> shaped = TestUtils.decode(helper, Recipe.DIRECT_CODEC, TestUtils.json(SHAPED));
         Recipe<?> shapeless = TestUtils.decode(helper, Recipe.DIRECT_CODEC, TestUtils.json(SHAPELESS));
-        KnownIssues.run(helper, "KI-11 bucket filling recipes cannot be encoded if not all of fluid, block and entity are set", Platforms.ALL, () -> {
-            assertFillsWater(helper, TestUtils.noException(helper, "syncing a shaped bucket filling recipe", () -> networkRoundTrip(helper, shaped)), "network round trip (shaped)");
-            assertFillsWater(helper, TestUtils.noException(helper, "syncing a shapeless bucket filling recipe", () -> networkRoundTrip(helper, shapeless)), "network round trip (shapeless)");
-        });
+        assertFillsWater(helper, TestUtils.noException(helper, "syncing a shaped bucket filling recipe", () -> networkRoundTrip(helper, shaped)), "network round trip (shaped)");
+        assertFillsWater(helper, TestUtils.noException(helper, "syncing a shapeless bucket filling recipe", () -> networkRoundTrip(helper, shapeless)), "network round trip (shapeless)");
+        helper.succeed();
     }
 
     /** The filling types have stable names and ids (json and network). */

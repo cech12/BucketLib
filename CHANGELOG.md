@@ -9,6 +9,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Furnace fuel checks of buckets (hoppers, furnace menu) crashed on dedicated servers, because they used client classes (#98)
 - Infinity did not prevent cracking by cracking fluids and the upper cracking temperature (#97)
 - Infinity buckets with water and an entity kept the entity as crafting remainder (the entity was duplicated) (#114)
+- Fluid ingredients accepted buckets with water and an entity (the entity was destroyed when crafting) (#99)
+- Bucket filling recipes failed to load if the first bucket of the ingredients cannot hold the content (#100)
+- Json codec of block/entity/empty ingredients wrote default registry entries for missing ids (#101)
+- Bucket filling recipes could not be encoded (shapeless json, network) if not all of fluid/block/entity are set (#102)
+- Entity/block ingredients with unknown ids crashed the recipe matching (#104)
+- Empty ingredients with an unknown item accepted every empty bucket (#106)
+- Empty ingredients with an item tag showed no buckets in recipe viewers (NeoForge) (#109)
+- Fluid ingredients crashed in recipe viewers if a fluid of the tag throws in `getBucket()` (#111)
 
 ## [26.3-5.3.0.1] - 2026-10-01
 ### Fixed

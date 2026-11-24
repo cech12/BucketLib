@@ -56,8 +56,11 @@ public class BlockIngredient implements ICustomIngredient {
                 return false;
             }
             bucketBlocks = List.of(bucketBlock);
-        } else {
+        } else if (this.tag != null) {
             bucketBlocks = RegistryUtil.getBucketBlocks().stream().filter(bucketBlock -> bucketBlock.block().defaultBlockState().is(this.tag)).toList();
+        } else {
+            //unknown block id (e.g. of a removed mod)
+            return false;
         }
         if (bucketBlocks.isEmpty()) {
             return false;
@@ -112,7 +115,7 @@ public class BlockIngredient implements ICustomIngredient {
 
     public static final MapCodec<BlockIngredient> CODEC = RecordCodecBuilder.mapCodec(builder ->
             builder.group(
-                    Identifier.CODEC.optionalFieldOf("block").forGetter(i -> Optional.of(BuiltInRegistries.BLOCK.getKey(i.block))),
+                    Identifier.CODEC.optionalFieldOf("block").forGetter(i -> Optional.ofNullable(i.block).map(BuiltInRegistries.BLOCK::getKey)),
                     TagKey.codec(BuiltInRegistries.BLOCK.key()).optionalFieldOf("tag").forGetter(i -> Optional.ofNullable(i.tag))
             ).apply(builder, BlockIngredient::new)
     );
